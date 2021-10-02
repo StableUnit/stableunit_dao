@@ -21,3 +21,5 @@ fundrasing
   contract for redeem them for suDAO over time
   contract which pays to developers in 5 milestones, and DAO can vote NO is dev didn’t reach milestones.
 3. multisig sells these NFTs on OPEN
+4. build the best stablecoin possible
+5. share ownership for every person in the world
