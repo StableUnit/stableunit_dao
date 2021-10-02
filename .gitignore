@@ -1,0 +1,10 @@
+node_modules
+build
+.vscode
+.idea
+.env
+artifacts
+cache
+package-lock.json
+/coverage.json
+/coverage/
