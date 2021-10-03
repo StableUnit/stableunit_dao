@@ -106,7 +106,7 @@ describe("TimelockVault", () => {
             // should have 0 available to claim
             await expect(
                 timelockVaultInstance.claim({from: patron})
-            ).to.be.revertedWith(" Can't claim 0 tokens");
+            ).to.be.revertedWith("Can't claim 0 tokens");
         })
 
         it("claim all after vesting", async () => {

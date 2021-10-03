@@ -1,25 +1,53 @@
+import dotenv from 'dotenv'
+dotenv.config();
+
 import "@nomiclabs/hardhat-truffle5";
 require("@nomiclabs/hardhat-web3");
 import { task } from "hardhat/config";
 import "solidity-coverage";
+import "@nomiclabs/hardhat-waffle";
 
-// This is a sample Hardhat task. To learn how to create your own go to
-// https://hardhat.org/guides/create-task.html
-task("accounts", "Prints the list of accounts", async (_, { web3 }) => {
-  const accounts = await web3.eth.getAccounts();
+import "./tasks/accounts.ts";
+import "./tasks/airdrop.ts";
+import "./tasks/transfer-owner.ts";
+import "./tasks/grant-role.ts";
+import "./tasks/renounce-role.ts";
 
-  for (const account of accounts) {
-    console.log(account);
-  }
-});
+const {
+    INFURA_KEY,
+    MNEMONIC,
+    ETHERSCAN_API_KEY,
 
-// You need to export an object to set up your config
-// Go to https://hardhat.org/config/ to learn more
+    PRIVATE_KEY
+} = process.env;
+
+const accounts = PRIVATE_KEY
+    ? [PRIVATE_KEY]
+    : { mnemonic: MNEMONIC };
 
 /**
  * @type import('hardhat/config').HardhatUserConfig
  */
-module.exports = {
-  solidity: "0.8.8",
+export default {
+    solidity: "0.8.7",
+    networks: {
+        hardhat: {
+        },
+        mainnet: {
+            url: `https://mainnet.infura.io/v3/${INFURA_KEY}`,
+            accounts,
+        },
+        rinkeby: {
+            url: `https://rinkeby.infura.io/v3/${INFURA_KEY}`,
+            accounts,
+        },
+        polygon: {
+            url: `https://polygon-mainnet.infura.io/v3/${INFURA_KEY}`,
+            accounts,
+        },
+        mumbai: {
+            url: `https://polygon-mumbai.infura.io/v3/${INFURA_KEY}`,
+            accounts,
+        }
+    }
 };
-
