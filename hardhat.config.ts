@@ -29,7 +29,7 @@ const accounts = PRIVATE_KEY
  * @type import('hardhat/config').HardhatUserConfig
  */
 export default {
-    solidity: "0.8.7",
+    solidity: "0.8.9",
     networks: {
         hardhat: {
         },
