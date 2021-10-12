@@ -1,24 +1,57 @@
-const {MAINNET} = require("./deployed_addresses");
+import {assertZeroNonce, fundDeployer, withdrawEther} from "./utils";
+
 const SafeProxy = artifacts.require("GnosisSafeProxy");
 const GnosisSafe = artifacts.require("GnosisSafe");
 const GnosisSafeL2 = artifacts.require("GnosisSafeL2");
 
-import {RINKEBY} from "./deployed_addresses";
+import {getDeployedAddresses, MAINNET} from "./deployed_addresses";
+const DEPLOYER_MIN_BALANCE = web3.utils.toBN(1e18);
+
 
 module.exports = function (deployer, network, accounts) {
-    console.log("network = ", network);
-    let NETWORK = {} as any;
-    if (network === RINKEBY.NAME) NETWORK = RINKEBY; else
-        return;
-
+    const [deployer_acc, deploy_e] = accounts;
+    const DEPLOYED = getDeployedAddresses(network);
+    // @ts-ignore
     deployer.then(async () => {
         let safeProxyInstance;
-        if (NETWORK.MULTISIG) {
-            safeProxyInstance = await SafeProxy.at(NETWORK.MULTISIG);
-        } else {
-            await deployer.deploy(SafeProxy, NETWORK.GNOSIS_SAFE_MASTERCOPY);
-            safeProxyInstance = await SafeProxy.deployed();
+        if (DEPLOYED.MULTISIG) {
+            safeProxyInstance = await GnosisSafe.at(DEPLOYED.MULTISIG);
+            // apply interface of proxy target
+            if (network === MAINNET.NAME) {
+                safeProxyInstance = await GnosisSafe.at(safeProxyInstance.address);
+            } else {
+                safeProxyInstance = await GnosisSafeL2.at(safeProxyInstance.address);
+            }
 
+            console.log("await safeProxyInstance.setup for exitsitign wallet(...)");
+            await safeProxyInstance.setup(
+                DEPLOYED.DEVELOPERS,
+                1,
+                "0x0000000000000000000000000000000000000000",
+                web3.utils.asciiToHex(""),
+                DEPLOYED.GNOSIS_SAFE_FALLBACK,
+                "0x0000000000000000000000000000000000000000",
+                0,
+                "0x0000000000000000000000000000000000000000"
+            );
+        } else {
+            const deployer_vanity = deploy_e;
+            await assertZeroNonce(web3, deployer_vanity);
+            await fundDeployer(web3, deployer_acc, deployer_vanity);
+            {
+                await deployer.deploy(SafeProxy, DEPLOYED.GNOSIS_SAFE_MASTERCOPY, {from: deployer_vanity});
+                safeProxyInstance = await SafeProxy.deployed();
+            }
+            await withdrawEther(web3, deployer_vanity, deployer_acc);
+
+            // apply interface of proxy target
+            if (network === MAINNET.NAME) {
+                safeProxyInstance = await GnosisSafe.at(safeProxyInstance.address);
+            } else {
+                safeProxyInstance = await GnosisSafeL2.at(safeProxyInstance.address);
+            }
+
+            console.log("await safeProxyInstance.setup(...)");
             // setup according to https://docs.gnosis.io/safe/docs/contracts_deployment/
             //     /// @dev Setup function sets initial storage of contract.
             //     /// @param _owners List of Safe owners.
@@ -39,20 +72,12 @@ module.exports = function (deployer, network, accounts) {
             //         uint256 payment,
             //         address payable paymentReceiver
             // )
-            // apply interface of proxy target
-            if (NETWORK.NAME === MAINNET.NAME) {
-                safeProxyInstance = await GnosisSafe.at(safeProxyInstance.address);
-            } else {
-                safeProxyInstance = await GnosisSafeL2.at(safeProxyInstance.address);
-            }
-
-            console.log("await safeProxyInstance.setup(...)");
             await safeProxyInstance.setup(
-                NETWORK.DEVELOPERS,
+                DEPLOYED.DEVELOPERS,
                 1,
                 "0x0000000000000000000000000000000000000000",
                 web3.utils.asciiToHex(""),
-                NETWORK.GNOSIS_SAFE_FALLBACK,
+                DEPLOYED.GNOSIS_SAFE_FALLBACK,
                 "0x0000000000000000000000000000000000000000",
                 0,
                 "0x0000000000000000000000000000000000000000"
