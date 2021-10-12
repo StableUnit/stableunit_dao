@@ -1,3 +1,10 @@
+import {
+    NftMockInstance,
+    TimelockVaultInstance,
+    TokenDistributorV2Instance,
+    TokenMockInstance
+} from "../../types/truffle-contracts";
+
 const truffleAssert = require('truffle-assertions');
 // @ts-ignore
 import {assert, web3, artifacts} from "hardhat";
@@ -21,14 +28,14 @@ const UINT256_0 = '0x0000000000000000000000000000000000000000';
 
 describe("TokenDistributor_v2", () => {
     let accounts: string[];
-    let patron;
-    let owner;
+    let patron: string;
+    let owner: string;
 
-    let daiTokenInstance;
-    let suDaoInstance;
-    let timelockVaultInstance;
-    let nftInstance;
-    let distributorInstance;
+    let daiTokenInstance: TokenMockInstance;
+    let suDaoInstance: TokenMockInstance;
+    let timelockVaultInstance: TimelockVaultInstance;
+    let nftInstance: NftMockInstance;
+    let distributorInstance: TokenDistributorV2Instance;
 
 
     const distributionId = 0;
@@ -88,12 +95,12 @@ describe("TokenDistributor_v2", () => {
             assert.equal(true, balanceBefore.eq(balanceAfter));
             // there is should be a value in the distributions mapping,
             // and fields of this struct should be as expected
-            const distribution = await distributorInstance.distributions(distributionId);
+            const distribution = await distributorInstance.distributions(distributionId) as any;
             assert.equal(distribution.maximumRewardAllocation.toString(), maxRewardAllocation.toString());
             assert.equal(distribution.donationMethod, daiTokenInstance.address);
             assert.equal(distribution.nftRequirement, nftInstance.address);
             // event should emit
-            truffleAssert.eventEmitted(result, 'SetDistribution', (ev) => {
+            truffleAssert.eventEmitted(result, 'SetDistribution', (ev: any) => {
                 return ev.id == distributionId;
             });
         });

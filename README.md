@@ -56,21 +56,22 @@ Fundrasing
 npm install
 npm audit fix
 truffle compile
+npm run generate-types
 `
 
 ## Test
 `
-npx hardhat test
+npm run test
 `
 
 ## Test coverage
 `
-npx hardhat coverage
+npm run coverage
 `
 
 ## Deploy contracts
 `
-truffle migrate --network rinkeby
+npm run migrate -- --network rinkeby
 `
 
 ## Verify

@@ -1,3 +1,5 @@
+import {SaftForNftV1Instance, SaftV0Instance, TokenMockInstance} from "../../types/truffle-contracts";
+
 const truffleAssert = require('truffle-assertions');
 // @ts-ignore
 import { assert, web3, artifacts } from "hardhat";
@@ -20,11 +22,11 @@ const GENESIS_ADDRESS = '0x0000000000000000000000000000000000000000';
 
 describe("SAFT", () => {
   let accounts: string[];
-  let purchaser;
-  let owner;
-  let daiTokenInstance;
-  let saftInstance;
-  let suDAOInstance;
+  let purchaser: string;
+  let owner: string;
+  let daiTokenInstance: TokenMockInstance;
+  let saftInstance: SaftV0Instance;
+  let suDAOInstance: TokenMockInstance;
 
   let suDAOTotalSupply = web3.utils.toWei('1000');
   let tokenAllocation = web3.utils.toWei('100');
@@ -96,7 +98,8 @@ describe("SAFT", () => {
       let daiBalanceAfter = await daiTokenInstance.balanceOf(purchaser);
       assert.equal(true, daiBalanceBefore.eq(daiBalanceAfter.add(paymentAmount)));
 
-      assert.equal(true, (await saftInstance.presale(purchaser))._tokensBought.eq(web3.utils.toBN(Number(tokenAllocation))));
+      // @ts-ignore
+        assert.equal(true, (await saftInstance.presale(purchaser))._tokensBought.eq(web3.utils.toBN(Number(tokenAllocation))));
 
       await suDAOInstance.approve(saftInstance.address, tokenAllocation);
 
@@ -375,7 +378,8 @@ describe("SAFT", () => {
       let result = await saftInstance.updatePaymentDeadline(purchaser, web3.utils.toBN(paymentPeriodSeconds));
 
       let txTimestamp = (await web3.eth.getBlock(result.receipt.blockNumber)).timestamp;
-      assert.equal(true, (web3.utils.toBN(Number(txTimestamp) + paymentPeriodSeconds).eq(web3.utils.toBN((await saftInstance.presale(purchaser)).paymentDeadline))));
+      // @ts-ignore
+        assert.equal(true, (web3.utils.toBN(Number(txTimestamp) + paymentPeriodSeconds).eq(web3.utils.toBN((await saftInstance.presale(purchaser)).paymentDeadline))));
     });
 
     it("Should not be able to update payment deadline due to caller is not the owner", async () => {
@@ -468,7 +472,7 @@ describe("SAFT", () => {
 
           const result = await saftInstance.claimTokens({ from: purchaser })
 
-          truffleAssert.eventEmitted(result, 'ClaimedReward', (ev) => {
+          truffleAssert.eventEmitted(result, 'ClaimedReward', (ev: any) => {
             return ev.account === purchaser &&
             web3.utils.toBN(ev.rewardAmount).gt(web3.utils.toBN(Number(tokenAllocation)).divn(2)) &&
             web3.utils.toBN(ev.rewardAmount).lt(web3.utils.toBN(Number(tokenAllocation)).divn(2).add(bn1e18));
@@ -485,7 +489,7 @@ describe("SAFT", () => {
 
           const result = await saftInstance.claimTokens({ from: purchaser })
 
-          truffleAssert.eventEmitted(result, 'ClaimedReward', (ev) => {
+          truffleAssert.eventEmitted(result, 'ClaimedReward', (ev: any) => {
             return ev.account === purchaser &&
             web3.utils.toBN(ev.rewardAmount).gt(web3.utils.toBN(Number(tokenAllocation)).divn(2)) &&
             web3.utils.toBN(ev.rewardAmount).lt(web3.utils.toBN(Number(tokenAllocation)).divn(2).add(bn1e18));
@@ -495,7 +499,7 @@ describe("SAFT", () => {
 
           const result2 = await saftInstance.claimTokens({ from: purchaser });
 
-          truffleAssert.eventEmitted(result2, 'ClaimedReward', (ev) => {
+          truffleAssert.eventEmitted(result2, 'ClaimedReward', (ev: any) => {
             return ev.account === purchaser && ev.rewardAmount < Number(bn1e18);
           });
       })
@@ -580,17 +584,18 @@ describe("SAFT", () => {
         await daiTokenInstance.approve(saftInstance.address, paymentAmount, { from: purchaser });
         await saftInstance.purchase(purchaser, paymentAmount, { from: purchaser });
 
-        let tokensBoughtBefore = (await saftInstance.presale(purchaser))._tokensBought;
+        let tokensBoughtBefore = (await saftInstance.presale(purchaser) as any)._tokensBought;
         assert.equal(true, tokensBoughtBefore > 0);
 
         let tokensSoldBefore = await saftInstance.totalTokensSold();
         assert.equal(true, tokensSoldBefore.eq(web3.utils.toBN(Number(tokenAllocation))));
 
         await saftInstance.donatePurchasedTokens({ from: purchaser });
-        let tokensBoughtAfter = (await saftInstance.presale(purchaser))._tokensBought;
+        let tokensBoughtAfter = (await saftInstance.presale(purchaser) as any)._tokensBought;
 
         assert.equal(0, tokensBoughtAfter);
 
+        // @ts-ignore
         assert.equal(true, tokensSoldBefore.eq(web3.utils.toBN((await saftInstance.totalTokensSold()) + (tokensBoughtBefore - (await saftInstance.presale(purchaser))._tokensClaimed))));
     })
 

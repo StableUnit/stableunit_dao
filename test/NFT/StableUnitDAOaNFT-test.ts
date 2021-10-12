@@ -2,6 +2,7 @@
 import {assert, web3, artifacts} from "hardhat";
 import chai, {expect} from 'chai'
 import {solidity} from "ethereum-waffle";
+import {StableUnitDAOaNFTInstance} from "../../types/truffle-contracts";
 
 chai.use(solidity);
 
@@ -13,8 +14,8 @@ const BN_1E18 = web3.utils.toBN(1e18);
 
 describe("StableUnitDAOaNFT", () => {
     let accounts: string[];
-    let owner, patron, alice, bob, carl;
-    let aNftInstance;
+    let [owner, patron, alice, bob, carl]: string[] = [];
+    let aNftInstance: StableUnitDAOaNFTInstance;
 
     beforeEach(async function () {
         accounts = await web3.eth.getAccounts();

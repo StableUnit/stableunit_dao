@@ -2,8 +2,9 @@ import { assert, web3, artifacts } from "hardhat";
 
 const RLP = require('rlp');
 
-export const predictAddress = async (deployerAddress, nonceAdded = 0) => {
+export const predictAddress = async (deployerAddress: string, nonceAdded = 0) => {
     let ownerNonce = (await web3.eth.getTransactionCount(deployerAddress)) + nonceAdded;
+    // @ts-ignore
     let governorAddress = "0x" + web3.utils.sha3(RLP.encode([deployerAddress, ownerNonce])).slice(12).substring(14)
     return governorAddress;
 }

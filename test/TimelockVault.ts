@@ -3,6 +3,7 @@ import {assert, web3, artifacts} from "hardhat";
 
 import chai, {expect} from 'chai'
 import {solidity} from "ethereum-waffle";
+import {TimelockVaultInstance, TokenMockInstance} from "../types/truffle-contracts";
 
 chai.use(solidity);
 
@@ -19,10 +20,10 @@ const UINT256_0 = '0x0000000000000000000000000000000000000000';
 
 describe("TimelockVault", () => {
     let accounts: string[];
-    let owner, patron, alice, bob, carl;
+    let owner: string, patron: string, alice: string, bob: string, carl: string;
 
-    let suDaoInstance;
-    let timelockVaultInstance;
+    let suDaoInstance: TokenMockInstance;
+    let timelockVaultInstance: TimelockVaultInstance;
 
     const amountToLock = BN_1E18.muln(100);
     const cliffSeconds = 100;

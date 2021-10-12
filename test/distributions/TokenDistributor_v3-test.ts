@@ -1,3 +1,11 @@
+import {
+    ERC20Contract,
+    NftMockInstance, StableUnitDAOaNFTInstance,
+    SuDAOInstance,
+    TimelockVaultInstance, TokenDistributorV3Instance,
+    TokenMockInstance
+} from "../../types/truffle-contracts";
+
 const truffleAssert = require('truffle-assertions');
 // @ts-ignore
 import {assert, web3, artifacts} from "hardhat";
@@ -5,7 +13,6 @@ import {BN_1E18, BN_EPS, EPS, UINT256_0} from "../utils/utils";
 
 const {increaseTime, chainTimestamp} = require('../utils/timeManipulation');
 
-// @ts-ignore
 const Distributor = artifacts.require("TokenDistributor_v3");
 // @ts-ignore
 const SuDAO = artifacts.require("SuDAO");
@@ -22,14 +29,14 @@ const AdvisorNft = artifacts.require("StableUnitDAOaNFT");
 describe("TokenDistributor_v3", () => {
     let accounts: string[];
     let owner;
-    let patron;
+    let patron: string;
 
-    let daiTokenInstance;
-    let suDaoInstance;
-    let timelockVaultInstance;
-    let ogNftInstance;
-    let aNftInstance;
-    let distributorInstance;
+    let daiTokenInstance: TokenMockInstance;
+    let suDaoInstance: SuDAOInstance;
+    let timelockVaultInstance: TimelockVaultInstance;
+    let ogNftInstance: NftMockInstance;
+    let aNftInstance: StableUnitDAOaNFTInstance;
+    let distributorInstance: TokenDistributorV3Instance;
 
 
     const distributionId = 0;
@@ -62,7 +69,7 @@ describe("TokenDistributor_v3", () => {
         await daiTokenInstance.approve(distributorInstance.address, amount, {from: user});
         await ogNftInstance.mint(user);
         const bonusBase = await aNftInstance.BASE_LEVEL();
-        await aNftInstance.mintWithLevel(user, Math.round(bonus * bonusBase));
+        await aNftInstance.mintWithLevel(user, Math.round(bonusBase.toNumber() * bonus));
     }
 
     async function mintAndParticipate(user = accounts[1], amount = maxDonationAmount, bonus = 1.5) {

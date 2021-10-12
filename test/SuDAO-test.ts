@@ -1,3 +1,5 @@
+import {SuDAOInstance} from "../types/truffle-contracts";
+
 const truffleAssert = require('truffle-assertions');
 // @ts-ignore
 import { assert, web3, artifacts } from "hardhat";
@@ -8,10 +10,10 @@ const suDAO = artifacts.require("SuDAO");
 const Token = artifacts.require("TokenMock");
 const bn1e18 = web3.utils.toBN(1e18);
 
-describe("suDAO", () => {
+describe("SuDAO", () => {
   let accounts: string[];
-  let user;
-  let suDAOInstance;
+  let user: string;
+  let suDAOInstance: SuDAOInstance;
 
   const suDAOTotalSupply = bn1e18.muln(1000);
   const mintAmount = bn1e18.muln(10);
