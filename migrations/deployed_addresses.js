@@ -31,4 +31,29 @@ const RINKEBY = {
     //
 }
 
-module.exports = {RINKEBY, OG_NFT_JSON, A_NFT_JSON};
+const MAINNET = {
+    NAME: "mainnet",
+}
+
+const BSC = {
+    NAME: "bsc",
+    
+    DEVELOPERS: [
+        "0xF2A961aF157426953e392F6468B0162F86B2aCBC",
+        "0xb79EbAa162f92A3E5B8E0CE3446e8b4a4E5C0A4B",
+        "0xace5686774d6b5dee84dc9f94fa803536415f172",
+    ],
+    TESTERS: [
+    ],
+    
+    GNOSIS_SAFE_FACTORY: "0xa6b71e26c5e0845f74c812102ca7114b6a896ab2",
+    GNOSIS_SAFE_MASTERCOPY: "0xd9db270c1b5e3bd161e8c8503c55ceabee709552",
+    GNOSIS_SAFE_FALLBACK: "0xf48f2b2d2a534e402487b3ee7c18c33aec0fe5e4",
+}
+
+const POLYGON = {
+    NAME: "polygon",
+}
+
+
+module.exports = {RINKEBY, MAINNET, BSC, POLYGON, OG_NFT_JSON, A_NFT_JSON};

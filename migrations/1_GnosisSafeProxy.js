@@ -1,3 +1,4 @@
+const {MAINNET} = require("./deployed_addresses");
 const SafeProxy = artifacts.require("GnosisSafeProxy");
 const GnosisSafe = artifacts.require("GnosisSafe");
 const GnosisSafeL2 = artifacts.require("GnosisSafeL2");
@@ -5,10 +6,11 @@ const GnosisSafeL2 = artifacts.require("GnosisSafeL2");
 const {RINKEBY} = require("./deployed_addresses");
 
 module.exports = function (deployer, network, accounts) {
-    if (network !== "rinkeby") return;
+    
     
     let NETWORK = {};
-    if (network === RINKEBY.NAME) NETWORK = RINKEBY;
+    if (network === RINKEBY.NAME) NETWORK = RINKEBY; else
+        return;
     
     deployer.then(async () => {
         let safeProxyInstance;
@@ -27,7 +29,7 @@ module.exports = function (deployer, network, accounts) {
             //     /// @param fallbackHandler Handler for fallback calls to this contract
             //     /// @param paymentToken Token that should be used for the payment (0 is ETH)
             //     /// @param payment Value that should be paid
-            //     /// @param paymentReceiver Adddress that should receive the payment (or 0 if tx.origin)
+            //     /// @param paymentReceiver Address that should receive the payment (or 0 if tx.origin)
             //     function setup(
             //         address[] calldata _owners,
             //         uint256 _threshold,
@@ -39,7 +41,12 @@ module.exports = function (deployer, network, accounts) {
             //         address payable paymentReceiver
             // )
             // apply interface of proxy target
-            safeProxyInstance = await GnosisSafe.at(safeProxyInstance.address);
+            if (NETWORK.NAME === MAINNET.NAME) {
+                safeProxyInstance = await GnosisSafe.at(safeProxyInstance.address);
+            } else {
+                safeProxyInstance = await GnosisSafeL2.at(safeProxyInstance.address);
+            }
+            
             console.log("await safeProxyInstance.setup(...)");
             await safeProxyInstance.setup(
                 NETWORK.DEVELOPERS,

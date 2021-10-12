@@ -30,10 +30,10 @@ import "./TimelockVault.sol";
  * To make balance visible in the erc20 wallets, the contact "looks like" erc20 token by implementing its interface
  * however all non-view methods such as transfer or approve aren't active and will be reverted.
  *
- * dev `turffle compile` would yield some warnings for usused paramenters - that okay, 
- * because we need to preserve the ERC20 interface without allowing tranfer, allows etc.
+ * dev `turffle compile` would yield some warnings for unused parameters - that okay,
+ * because we need to preserve the ERC20 interface without allowing transfer, allows etc.
 */
-contract VeToken is TimelockVault, IERC20, IERC20Metadata {
+contract VestingToken is TimelockVault, IERC20, IERC20Metadata {
     string private _name;
     string private _symbol;
 

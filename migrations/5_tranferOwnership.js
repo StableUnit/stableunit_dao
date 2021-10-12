@@ -1,8 +1,8 @@
 const {OG_NFT_JSON} = require("./deployed_addresses");
 
 const SafeProxy = artifacts.require("GnosisSafeProxy");
-const SuDAO = artifacts.require("suDAO");
-const TimelockVault = artifacts.require("VeToken");
+const SuDAO = artifacts.require("SuDAO");
+const TimelockVault = artifacts.require("VestingToken");
 const Distributor = artifacts.require("TokenDistributor_v3");
 const AdvisorNft = artifacts.require("StableUnitDAOaNFT");
 
@@ -23,10 +23,9 @@ const CLIFF_SECONDS = 10 * 60;
 const DEFAULT_ADMIN_ROLE = "0x0000000000000000000000000000000000000000";
 
 module.exports = function (deployer, network, accounts) {
-    if (network !== "rinkeby") return;
-    
     let NETWORK = {};
-    if (network === RINKEBY.NAME) NETWORK = RINKEBY;
+    if (network === RINKEBY.NAME) NETWORK = RINKEBY; else
+        return;
     
     deployer.then(async () => {
         const suDaoInstance = await SuDAO.deployed();
@@ -60,7 +59,7 @@ module.exports = function (deployer, network, accounts) {
                 // deploy mock token for testnet
                 await deployer.deploy(NftMock, "Test NFT", "tNFT");
                 const ogNftInstance = await NftMock.deployed();
-                console.log("nftInstance: ", ogNftInstance.address);
+                console.log("setBaseURI() ");
                 await aNftInstance.setBaseURI(`https://ipfs.io/ipfs/${OG_NFT_JSON}?id=`);
                 for (const developer of NETWORK.DEVELOPERS) {
                     console.log("await ogNftInstance.mint(developer);");
