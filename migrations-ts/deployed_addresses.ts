@@ -1,5 +1,6 @@
-const OG_NFT_JSON = "QmP8vZkeDEr2wwsiqhJ4JW44dZPzgXpYVQENK7gnPm628Z";
-const A_NFT_JSON = "QmemBvkthjTuKZiNhZRAvUVCvNu4bKzHE6698aX1qzNQEL";
+const A_NFT_JSON = "bafkreiaj3asbfeufre3x6bmysmkdtmi267d6lv6m4goqck5qsmmgdrn4fy";
+const OG_NFT_JSON = "bafkreihnsgfxrrv3vf43evbkzz423msqp3rzxynzsnigbnjrswlrsg4yom";
+const C_NFT_JSON = "bafkreigds7sp3cgz4ybihsy3i6jbvvfigwsf4vfh6hhrgrfj5xja7kbdqi";
 
 const GNOSIS = {
     GNOSIS_SAFE_FACTORY: "0xa6b71e26c5e0845f74c812102ca7114b6a896ab2",

@@ -1,0 +1,17 @@
+aNFT.png
+bafybeifti4dm2osgxghzd7sayggrt3qjwt7qsbw6unssuirdfuylwzyieu
+https://bafybeifti4dm2osgxghzd7sayggrt3qjwt7qsbw6unssuirdfuylwzyieu.ipfs.dweb.link/
+json
+https://bafkreiaj3asbfeufre3x6bmysmkdtmi267d6lv6m4goqck5qsmmgdrn4fy.ipfs.dweb.link/
+
+cNFT.png
+bafybeihvmi6d6e43c5s2vfr6p3knrelxmrvqjqaprxts7rqd26h6emyto4
+https://bafybeihvmi6d6e43c5s2vfr6p3knrelxmrvqjqaprxts7rqd26h6emyto4.ipfs.dweb.link/
+json
+https://bafkreigds7sp3cgz4ybihsy3i6jbvvfigwsf4vfh6hhrgrfj5xja7kbdqi.ipfs.dweb.link
+
+ogNFT.png
+bafybeieioybx2jqtjawfjkqhh34vzam6ifhhqtjge5dgcjbnewmqipzi5u
+https://bafybeieioybx2jqtjawfjkqhh34vzam6ifhhqtjge5dgcjbnewmqipzi5u.ipfs.dweb.link/
+json
+https://bafkreihnsgfxrrv3vf43evbkzz423msqp3rzxynzsnigbnjrswlrsg4yom.ipfs.dweb.link/
