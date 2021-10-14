@@ -21,9 +21,18 @@ module.exports = function (deployer, network, accounts) {
     // @ts-ignore
     deployer.then(async () => {
         if (DEPLOYED.DISTRIBUTOR) return;
-        const aNftInstance = await AdvisorNft.deployed();
-        const suDaoInstance = await SuDAO.deployed();
-        const timelockVaultInstance = await TimelockVault.deployed();
+
+        let aNftInstance = DEPLOYED.A_NFT
+            ? await AdvisorNft.at(DEPLOYED.A_NFT)
+            : await AdvisorNft.deployed();
+
+        const timelockVaultInstance = DEPLOYED.TIMELOCK_VAULT
+            ? await TimelockVault.at(DEPLOYED.TIMELOCK_VAULT)
+            : await TimelockVault.deployed();
+
+        const suDaoInstance = DEPLOYED.SU_DAO
+            ? await SuDAO.at(DEPLOYED.SU_DAO)
+            : await SuDAO.deployed();
 
         // await deployer.deploy(
         //     Distributor,

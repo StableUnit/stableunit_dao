@@ -18,7 +18,9 @@ module.exports = function (deployer, network, accounts) {
     // @ts-ignore
     deployer.then(async () => {
         if (DEPLOYED.TIMELOCK_VAULT) return;
-        const suDaoInstance = await SuDAO.deployed();
+        const suDaoInstance = DEPLOYED.SU_DAO
+            ? await SuDAO.at(DEPLOYED.SU_DAO)
+            : await SuDAO.deployed();
 
         // await deployer.deploy(VeToken, "Vested StableUnitDAO", "veSuDAO", suDaoInstance.address);
         // const veToken = await VeToken.deployed();
