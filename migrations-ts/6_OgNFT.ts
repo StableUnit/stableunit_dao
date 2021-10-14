@@ -1,8 +1,8 @@
 import {getDeployedAddresses} from "./deployed_addresses";
 import {checkVanityAddress, fundDeployer, withdrawEther} from "./utils";
 
-const {A_NFT_JSON} = require("./deployed_addresses");
-const AdvisorNft = artifacts.require("StableUnitDAOaNFT");
+const {OG_NFT_JSON} = require("./deployed_addresses");
+const OgNft = artifacts.require("StableUnitDAOogNFT");
 
 module.exports = function (deployer, network, accounts) {
     const [deployer_acc,
@@ -18,25 +18,25 @@ module.exports = function (deployer, network, accounts) {
 
     // @ts-ignore
     deployer.then(async () => {
-        let aNftInstance;
-        if (DEPLOYED.A_NFT) {
-            aNftInstance = await AdvisorNft.at(DEPLOYED.A_NFT)
+        let ogNftInstance;
+        if (DEPLOYED.OG_NFT) {
+            ogNftInstance = await OgNft.at(DEPLOYED.OG_NFT)
         } else {
-            const deployer_vanity = deployer_vanity_2;
+            const deployer_vanity = deployer_vanity_6;
             await checkVanityAddress(web3, deployer_acc, deployer_vanity);
             await fundDeployer(web3, deployer_acc, deployer_vanity);
             {
-                await deployer.deploy(AdvisorNft, {from: deployer_vanity});
-                aNftInstance = await AdvisorNft.deployed();
-                await aNftInstance.transferOwnership(deployer_acc, {from: deployer_vanity});
+                await deployer.deploy(OgNft, {from: deployer_vanity});
+                ogNftInstance = await OgNft.deployed();
+                await ogNftInstance.transferOwnership(deployer_acc, {from: deployer_vanity});
             }
             await withdrawEther(web3, deployer_vanity, deployer_acc);
 
-            await aNftInstance.setBaseURI(`https://ipfs.io/ipfs/${A_NFT_JSON}?id=`);
+            await ogNftInstance.setBaseURI(`https://ipfs.io/ipfs/${OG_NFT_JSON}?id=`);
             // test mock deploying
             for (let i = 0; i < DEPLOYED.DEVELOPERS.length; i++) {
-                console.log("aNftInstance.mint(NETWORK.DEVELOPERS[i], 1200 + 200*i)");
-                await aNftInstance.mintWithLevel(DEPLOYED.DEVELOPERS[i], 1200 + 200 * i);
+                console.log("aNftInstance.mint(NETWORK.DEVELOPERS[i])");
+                await ogNftInstance.adminMint(DEPLOYED.DEVELOPERS[i]);
             }
         }
     });

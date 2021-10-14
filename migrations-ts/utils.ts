@@ -1,7 +1,7 @@
 import Web3 from "web3";
 
 const RLP = require('rlp');
-const DEPLOYER_MIN_BALANCE = Web3.utils.toBN(1e18 * 0.25);
+const DEPLOYER_MIN_BALANCE = Web3.utils.toBN(1e18 * 0.5);
 const ACCOUNT_DUST_THRESHOLD = Web3.utils.toBN(1e18 * 0.00001);
 
 
@@ -9,6 +9,14 @@ export async function assertZeroNonce(web3: Web3, deployerAddress: string) {
     const nonce = await web3.eth.getTransactionCount(deployerAddress);
     if (nonce !== 0) throw "deployer has nonce > 0";
 }
+
+export async function checkVanityAddress(web3: Web3, deployer_acc: string, deployer_vanity: string) {
+    if ((await web3.eth.getTransactionCount(deployer_vanity)) != 0) {
+        await withdrawEther(web3, deployer_vanity, deployer_acc);
+        throw "vanity address already used";
+    }
+}
+
 
 export const predictAddress = async (web3: Web3, deployerAddress: string, nonceAdded = 0) => {
     let ownerNonce = (await web3.eth.getTransactionCount(deployerAddress)) + nonceAdded;
@@ -47,13 +55,17 @@ export const withdrawEther = async (web3: Web3, fromAccount: string, toAccount: 
         console.log(`withdrawEther: sending ${Number(fromMaxToSend.toString()) / 1e18} ETH from ${toAccount}`);
         // const fromBalance2 = web3.utils.toBN(await web3.eth.getBalance(fromAccount));
         // console.assert(fromBalance === fromBalance2);
-        await web3.eth.sendTransaction({
-            from: fromAccount,
-            to: toAccount,
-            value: fromMaxToSend,
-            gasPrice
-        });
-        const fromBalanceLeft = await web3.eth.getBalance(fromAccount);
-        console.log(`withdrawEther: ${fromAccount} balance left ${Number(fromBalanceLeft.toString()) / 1e18} ETH`);
+        try {
+            await web3.eth.sendTransaction({
+                from: fromAccount,
+                to: toAccount,
+                value: fromMaxToSend,
+                gasPrice
+            });
+            const fromBalanceLeft = await web3.eth.getBalance(fromAccount);
+            console.log(`withdrawEther: ${fromAccount} balance left ${Number(fromBalanceLeft.toString()) / 1e18} ETH`);
+        } catch (e: any) {
+            console.log("withdrawEther error:", e.toString());
+        }
     }
 }
