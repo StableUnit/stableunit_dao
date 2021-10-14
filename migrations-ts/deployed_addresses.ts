@@ -27,7 +27,7 @@ const RINKEBY = {
     GNOSIS_SAFE_MASTERCOPY: GNOSIS.GNOSIS_SAFE_MASTERCOPY,
     GNOSIS_SAFE_FALLBACK: GNOSIS.GNOSIS_SAFE_FALLBACK,
 
-    MULTISIG: "",
+    DAO_MULTISIG: "0x1604e6c50F48aBd827d1518E97790Ff70F8dcD63",
     DAI: "",
     OG_NFT: "",
     // A_NFT
@@ -41,7 +41,8 @@ const MAINNET = {
     NAME: "mainnet",
 
     DEVELOPERS: [
-        "0xCcCcCccc5aD35d8e5B3389559cBF8F0971c0B0ad"
+        "0xCcCcCccc5aD35d8e5B3389559cBF8F0971c0B0ad",
+        "0xa33ac3F6c76ae645051550F56Aa74F902e1B3510"
     ],
     TESTERS: [],
 
@@ -49,7 +50,7 @@ const MAINNET = {
     GNOSIS_SAFE_MASTERCOPY: GNOSIS.GNOSIS_SAFE_MASTERCOPY,
     GNOSIS_SAFE_FALLBACK: GNOSIS.GNOSIS_SAFE_FALLBACK,
 
-    MULTISIG: "0x1604e6c50F48aBd827d1518E97790Ff70F8dcD63",
+    DAO_MULTISIG: "0xDDddDdddd83dE5cE88a7e7A0dF47a702528984E7",
     DAI: "",
     OG_NFT: "",
     // A_NFT
@@ -68,7 +69,7 @@ const BSC = {
     GNOSIS_SAFE_MASTERCOPY: GNOSIS.GNOSIS_SAFE_MASTERCOPY,
     GNOSIS_SAFE_FALLBACK: GNOSIS.GNOSIS_SAFE_FALLBACK,
 
-    MULTISIG: "0xdDddD6BCDF3Ec3C770D6819E9Be84c55DbC82DEe",
+    DAO_MULTISIG: "0xDDddDdddd83dE5cE88a7e7A0dF47a702528984E7",
     DAI: "",
     OG_NFT: "",
 }
@@ -76,9 +77,16 @@ const BSC = {
 const POLYGON = {
     NAME: "polygon",
 
+    DEVELOPERS: MAINNET.DEVELOPERS,
+    TESTERS: MAINNET.TESTERS,
+
     GNOSIS_SAFE_FACTORY: GNOSIS.GNOSIS_SAFE_FACTORY,
     GNOSIS_SAFE_MASTERCOPY: GNOSIS.GNOSIS_SAFE_MASTERCOPY,
     GNOSIS_SAFE_FALLBACK: GNOSIS.GNOSIS_SAFE_FALLBACK,
+
+    DAO_MULTISIG: "0xDDddDdddd83dE5cE88a7e7A0dF47a702528984E7",
+    DAI: "",
+    OG_NFT: "",
 }
 
 
@@ -88,6 +96,8 @@ export function getDeployedAddresses(network: string): typeof RINKEBY {
     let NETWORK = {} as typeof RINKEBY;
     if (network == RINKEBY.NAME) NETWORK = RINKEBY; else
     if (network == BSC.NAME) NETWORK = BSC; else
-        throw "unknown network";
+    if (network == POLYGON.NAME) NETWORK = POLYGON; else
+    if (network == MAINNET.NAME) NETWORK = MAINNET; else
+        throw `getDeployedAddresses error: unknown network ${network}`;
     return NETWORK;
 }

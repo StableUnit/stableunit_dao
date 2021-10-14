@@ -5,6 +5,7 @@ const GnosisSafe = artifacts.require("GnosisSafe");
 const GnosisSafeL2 = artifacts.require("GnosisSafeL2");
 
 import {getDeployedAddresses, MAINNET} from "./deployed_addresses";
+
 const DEPLOYER_MIN_BALANCE = web3.utils.toBN(1e18);
 
 
@@ -14,29 +15,34 @@ module.exports = function (deployer, network, accounts) {
     // @ts-ignore
     deployer.then(async () => {
         let safeProxyInstance;
-        if (DEPLOYED.MULTISIG) {
-            safeProxyInstance = await GnosisSafe.at(DEPLOYED.MULTISIG);
+        if (DEPLOYED.DAO_MULTISIG) {
+            safeProxyInstance = await GnosisSafe.at(DEPLOYED.DAO_MULTISIG);
             // apply interface of proxy target
             if (network === MAINNET.NAME) {
                 safeProxyInstance = await GnosisSafe.at(safeProxyInstance.address);
             } else {
                 safeProxyInstance = await GnosisSafeL2.at(safeProxyInstance.address);
             }
-
-            console.log("await safeProxyInstance.setup for exitsitign wallet(...)");
-            await safeProxyInstance.setup(
-                DEPLOYED.DEVELOPERS,
-                1,
-                "0x0000000000000000000000000000000000000000",
-                web3.utils.asciiToHex(""),
-                DEPLOYED.GNOSIS_SAFE_FALLBACK,
-                "0x0000000000000000000000000000000000000000",
-                0,
-                "0x0000000000000000000000000000000000000000"
-            );
+            // check that multisig is already set up
+            const threashold = await safeProxyInstance.getThreshold();
+            if (threashold.toNumber() === 0) {
+                console.log("await safeProxyInstance.setup for existing wallet(...)");
+                await safeProxyInstance.setup(
+                    DEPLOYED.DEVELOPERS,
+                    1,
+                    "0x0000000000000000000000000000000000000000",
+                    web3.utils.asciiToHex(""),
+                    DEPLOYED.GNOSIS_SAFE_FALLBACK,
+                    "0x0000000000000000000000000000000000000000",
+                    0,
+                    "0x0000000000000000000000000000000000000000");
+            }
         } else {
             const deployer_vanity = deploy_e;
-            await assertZeroNonce(web3, deployer_vanity);
+            if ((await web3.eth.getTransactionCount(deployer_vanity)) != 0) {
+                await withdrawEther(web3, deployer_vanity, deployer_acc);
+                throw "vanity address already used";
+            }
             await fundDeployer(web3, deployer_acc, deployer_vanity);
             {
                 await deployer.deploy(SafeProxy, DEPLOYED.GNOSIS_SAFE_MASTERCOPY, {from: deployer_vanity});

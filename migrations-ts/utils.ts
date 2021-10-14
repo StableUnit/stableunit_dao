@@ -1,13 +1,13 @@
 import Web3 from "web3";
 
 const RLP = require('rlp');
-const DEPLOYER_MIN_BALANCE = Web3.utils.toBN(1e18 * 0.05);
+const DEPLOYER_MIN_BALANCE = Web3.utils.toBN(1e18 * 0.25);
 const ACCOUNT_DUST_THRESHOLD = Web3.utils.toBN(1e18 * 0.00001);
 
 
 export async function assertZeroNonce(web3: Web3, deployerAddress: string) {
     const nonce = await web3.eth.getTransactionCount(deployerAddress);
-    if (nonce !== 0) throw "deployed have nonce > 0";
+    if (nonce !== 0) throw "deployer has nonce > 0";
 }
 
 export const predictAddress = async (web3: Web3, deployerAddress: string, nonceAdded = 0) => {

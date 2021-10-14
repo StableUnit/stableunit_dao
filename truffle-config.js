@@ -48,6 +48,26 @@ module.exports = {
             timeoutBlocks: 2000,
             skipDryRun: true
         },
+    
+        polygon: {
+            provider: () => new HDWalletProvider(PRIVATE_KEYS, `https://polygon-mainnet.infura.io/v3/${process.env.INFURA_KEY}`),
+            network_id: 137,
+            gas: 500000,
+            // gasPrice: 3 * 1e9,
+            confirmations: 1,
+            timeoutBlocks: 2000,
+            skipDryRun: true
+        },
+    
+        mainnet: {
+            provider: () => new HDWalletProvider(PRIVATE_KEYS, `wss://mainnet.infura.io/ws/v3/${process.env.INFURA_KEY}`),
+            network_id: 1,
+            gas: 500_000,
+            gasPrice: 80 * 1e9,
+            confirmations: 1,
+            timeoutBlocks: 2000,  // # of blocks before a deployment times out  (minimum/default: 50)
+            skipDryRun: true     // Skip dry run before migrations? (default: false for public nets )
+        },
         
     },
     
@@ -66,13 +86,14 @@ module.exports = {
                     enabled: true,
                     runs: 200
                 },
-                evmVersion: "byzantium"
+                // evmVersion: "byzantium"
             }
         }
     },
     plugins: ["truffle-plugin-verify", "solidity-coverage"],
     api_keys: {
         etherscan: process.env.ETHERSCAN_API_KEY,
-        bscscan: process.env.BSCSCAN_API_KEY
+        bscscan: process.env.BSCSCAN_API_KEY,
+        polygonscan: process.env.POLYGON_API_KEY,
     }
 };
