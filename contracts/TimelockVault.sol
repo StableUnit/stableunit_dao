@@ -169,6 +169,19 @@ contract TimelockVault is AccessControl {
         LOCKED_TOKEN.safeTransfer(msg.sender, (claim_amount / 1e12) * 1e12);
     }
 
+
+    /**
+     * @notice User can donate tokens under vesting to DAO or other admin contract as us treasury.
+     */
+    function donateTokens(address toAdmin) external {
+        require(hasRole(DEFAULT_ADMIN_ROLE, toAdmin) == true, "invalid admin address");
+        uint256 balance = totalDeposited(msg.sender) - totalClaimed(msg.sender);
+        require(balance > 0, "nothing to donate");
+        accounts[msg.sender].amount_already_withdrawn_div1e12 = accounts[msg.sender].amount_already_withdrawn_div1e12 + uint64(balance / 1e12);
+        LOCKED_TOKEN.safeTransfer(toAdmin, (balance / 1e12) * 1e12);
+    }
+
+
     /**
     * @notice The owner of the contact can take away tokens accidentally sent to the contract.
     */

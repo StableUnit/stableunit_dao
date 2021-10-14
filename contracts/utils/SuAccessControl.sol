@@ -28,8 +28,8 @@ contract SuAccessControl is AccessControl {
 
         grantRole(DEFAULT_ADMIN_ROLE, newOwner);
         grantRole(MINTER_ROLE, newOwner);
+        revokeRole(MINTER_ROLE, msg.sender);
 
         revokeRole(DEFAULT_ADMIN_ROLE, msg.sender);
-        revokeRole(MINTER_ROLE, msg.sender);
     }
 }

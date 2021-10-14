@@ -19,7 +19,6 @@ import "@openzeppelin/contracts/token/ERC20/extensions/ERC20Votes.sol";
 import "@openzeppelin/contracts/token/ERC20/extensions/ERC20Burnable.sol";
 import "./utils/SuAccessControl.sol";
 
-
 /**
  * @title Governance token for StableUnit Decentralized Autonomous Organisation
  */

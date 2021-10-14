@@ -29,12 +29,12 @@ describe("TimelockVault", () => {
     const cliffSeconds = 100;
     const vestingPeriodSeconds = 500;
 
-    const mintAndLockTokens = async (amountToLock = BN_1E18.muln(100), user = owner, toUser = patron) => {
-        await suDaoInstance.mint(user, amountToLock);
-        await suDaoInstance.approve(timelockVaultInstance.address, amountToLock);
+    const mintAndLockTokens = async (_amountToLock = amountToLock, user = owner, toUser = patron) => {
+        await suDaoInstance.mint(user, _amountToLock);
+        await suDaoInstance.approve(timelockVaultInstance.address, _amountToLock);
         const tx = await timelockVaultInstance.lockUnderVesting(
             toUser,
-            amountToLock,
+            _amountToLock,
             vestingPeriodSeconds,
             cliffSeconds
         );
@@ -47,9 +47,9 @@ describe("TimelockVault", () => {
         suDaoInstance = await TokenMock.new("SuDAO mock", "mSuDao", 18);
         await suDaoInstance.mint(owner, amountToLock);
         timelockVaultInstance = await TimelockVault.new(suDaoInstance.address);
-        for (let i = 0; i < 10; i++) {
-            await timelockVaultInstance.grantRole(UINT256_0, accounts[i]);
-        }
+        // for (let i = 0; i < 10; i++) {
+        //     await timelockVaultInstance.grantRole(UINT256_0, accounts[i]);
+        // }
     });
 
     describe("lockUnderVesting", async () => {
@@ -164,6 +164,28 @@ describe("TimelockVault", () => {
             const rescuedAmount = Number(balanceAfter.sub(balanceBefore).toString());
             const rescueAmount = Number(rescueAmountBn.toString());
             assert.equal(rescuedAmount, rescueAmount);
+        })
+
+        it("donate token to admin", async () => {
+            await mintAndLockTokens();
+
+            const balanceBefore = await suDaoInstance.balanceOf(owner);
+            await timelockVaultInstance.donateTokens(owner, {from: patron})
+            const balanceAfter = await suDaoInstance.balanceOf(owner);
+            const donated = Number(balanceAfter.sub(balanceBefore).toString());
+            // console.log(donated);
+            assert.isTrue(donated == Number(amountToLock.toString()));
+        })
+
+        it("donate token to invalid admin address should fail", async () => {
+            await mintAndLockTokens();
+            await expect(
+                timelockVaultInstance.donateTokens(alice, {from: patron})
+            ).to.be.revertedWith("invalid admin address");
+
+            await expect(
+                timelockVaultInstance.donateTokens(bob, {from: patron})
+            ).to.be.revertedWith("invalid admin address");
         })
 
     });

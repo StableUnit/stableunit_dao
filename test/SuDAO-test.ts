@@ -70,7 +70,10 @@ describe("SuDAO", () => {
         });
     });
 
-    describe("setMinter", function () {
+    describe("Access control", function () {
+        it("Should be able to transfer ownership", async () => {
+            await suDAOInstance.transferOwnership(user);
+        });
         it("Should be able to set minter", async () => {
             await suDAOInstance.setMinter(user, true);
             await mint(user, mintAmount, user);
@@ -94,6 +97,7 @@ describe("SuDAO", () => {
             );
         });
     });
+
 
     describe("rescueTokens", function () {
         it("Should rescue eth successfully", async () => {
