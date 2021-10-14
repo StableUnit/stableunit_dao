@@ -9,7 +9,7 @@
   "scripts": {
     "test": "npx hardhat test",
     "coverage": "npx hardhat coverage",
-    "generate-types": "typechain --target=truffle-v5 'build/contracts/*.json'",
+    "generate-types": "truffle compile && typechain --target=truffle-v5 'build/contracts/*.json'",
     "migrate": "tsc -p ./tsconfig.migrate.json --outDir ./migrations && truffle migrate",
     "typecheck": "tsc --noEmit"
   },

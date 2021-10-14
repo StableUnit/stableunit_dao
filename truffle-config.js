@@ -4,7 +4,23 @@ require('dotenv').config({path: envPath});
 
 const HDWalletProvider = require("@truffle/hdwallet-provider");
 const PRIVATE_KEYS = [
-    process.env.PRIVATE_KEY, process.env.PRIVATE_KEY_VANITY_D,
+    process.env.PRIVATE_KEY,
+    process.env.PRIVATE_KEY_VANITY_1,
+    process.env.PRIVATE_KEY_VANITY_2,
+    process.env.PRIVATE_KEY_VANITY_3,
+    process.env.PRIVATE_KEY_VANITY_4,
+    process.env.PRIVATE_KEY_VANITY_5,
+    process.env.PRIVATE_KEY_VANITY_6,
+];
+
+const PRIVATE_KEYS_TESTNET = [
+    process.env.PRIVATE_KEY_TESTNET,
+    process.env.PRIVATE_KEY_VANITY_1,
+    process.env.PRIVATE_KEY_VANITY_2,
+    process.env.PRIVATE_KEY_VANITY_3,
+    process.env.PRIVATE_KEY_VANITY_4,
+    process.env.PRIVATE_KEY_VANITY_5,
+    process.env.PRIVATE_KEY_VANITY_6,
 ];
 
 module.exports = {
@@ -24,13 +40,12 @@ module.exports = {
             network_id: "*",       // Any network (default: none)
         },
         development: {
-            provider: () => new HDWalletProvider(PRIVATE_KEYS, `http://127.0.0.1:8545`),
+            provider: () => new HDWalletProvider(PRIVATE_KEYS_TESTNET, `http://127.0.0.1:8545`),
             network_id: "*",      // Any network (default: none)
             skipDryRun: true
         },
-        
         rinkeby: {
-            provider: () => new HDWalletProvider(PRIVATE_KEYS, `wss://rinkeby.infura.io/ws/v3/${process.env.INFURA_KEY}`),
+            provider: () => new HDWalletProvider(PRIVATE_KEYS_TESTNET, `wss://rinkeby.infura.io/ws/v3/${process.env.INFURA_KEY}`),
             network_id: 4,
             gas: 10000000,
             timeoutBlocks: 200,
@@ -42,23 +57,22 @@ module.exports = {
         bsc: {
             provider: () => new HDWalletProvider(PRIVATE_KEYS, `https://bsc-dataseed1.binance.org`),
             network_id: 56,
-            gas: 500000,
+            gas: 10000000,
             gasPrice: 5 * 1e9,
             confirmations: 1,
             timeoutBlocks: 2000,
             skipDryRun: true
         },
-    
         polygon: {
+            // provider: () => new HDWalletProvider(PRIVATE_KEYS, `https://polygon-rpc.com`),
             provider: () => new HDWalletProvider(PRIVATE_KEYS, `https://polygon-mainnet.infura.io/v3/${process.env.INFURA_KEY}`),
             network_id: 137,
-            gas: 500000,
-            // gasPrice: 3 * 1e9,
+            gas: 10000000,
+            gasPrice: 34 * 1e9,
             confirmations: 1,
             timeoutBlocks: 2000,
             skipDryRun: true
         },
-    
         mainnet: {
             provider: () => new HDWalletProvider(PRIVATE_KEYS, `wss://mainnet.infura.io/ws/v3/${process.env.INFURA_KEY}`),
             network_id: 1,
