@@ -11,10 +11,10 @@ pragma solidity ^0.8.7;
      \______/  \______/ |_______/ |__/  |__/ \______/
 
 */
-import "@openzeppelin/contracts/access/AccessControl.sol";
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "hardhat/console.sol";
+import "./utils/SuAccessControl.sol";
 
 /*
  * @title The contact enables the storage of erc20 tokens under the linear time-vesting with the cliff time-lock.
@@ -30,7 +30,7 @@ import "hardhat/console.sol";
  * To make balance visible in the erc20 wallets, the contact "looks like" erc20 token by implementing its interface
  * however all non-view methods such as transfer or approve aren't active and will be reverted.
 */
-contract TimelockVault is AccessControl {
+contract TimelockVault is SuAccessControl {
     using SafeERC20 for ERC20;
     ERC20 public immutable LOCKED_TOKEN;
 

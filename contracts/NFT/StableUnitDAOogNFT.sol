@@ -14,22 +14,20 @@ pragma solidity ^0.8.7;
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Enumerable.sol";
 import "@openzeppelin/contracts/security/Pausable.sol";
-import "@openzeppelin/contracts/access/AccessControl.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
 
 import "hardhat/console.sol";
+import "../utils/SuAccessControl.sol";
 
-contract StableUnitDAOogNFT is ERC721, ERC721Enumerable, Pausable, AccessControl {
+contract StableUnitDAOogNFT is ERC721, ERC721Enumerable, Pausable, SuAccessControl {
     using Counters for Counters.Counter;
 
-    bytes32 public constant PAUSER_ROLE = keccak256("PAUSER_ROLE");
-    bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
     Counters.Counter private _tokenIdCounter;
     mapping(address => bool) public pausedImmune;
 
     string baseURI;
 
-    constructor() ERC721("StableUnitDAO ogNFT", "SUDAO") {
+    constructor() ERC721("StableUnitDAO ogNFT", "ogNFT") {
         _setupRole(DEFAULT_ADMIN_ROLE, msg.sender);
         _setupRole(PAUSER_ROLE, msg.sender);
         _setupRole(MINTER_ROLE, msg.sender);

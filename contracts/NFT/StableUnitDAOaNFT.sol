@@ -14,16 +14,14 @@ pragma solidity ^0.8.7;
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Enumerable.sol";
 import "@openzeppelin/contracts/security/Pausable.sol";
-import "@openzeppelin/contracts/access/AccessControl.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
 
 import "hardhat/console.sol";
+import "../utils/SuAccessControl.sol";
 
-contract StableUnitDAOaNFT is ERC721, ERC721Enumerable, Pausable, AccessControl {
+contract StableUnitDAOaNFT is ERC721, ERC721Enumerable, Pausable, SuAccessControl {
     using Counters for Counters.Counter;
 
-    bytes32 public constant PAUSER_ROLE = keccak256("PAUSER_ROLE");
-    bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
     uint256 public constant BASE_LEVEL = 1000;
     uint256 public constant MAX_LEVEL = 10_000;
 

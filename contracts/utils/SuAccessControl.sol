@@ -15,8 +15,8 @@ pragma solidity ^0.8.7;
 import "@openzeppelin/contracts/access/AccessControl.sol";
 
 contract SuAccessControl is AccessControl {
-    bytes32 public constant PAUSER_ROLE = keccak256("PAUSER_ROLE");
     bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
+    bytes32 public constant PAUSER_ROLE = keccak256("PAUSER_ROLE");
     bytes32 public constant BURNER_ROLE = keccak256("BURNER_ROLE");
 
     /**
@@ -26,10 +26,22 @@ contract SuAccessControl is AccessControl {
     function transferOwnership(address newOwner) external onlyRole(DEFAULT_ADMIN_ROLE) {
         require(newOwner != address(0), "Ownable: new owner is the zero address");
 
-        grantRole(DEFAULT_ADMIN_ROLE, newOwner);
-        grantRole(MINTER_ROLE, newOwner);
-        revokeRole(MINTER_ROLE, msg.sender);
+        if (hasRole(MINTER_ROLE, msg.sender)) {
+            grantRole(MINTER_ROLE, newOwner);
+            revokeRole(MINTER_ROLE, msg.sender);
+        }
 
+        if (hasRole(PAUSER_ROLE, msg.sender)) {
+            grantRole(PAUSER_ROLE, newOwner);
+            revokeRole(PAUSER_ROLE, msg.sender);
+        }
+
+        if (hasRole(BURNER_ROLE, msg.sender)) {
+            grantRole(BURNER_ROLE, newOwner);
+            revokeRole(BURNER_ROLE, msg.sender);
+        }
+
+        grantRole(DEFAULT_ADMIN_ROLE, newOwner);
         revokeRole(DEFAULT_ADMIN_ROLE, msg.sender);
     }
 }
