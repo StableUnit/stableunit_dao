@@ -3,6 +3,22 @@
 [![standard-readme compliant](https://img.shields.io/badge/readme%20style-standard-brightgreen.svg?style=flat-square)](https://github.com/RichardLitt/standard-readme)
 [![built-with openzeppelin](https://img.shields.io/badge/built%20with-OpenZeppelin-3677FF)](https://docs.openzeppelin.com/)
 
+## Overview
+StableUnit - over-collateralized multi-currency stablecoin that yields interest directly to users wallets.
+Censorship resistance is achieved by DAO ownership.
+
+The end goal is to expand DAO for the maximum number of people
+and implement an open-source monetary system that owned by everyone on the planet
+and shares benefit equally for everyone.
+Collective ownership would prevent centralized abuse such as overprinting and solves UBI.
+[More details](https://www.notion.so/System-details-29fa471948df4353a960e96ca292a830)
+
+DAO is owned and governed by NFT and SuDAO token holders,
+to represent both reputation-based and capital-based sources of influence.
+This repository contains wip implementation of the system.
+
+[Full documentation](https://www.notion.so/StableUnit-DAO-d49f036e13b1417eac48f5b93c9c20fc)
+
 # Proposal 
 My proposal for stableunit community to form onchain org to creating something cool together
 init DAO
@@ -42,7 +58,7 @@ Fundrasing
         kolNFT
     SuDAO.sol - erc20 with voteDelegate
     Distributors
-        TokenDistributor_v2.sol - code for friends only, to distribute first suDAO and get initital capital
+        TokenDistributor_v3.sol - code for friends only, to distribute first suDAO and get initital capital
             tokens get distributed via timelockVault
         TimelockVault.sol - locks suDAO under vesting
 
