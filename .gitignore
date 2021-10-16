@@ -5,7 +5,6 @@ build
 .env
 artifacts
 cache
-package-lock.json
 /coverage.json
 /coverage/
 coverage.json
