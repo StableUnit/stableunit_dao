@@ -109,8 +109,9 @@ contract TokenDistributor_v2s1 is Ownable {
         uint64 cliffSeconds,
         address nftRequirement
     ) external onlyOwner {
-        require(cliffSeconds < fullVestingSeconds, "cliff seconds < vesting seconds");
-        require(minimumRewardAllocation <= maximumRewardAllocation, "invalid min/max rewards");
+        require(cliffSeconds < fullVestingSeconds, "!cliff seconds < vesting seconds");
+        require(minimumRewardAllocation <= maximumRewardAllocation, "!min < max rewards");
+        require(startTimestamp < deadlineTimestamp, "!startTimestamp < deadlineTimestamp");
 
         distributions[id] = DistributionInfo({
         minimumRewardAllocation : minimumRewardAllocation,
