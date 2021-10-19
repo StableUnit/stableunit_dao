@@ -229,8 +229,40 @@ describe("TokenDistributor_v2_1", () => {
                 "insufficient minimal amount"
             );
         });
-
     });
+
+    describe("donate deadlines", function () {
+        it("Should not be able to participate before distribution starts", async () => {
+            // create with start time == end time - 1
+            await distributorInstance.setDistribution(
+                distributionId,
+                minRewardAllocation,
+                maxRewardAllocation,
+                maxDonationAmount,
+                daiTokenInstance.address,
+                await chainTimestamp() + deadlineSeconds - 1,
+                await chainTimestamp() + deadlineSeconds,
+                vestingPeriodSeconds,
+                cliffSeconds,
+                nftInstance.address,
+            );
+
+            await truffleAssert.reverts(
+                mintAndDonate(patron, maxDonationAmount),
+                "participation has not started yet"
+            );
+        });
+
+        it("Should not be able to participate after distribution ends", async () => {
+            await setDistribution();
+            increaseTime(web3, deadlineSeconds + 1);
+
+            await truffleAssert.reverts(
+                mintAndDonate(patron, maxDonationAmount),
+                "participation is over"
+            );
+        });
+    })
 
     describe("adminWithdraw", function () {
         it("withdraw DAI", async () => {
