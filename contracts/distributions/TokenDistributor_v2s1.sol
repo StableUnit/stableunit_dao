@@ -23,7 +23,7 @@ import "hardhat/console.sol";
 /**
  * @title The contract that distribute suDAO tokens for community based on NFT membership
  */
-contract TokenDistributor_v2 is Ownable {
+contract TokenDistributor_v2s1 is Ownable {
     using SafeERC20 for IERC20;
 
     TimelockVault public immutable TIMELOCK_VAULT;
@@ -34,6 +34,7 @@ contract TokenDistributor_v2 is Ownable {
         uint256 maximumRewardAllocation;    // Maximum amount of suDAO Tokens to acquire
         uint256 maximumDonationAmount;      // Maximum donation amount, for example 50,000 USDT
         address donationMethod;             // for example USDT address
+        uint64 startTimestamp;              // the date when participation is available
         uint64 deadlineTimestamp;           // ultimate date when participation is available
         uint64 fullVestingSeconds;          // Default vesting period is 12 months
         uint64 cliffSeconds;                //      with 3 months cliff.
@@ -56,7 +57,9 @@ contract TokenDistributor_v2 is Ownable {
      */
     function participate(uint256 distributionId, uint256 donationAmount) payable external {
         DistributionInfo storage distribution = distributions[distributionId];
+
         require(distribution.maximumDonationAmount > 0, "distribution doesn't exit");
+        require(block.timestamp >= distribution.startTimestamp, "participation has not started yet");
         require(block.timestamp <= distribution.deadlineTimestamp, "participation is over");
         require(IERC721(distribution.nftRequirement).balanceOf(msg.sender) > 0, "caller doesn't have required NFT");
 
@@ -100,6 +103,7 @@ contract TokenDistributor_v2 is Ownable {
         uint256 maximumRewardAllocation,
         uint256 maximumDonationAmount,
         address donationMethod,
+        uint64 startTimestamp,
         uint64 deadlineTimestamp,
         uint64 fullVestingSeconds,
         uint64 cliffSeconds,
@@ -113,6 +117,7 @@ contract TokenDistributor_v2 is Ownable {
         maximumRewardAllocation : maximumRewardAllocation,
         maximumDonationAmount : maximumDonationAmount,
         donationMethod : donationMethod,
+        startTimestamp: startTimestamp,
         deadlineTimestamp : deadlineTimestamp,
         fullVestingSeconds : fullVestingSeconds,
         cliffSeconds : cliffSeconds,
@@ -125,6 +130,7 @@ contract TokenDistributor_v2 is Ownable {
             maximumRewardAllocation,
             maximumDonationAmount,
             donationMethod,
+            startTimestamp,
             deadlineTimestamp,
             fullVestingSeconds,
             cliffSeconds,
@@ -135,7 +141,7 @@ contract TokenDistributor_v2 is Ownable {
     receive() external payable {}
 
     /**
-     * @notice The owner of the contact can take away tokens accidentally sent to the contract.
+     * @notice The owner of the contact can take away tokens sent to the contract.
      * @dev The owner can't take away SuDAO token already distributed to users, because they are stored on timelockVault
      */
     function adminWithdraw(IERC20 token) external onlyOwner {
@@ -153,6 +159,7 @@ contract TokenDistributor_v2 is Ownable {
         uint256 maximumRewardAllocation,
         uint256 maximumDonationAmount,
         address donationMethod,
+        uint64 startTimestamp,
         uint64 deadlineTimestamp,
         uint64 fullVestingSeconds,
         uint64 cliffSeconds,

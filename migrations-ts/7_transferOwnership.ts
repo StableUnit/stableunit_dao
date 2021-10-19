@@ -6,7 +6,7 @@ const {OG_NFT_JSON} = require("./deployed_addresses");
 const SafeProxy = artifacts.require("GnosisSafeProxy");
 const SuDAO = artifacts.require("SuDAO");
 const TimelockVault = artifacts.require("VestingToken");
-const Distributor = artifacts.require("TokenDistributor_v3");
+const Distributor = artifacts.require("TokenDistributor_v3s1");
 const AdvisorNft = artifacts.require("StableUnitDAOaNFT");
 
 const TokenMock = artifacts.require('TokenMock');
@@ -19,6 +19,7 @@ const MAX_DONATION = BN_1E18.muln(25_000);
 const MIN_REWARD_ALLOCATION = BN_1E18.muln(Math.round(2_500 / (1 - 0.70))); // -70% off
 const MAX_REWARD_ALLOCATION = BN_1E18.muln(Math.round(25_000 / (1 - 0.70))); // -70% off
 const TOTAL_REWARD = BN_1E18.muln(Math.round(250_000 / (1 - 0.70)));
+const START_TIMESTAMP = Math.ceil(new Date().getTime() / 1000) + 1 * 60 * 60;
 const DEADLINE_TIMESTAMP = Math.ceil(new Date().getTime() / 1000) + 7 * 24 * 60 * 60;
 const VESTING_SECONDS = 365 * 24 * 60 * 60;
 const CLIFF_SECONDS = 90 * 24 * 60 * 60;
@@ -100,6 +101,7 @@ module.exports = function (deployer, network, accounts) {
             MAX_REWARD_ALLOCATION,
             MAX_DONATION,
             daiInstance.address,
+            START_TIMESTAMP,
             DEADLINE_TIMESTAMP,
             VESTING_SECONDS,
             CLIFF_SECONDS,

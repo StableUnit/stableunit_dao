@@ -1,7 +1,6 @@
 import {
     NftMockInstance,
-    TimelockVaultInstance,
-    TokenDistributorV2Instance,
+    TimelockVaultInstance, TokenDistributorV2s1Instance,
     TokenMockInstance
 } from "../../types/truffle-contracts";
 
@@ -12,7 +11,7 @@ import {assert, web3, artifacts} from "hardhat";
 const {increaseTime, chainTimestamp} = require('../utils/timeManipulation');
 
 // @ts-ignore
-const Distributor = artifacts.require("TokenDistributor_v3");
+const DistributorV2 = artifacts.require("TokenDistributor_v2s1");
 // @ts-ignore
 const SuDAO = artifacts.require("SuDAO");
 // @ts-ignore
@@ -26,7 +25,7 @@ const BN_1E18 = web3.utils.toBN(1e18);
 
 const UINT256_0 = '0x0000000000000000000000000000000000000000';
 
-describe("TokenDistributor_v2", () => {
+describe("TokenDistributor_v2_1", () => {
     let accounts: string[];
     let patron: string;
     let owner: string;
@@ -35,13 +34,14 @@ describe("TokenDistributor_v2", () => {
     let suDaoInstance: TokenMockInstance;
     let timelockVaultInstance: TimelockVaultInstance;
     let nftInstance: NftMockInstance;
-    let distributorInstance: TokenDistributorV2Instance;
+    let distributorInstance: TokenDistributorV2s1Instance;
 
 
     const distributionId = 0;
     const maxRewardAllocation = BN_1E18.muln(100);
     const minRewardAllocation = BN_1E18.muln(10);
     const maxDonationAmount = BN_1E18.muln(10);
+    const startSeconds = 0;
     const deadlineSeconds = 10;
     const vestingPeriodSeconds = 30;
     const cliffSeconds = 20;
@@ -57,6 +57,7 @@ describe("TokenDistributor_v2", () => {
             maxRewardAllocation,
             maxDonationAmount,
             donationMethod,
+            await chainTimestamp() + startSeconds,
             await chainTimestamp() + deadlineSeconds,
             vestingPeriodSeconds,
             cliffSeconds,
@@ -82,7 +83,7 @@ describe("TokenDistributor_v2", () => {
         nftInstance = await Nft.new("Test NFT", "tNFT");
         suDaoInstance = await SuDAO.new(suDAOTotalSupply);
         timelockVaultInstance = await TimelockVault.new(suDaoInstance.address);
-        distributorInstance = await Distributor.new(UINT256_0, suDaoInstance.address, timelockVaultInstance.address);
+        distributorInstance = await DistributorV2.new(suDaoInstance.address, timelockVaultInstance.address);
         await timelockVaultInstance.grantRole(UINT256_0, distributorInstance.address);
     });
 
@@ -113,6 +114,7 @@ describe("TokenDistributor_v2", () => {
                     maxRewardAllocation,
                     maxDonationAmount,
                     daiTokenInstance.address,
+                    await chainTimestamp() + startSeconds,
                     await chainTimestamp() + deadlineSeconds,
                     vestingPeriodSeconds,
                     cliffSeconds,

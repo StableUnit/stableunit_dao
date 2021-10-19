@@ -1,8 +1,7 @@
 import {
-    ERC20Contract,
     NftMockInstance, StableUnitDAOaNFTInstance,
     SuDAOInstance,
-    TimelockVaultInstance, TokenDistributorV3Instance,
+    TimelockVaultInstance, TokenDistributorV3s1Instance,
     TokenMockInstance
 } from "../../types/truffle-contracts";
 
@@ -13,7 +12,7 @@ import {BN_1E18, BN_EPS, EPS, UINT256_0} from "../utils/utils";
 
 const {increaseTime, chainTimestamp} = require('../utils/timeManipulation');
 
-const Distributor = artifacts.require("TokenDistributor_v3");
+const Distributor = artifacts.require("TokenDistributor_v3s1");
 // @ts-ignore
 const SuDAO = artifacts.require("SuDAO");
 // @ts-ignore
@@ -36,13 +35,14 @@ describe("TokenDistributor_v3", () => {
     let timelockVaultInstance: TimelockVaultInstance;
     let ogNftInstance: NftMockInstance;
     let aNftInstance: StableUnitDAOaNFTInstance;
-    let distributorInstance: TokenDistributorV3Instance;
+    let distributorInstance: TokenDistributorV3s1Instance;
 
 
     const distributionId = 0;
     const maxRewardAllocation = BN_1E18.muln(100);
     const minRewardAllocation = BN_1E18.muln(10);
     const maxDonationAmount = BN_1E18.muln(10);
+    const startSeconds = 0;
     const deadlineSeconds = 20;
     const vestingPeriodSeconds = 40;
     const cliffSeconds = 30;
@@ -57,6 +57,7 @@ describe("TokenDistributor_v3", () => {
             maxRewardAllocation,
             maxDonationAmount,
             donationMethod,
+            await chainTimestamp() + startSeconds,
             await chainTimestamp() + deadlineSeconds,
             vestingPeriodSeconds,
             cliffSeconds,

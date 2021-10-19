@@ -12,7 +12,7 @@
 */
 pragma solidity ^0.8.7;
 
-import "./TokenDistributor_v2.sol";
+import "./TokenDistributor_v2s1.sol";
 import "../NFT/StableUnitDAOaNFT.sol";
 import "@openzeppelin/contracts/utils/math/Math.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
@@ -24,13 +24,13 @@ import "@openzeppelin/contracts/access/Ownable.sol";
  * @notice All functions of TokenDistributor_v2 are available too.
  * @custom:experimental This is an experimental contract.
  */
-contract TokenDistributor_v3 is TokenDistributor_v2 {
+contract TokenDistributor_v3s1 is TokenDistributor_v2s1 {
     using SafeERC20 for IERC20;
 
     StableUnitDAOaNFT public immutable A_NFT;
 
     constructor(StableUnitDAOaNFT _aNft, ERC20 _suDao, TimelockVault _timelockVault)
-    TokenDistributor_v2(_suDao, _timelockVault)
+    TokenDistributor_v2s1(_suDao, _timelockVault)
     {
         A_NFT = _aNft;
     }
@@ -45,6 +45,7 @@ contract TokenDistributor_v3 is TokenDistributor_v2 {
 
         // check basic participation requirements
         require(distribution.maximumDonationAmount > 0, "distribution doesn't exit");
+        require(block.timestamp >= distribution.startTimestamp, "participation has not started yet");
         require(block.timestamp <= distribution.deadlineTimestamp, "participation is over");
         require(IERC721(distribution.nftRequirement).balanceOf(msg.sender) > 0, "caller doesn't have community NFT");
         require(A_NFT.balanceOf(msg.sender) > 0, "caller doesn't have aNFT");
