@@ -34,16 +34,21 @@ init DAO
 **now we have DAO from the project supporters which is able to deploy any contact on BSC and control the faite of the project**
 
 
-Fundrasing
+Oversimplified plan
 ---
 1. we develop contracts which exchange 7% of suDAO for special NFT
-2. create a proposal for DAO to issue a 3 types of NFT token,
-  type a for $1000
-  type b for $10,000
-  type c for $100,000
-  contract for redeem them for suDAO over time
-  contract which pays to developers in 5 milestones, and DAO can vote NO is dev didn’t reach milestones.
-3. multisig sells these NFTs on OPEN
+2. create a proposal for DAO to issue a 3 types of NFT tokens:
+  
+    type A for $1000
+
+    type B for $10,000
+
+    type C for $100,000
+  
+    contract for redeem fNFTs for suDAO over time
+
+    contract which pays to developers in 5 milestones, and DAO can vote NO is dev didn’t reach milestones.
+3. dao-multisig sells these NFTs on OPEN
 4. build the best stablecoin possible
 5. share ownership for every person in the world
 
@@ -68,44 +73,45 @@ Fundrasing
 # Deployment
 
 ## Compile
-`
+```
 npm install
 npm audit fix
 truffle compile
 npm run generate-types
-`
+```
 
 ## Test
-`
+```
 npm run test
-`
-
-## Test coverage
-`
 npm run coverage
-`
+```
 
 ## Deploy contracts
-`
+```
 npm run migrate -- --network rinkeby
-`
+```
 
 ## Verify
 ```
-truffle run verify SuDAO --network rinkeby
-truffle run verify StableUnitDAOaNFT --network rinkeby
-truffle run verify VeToken --network rinkeby 
-truffle run verify TokenDistributor_v3 --network rinkeby
-truffle run verify NftMock --network rinkeby
-
+npm run verify
+```
+or
+```
 truffle run verify GnosisSafeProxy --network rinkeby
+truffle run verify StableUnitDAOaNFT --network rinkeby
+truffle run verify SuDAO --network rinkeby
+truffle run verify VestingToken --network rinkeby 
+truffle run verify TokenDistributor_v3s1 --network rinkeby --debug
+truffle run verify StableUnitDAOogNFT --network rinkeby
+
+truffle run verify NftMock --network rinkeby
 truffle run verify TokenMock --network rinkeby
 ```
 
 # StableUnit DAO NFTs
 
 Features three options for NFT DAO:
-- Og-NFT, original community of 150 participants
+- Og-NFT, original community of 99+ participants
 - A-NFT, advisors
 - C-NFT, community tokens. Allow inviting new members
 
@@ -120,17 +126,19 @@ We have 3 NFT tokens:
 - A-NFT - advisors
 - C-NFT - future community members
 
-    1. Og-NFT in total would have f_og(t) suDAO voting power from 100% to 30% at the end of the year
-    2. A-NFT in total would have f_a(t) suDAO voting power 1/10 from all og-NFT
-    3. C-NFT in total would have f_c(t) from 0 to 50% (I,.e, same as og-NFT eventually)
-
+```
+1. Og-NFT in total would have f_og(t) suDAO voting power from 100% to 30% at the end of the year
+2. A-NFT in total would have f_a(t) suDAO voting power 1/10 from all og-NFT
+3. C-NFT in total would have f_c(t) from 0 to 50% (I,.e, same as og-NFT eventually)
+```
 SuDAO in minted every block like bitcoin-like function and goes to treasury, split into 4 buckets:
-1. Capital providers & fund supporters 15%
+1. Capital providers & patrons 15%
 2. Development 25 %(+4 year vesting)
-3. Farming and inntives 30%
+3. Farming and other incentives 30%
 4. DAO Treasury 30%
 
-Og-NFT got invited by core team. Each next invitee has diminising voting power such that a sum of all NFT powers is finite, like bitcoin mint.
+Og-NFT got invited by core team. 
+Each next invitee has diminishing voting power such that a sum of all NFT powers is finite, like bitcoin mint.
 
 C-NFT token get the same system, can be any amount of members, but each new one gets little less voting power
 
@@ -197,7 +205,10 @@ npx hardhat renounce-role --address 0xDEPLOYED_ADDRESS --network NETWORK_NAME
 
 ## Hardhat Guide
 
-This project demonstrates a basic Hardhat use case. It comes with a sample contract, a test for that contract, a sample script that deploys that contract, and an example of a task implementation, which simply lists the available accounts.
+This project demonstrates a basic Hardhat use case. 
+It comes with a sample contract, a test for that contract, 
+a sample script that deploys that contract, and an example of a task implementation, 
+which simply lists the available accounts.
 
 Try running some following tasks:
 ```shell
@@ -229,7 +240,7 @@ npx hardhat transfer-owner --network mumbai --address 0x000000006cD799E2cC7A3Fe6
 
 ```
 
-### renounce deployer as an owner
+### renounce the deployer as an owner
 ```bash
  npx hardhat renounce-role --network mumbai --address 0x000000006cD799E2cC7A3Fe68ef0D8bfD7f8f477
 ```

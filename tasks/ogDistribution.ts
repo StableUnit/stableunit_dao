@@ -7,9 +7,8 @@ import { task } from "hardhat/config";
 import ROLES from '../scripts/roles';
 
 /**
- * launch with command
+ * launch with the  command:
  * npx hardhat ogDistribution --address 0xfffffffff615bee8d0c7d329ebe0d444ab46ee5a --filename ./misc/ogNftAirdrop.txt --network rinkeby --verbose
-
  */
 
 task("ogDistribution", "Assigns new owner and renounces role")
