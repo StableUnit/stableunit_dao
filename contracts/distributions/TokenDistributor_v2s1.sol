@@ -18,12 +18,11 @@ import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import "@openzeppelin/contracts/token/ERC721/extensions/IERC721Enumerable.sol";
 import "../TimelockVault.sol";
-import "hardhat/console.sol";
 
 /**
  * @title The contract that distribute suDAO tokens for community based on NFT membership
  */
-contract TokenDistributor_v2s1 is Ownable {
+contract TokenDistributor_v2s1 is SuAccessControl {
     using SafeERC20 for IERC20;
 
     TimelockVault public immutable TIMELOCK_VAULT;
@@ -48,6 +47,7 @@ contract TokenDistributor_v2s1 is Ownable {
         SU_DAO = _suDAO;
         TIMELOCK_VAULT = _timelockVault;
         _suDAO.approve(address(_timelockVault), type(uint256).max);
+        _setupRole(MINTER_ROLE, msg.sender);
     }
 
     /**
@@ -108,7 +108,7 @@ contract TokenDistributor_v2s1 is Ownable {
         uint64 fullVestingSeconds,
         uint64 cliffSeconds,
         address nftRequirement
-    ) external onlyOwner {
+    ) external onlyRole(MINTER_ROLE) {
         require(cliffSeconds < fullVestingSeconds, "!cliff seconds < vesting seconds");
         require(minimumRewardAllocation <= maximumRewardAllocation, "!min < max rewards");
         require(startTimestamp < deadlineTimestamp, "!startTimestamp < deadlineTimestamp");
@@ -145,7 +145,7 @@ contract TokenDistributor_v2s1 is Ownable {
      * @notice The owner of the contact can take away tokens sent to the contract.
      * @dev The owner can't take away SuDAO token already distributed to users, because they are stored on timelockVault
      */
-    function adminWithdraw(IERC20 token) external onlyOwner {
+    function adminWithdraw(IERC20 token) external onlyRole(DEFAULT_ADMIN_ROLE) {
         if (token == IERC20(address(0))) {
             payable(msg.sender).transfer(address(this).balance);
         } else {

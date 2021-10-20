@@ -1,4 +1,4 @@
-import {assertZeroNonce, fundDeployer, withdrawEther} from "./utils";
+import {assertZeroNonce, fundDeployer, prepareVanityAddress, withdrawEther} from "./utils";
 
 const SafeProxy = artifacts.require("GnosisSafeProxy");
 const GnosisSafe = artifacts.require("GnosisSafe");
@@ -39,10 +39,7 @@ module.exports = function (deployer, network, accounts) {
             }
         } else {
             const deployer_vanity = deploy_e;
-            if ((await web3.eth.getTransactionCount(deployer_vanity)) != 0) {
-                await withdrawEther(web3, deployer_vanity, deployer_acc);
-                throw "vanity address already used";
-            }
+            await prepareVanityAddress(web3, deployer_acc, deployer_vanity);
             await fundDeployer(web3, deployer_acc, deployer_vanity);
             {
                 await deployer.deploy(SafeProxy, DEPLOYED.GNOSIS_SAFE_MASTERCOPY, {from: deployer_vanity});

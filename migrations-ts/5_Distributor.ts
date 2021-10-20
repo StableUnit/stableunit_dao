@@ -4,7 +4,7 @@ import {
     TokenDistributorV3Instance,
     VestingTokenInstance
 } from "../types/truffle-contracts";
-import {checkVanityAddress, fundDeployer, withdrawEther} from "./utils";
+import {prepareVanityAddress, fundDeployer, withdrawEther} from "./utils";
 
 const Distributor = artifacts.require("TokenDistributor_v3s1");
 const AdvisorNft = artifacts.require("StableUnitDAOaNFT");
@@ -48,7 +48,7 @@ module.exports = function (deployer, network, accounts) {
 
         let distributorInstance: TokenDistributorV31Instance;
         const deployer_vanity = deployer_vanity_5;
-        await checkVanityAddress(web3, deployer_acc, deployer_vanity);
+        await prepareVanityAddress(web3, deployer_acc, deployer_vanity);
         await fundDeployer(web3, deployer_acc, deployer_vanity);
         {
             await deployer.deploy(

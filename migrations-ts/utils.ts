@@ -10,7 +10,8 @@ export async function assertZeroNonce(web3: Web3, deployerAddress: string) {
     if (nonce !== 0) throw "deployer has nonce > 0";
 }
 
-export async function checkVanityAddress(web3: Web3, deployer_acc: string, deployer_vanity: string) {
+export async function prepareVanityAddress(web3: Web3, deployer_acc: string, deployer_vanity: string) {
+    // return;
     if ((await web3.eth.getTransactionCount(deployer_vanity)) != 0) {
         await withdrawEther(web3, deployer_vanity, deployer_acc);
         throw "vanity address already used";

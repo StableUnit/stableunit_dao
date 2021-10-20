@@ -20,6 +20,13 @@ contract SuAccessControl is AccessControl {
     bytes32 public constant BURNER_ROLE = keccak256("BURNER_ROLE");
 
     /**
+    * @dev Initializes the contract setting the deployer as the initial owner.
+    */
+    constructor() {
+        _setupRole(DEFAULT_ADMIN_ROLE, msg.sender);
+    }
+
+    /**
      * @dev Transfers ownership of the contract to a new account (`newOwner`).
      * Can only be called by the current owner.
      */

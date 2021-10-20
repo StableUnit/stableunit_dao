@@ -1,5 +1,5 @@
 import {getDeployedAddresses} from "./deployed_addresses";
-import {checkVanityAddress, fundDeployer, withdrawEther} from "./utils";
+import {prepareVanityAddress, fundDeployer, withdrawEther} from "./utils";
 
 const {OG_NFT_JSON} = require("./deployed_addresses");
 const OgNft = artifacts.require("StableUnitDAOogNFT");
@@ -23,7 +23,7 @@ module.exports = function (deployer, network, accounts) {
             ogNftInstance = await OgNft.at(DEPLOYED.OG_NFT)
         } else {
             const deployer_vanity = deployer_vanity_6;
-            await checkVanityAddress(web3, deployer_acc, deployer_vanity);
+            await prepareVanityAddress(web3, deployer_acc, deployer_vanity);
             await fundDeployer(web3, deployer_acc, deployer_vanity);
             {
                 await deployer.deploy(OgNft, {from: deployer_vanity});

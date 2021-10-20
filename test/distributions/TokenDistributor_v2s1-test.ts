@@ -120,7 +120,7 @@ describe("TokenDistributor_v2_1", () => {
                     cliffSeconds,
                     nftInstance.address,
                     {from: patron}),
-                "Ownable: caller is not the owner"
+                "'AccessControl: account 0x70997970c51812dc3a010c7d01b50e0d17dc79c8 is missing role 0x9f2df0fed2c77648de5860a4cc508cd0818c85b8b8a1ab4ceeef8d981c8956a6'"
             );
         });
 
@@ -266,6 +266,15 @@ describe("TokenDistributor_v2_1", () => {
 
     describe("adminWithdraw", function () {
         it("withdraw DAI", async () => {
+            await daiTokenInstance.mint(distributorInstance.address, BN_1E18);
+
+            let daiBalanceBefore = await daiTokenInstance.balanceOf(owner);
+            await distributorInstance.adminWithdraw(daiTokenInstance.address);
+            let daiBalanceAfter = await daiTokenInstance.balanceOf(owner);
+            assert.equal(true, daiBalanceBefore.eq(daiBalanceAfter.sub(BN_1E18)));
+        })
+
+        it("participate and withdraw DAI", async () => {
             await suDaoInstance.mint(distributorInstance.address, totalRewards);
             await setDistribution();
             await daiTokenInstance.mint(patron, maxDonationAmount);

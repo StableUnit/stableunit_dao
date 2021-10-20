@@ -14,17 +14,13 @@ const NftMock = artifacts.require('NftMock');
 
 
 const BN_1E18 = web3.utils.toBN(1e18);
-const DISTRIBUTION_ID = 0;
-const MAX_DONATION = BN_1E18.muln(25_000);
-const MIN_REWARD_ALLOCATION = BN_1E18.muln(Math.round(2_500 / (1 - 0.70))); // -70% off
-const MAX_REWARD_ALLOCATION = BN_1E18.muln(Math.round(25_000 / (1 - 0.70))); // -70% off
-const TOTAL_REWARD = BN_1E18.muln(Math.round(250_000 / (1 - 0.70)));
-const START_TIMESTAMP = Math.ceil(new Date().getTime() / 1000) + 1 * 60 * 60;
-const DEADLINE_TIMESTAMP = Math.ceil(new Date().getTime() / 1000) + 7 * 24 * 60 * 60;
-const VESTING_SECONDS = 365 * 24 * 60 * 60;
-const CLIFF_SECONDS = 90 * 24 * 60 * 60;
-
 const DEFAULT_ADMIN_ROLE = "0x0000000000000000000000000000000000000000";
+
+const DAY_SECONDS = 24 * 60 * 60;
+const TOTAL_REWARD = BN_1E18.muln(Math.round(420_000)); // 2% from total supply
+const VESTING_SECONDS = 365 * DAY_SECONDS;
+const CLIFF_SECONDS = 90 * DAY_SECONDS;
+
 
 module.exports = function (deployer, network, accounts) {
     const [deployer_acc, deploy_e] = accounts;
@@ -74,7 +70,7 @@ module.exports = function (deployer, network, accounts) {
                 await deployer.deploy(NftMock, "Test NFT", "tNFT");
                 const ogNftInstance = await NftMock.deployed();
                 console.log("setBaseURI() ");
-                await aNftInstance.setBaseURI(`https://ipfs.io/ipfs/${OG_NFT_JSON}?id=`);
+                await ogNftInstance.setBaseURI(`https://ipfs.io/ipfs/${OG_NFT_JSON}?id=`);
                 for (const developer of DEPLOYED.DEVELOPERS) {
                     console.log("await ogNftInstance.mint(developer);");
                     await ogNftInstance.mint(developer);
@@ -92,29 +88,8 @@ module.exports = function (deployer, network, accounts) {
                 ? await SafeProxy.at(DEPLOYED.DAO_MULTISIG)
                 : await SafeProxy.deployed();
 
-
-        // create presale for ogNFT
-        console.log("call setDistribution...");
-        await distributorInstance.setDistribution(
-            DISTRIBUTION_ID,
-            MIN_REWARD_ALLOCATION,
-            MAX_REWARD_ALLOCATION,
-            MAX_DONATION,
-            daiInstance.address,
-            START_TIMESTAMP,
-            DEADLINE_TIMESTAMP,
-            VESTING_SECONDS,
-            CLIFF_SECONDS,
-            ogNftInstance.address,
-        );
-        console.log("await suDaoInstance.mint(distributorInstance.address, TOTAL_REWARD);");
-        await suDaoInstance.mint(distributorInstance.address, TOTAL_REWARD);
-
         console.log("transferring ownership...");
-        if (!DEPLOYED.SU_DAO) {
-            console.log("await suDaoInstance.transferOwnership(safeProxyInstance.address);");
-            await suDaoInstance.transferOwnership(safeProxyInstance.address);
-        }
+
         if (!DEPLOYED.A_NFT) {
             console.log("await aNftInstance.grantRole(DEFAULT_ADMIN_ROLE, safeProxyInstance.address)");
             await aNftInstance.grantRole(DEFAULT_ADMIN_ROLE, safeProxyInstance.address);
@@ -132,8 +107,55 @@ module.exports = function (deployer, network, accounts) {
             await timelockVaultInstance.revokeRole(DEFAULT_ADMIN_ROLE, accounts[0]);
         }
         if (!DEPLOYED.DISTRIBUTOR) {
+            // create presale for ogNFT
+            console.log("call setDistributions...");
+            // distribution #1 aNFT only, days 1-2, 1-10k
+            // distribution #2, days 2-7, 1-20k
+            // distribution #3, days 3-7, 2.5-25k 0.4
+            async function setDistribution(
+                id: number,
+                nftAddress: string,
+                startDay: number,
+                endDay: number,
+                minDonation: number,
+                maxDonation: number,
+                suRate: number
+            ) {
+                await distributorInstance.setDistribution(
+                    id,
+                    BN_1E18.muln(Math.round(minDonation / suRate)),
+                    BN_1E18.muln(Math.round(maxDonation / suRate)),
+                    BN_1E18.muln(maxDonation),
+                    daiInstance.address,
+                    Math.ceil(new Date().getTime() / 1000) + startDay * DAY_SECONDS,
+                    Math.ceil(new Date().getTime() / 1000) + endDay * DAY_SECONDS,
+                    VESTING_SECONDS,
+                    CLIFF_SECONDS,
+                    nftAddress,
+                );
+            }
+
+            await setDistribution(
+                1, aNftInstance.address, 0, 2,
+                1_000, 10_000, 0.3
+            );
+            await setDistribution(
+                2, ogNftInstance.address, 2, 7,
+                1_000, 10_000, 0.3
+            );
+            await setDistribution(
+                3, ogNftInstance.address, 4, 7,
+                2_500, 25_000, 0.4
+            );
             console.log("await distributorInstance.transferOwnership(safeProxyInstance.address);");
             await distributorInstance.transferOwnership(safeProxyInstance.address);
+        }
+
+        if (!DEPLOYED.SU_DAO) {
+            console.log("await suDaoInstance.mint(distributorInstance.address, TOTAL_REWARD);");
+            await suDaoInstance.mint(distributorInstance.address, TOTAL_REWARD);
+            console.log("await suDaoInstance.transferOwnership(safeProxyInstance.address);");
+            await suDaoInstance.transferOwnership(safeProxyInstance.address);
         }
 
         console.log(`\nDAI: "${daiInstance.address}",`);

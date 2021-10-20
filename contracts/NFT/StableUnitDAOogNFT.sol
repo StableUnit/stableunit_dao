@@ -15,8 +15,6 @@ import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Enumerable.sol";
 import "@openzeppelin/contracts/security/Pausable.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
-
-import "hardhat/console.sol";
 import "../utils/SuAccessControl.sol";
 
 contract StableUnitDAOogNFT is ERC721, ERC721Enumerable, Pausable, SuAccessControl {

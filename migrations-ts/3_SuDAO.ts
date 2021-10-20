@@ -1,5 +1,5 @@
 import {getDeployedAddresses} from "./deployed_addresses";
-import {checkVanityAddress, fundDeployer, withdrawEther} from "./utils";
+import {prepareVanityAddress, fundDeployer, withdrawEther} from "./utils";
 import {SuDAOInstance} from "../types/truffle-contracts";
 
 const SuDAO = artifacts.require("SuDAO");
@@ -20,7 +20,7 @@ module.exports = function (deployer, network, accounts) {
         // const suDAOInstance = await SuDAO.deployed();
         let suDAOInstance: SuDAOInstance;
         const deployer_vanity = deployer_vanity_3;
-        await checkVanityAddress(web3, deployer_acc, deployer_vanity);
+        await prepareVanityAddress(web3, deployer_acc, deployer_vanity);
         await fundDeployer(web3, deployer_acc, deployer_vanity);
         {
             await deployer.deploy(SuDAO, 0, {from: deployer_vanity});

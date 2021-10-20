@@ -1,5 +1,5 @@
 import {getDeployedAddresses} from "./deployed_addresses";
-import {checkVanityAddress, fundDeployer, withdrawEther} from "./utils";
+import {prepareVanityAddress, fundDeployer, withdrawEther} from "./utils";
 
 const {A_NFT_JSON} = require("./deployed_addresses");
 const AdvisorNft = artifacts.require("StableUnitDAOaNFT");
@@ -22,7 +22,7 @@ module.exports = function (deployer, network, accounts) {
             aNftInstance = await AdvisorNft.at(DEPLOYED.A_NFT)
         } else {
             const deployer_vanity = deployer_vanity_2;
-            await checkVanityAddress(web3, deployer_acc, deployer_vanity);
+            await prepareVanityAddress(web3, deployer_acc, deployer_vanity);
             await fundDeployer(web3, deployer_acc, deployer_vanity);
             {
                 await deployer.deploy(AdvisorNft, {from: deployer_vanity});

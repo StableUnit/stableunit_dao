@@ -1,6 +1,6 @@
 import {getDeployedAddresses} from "./deployed_addresses";
 import {SuDAOInstance, VestingTokenInstance} from "../types/truffle-contracts";
-import {checkVanityAddress, fundDeployer, withdrawEther} from "./utils";
+import {prepareVanityAddress, fundDeployer, withdrawEther} from "./utils";
 
 const VeToken = artifacts.require("VestingToken");
 const SuDAO = artifacts.require("SuDAO");
@@ -26,7 +26,7 @@ module.exports = function (deployer, network, accounts) {
         // const veToken = await VeToken.deployed();
         let veToken: VestingTokenInstance;
         const deployer_vanity = deployer_vanity_4;
-        await checkVanityAddress(web3, deployer_acc, deployer_vanity);
+        await prepareVanityAddress(web3, deployer_acc, deployer_vanity);
         await fundDeployer(web3, deployer_acc, deployer_vanity);
         {
             await deployer.deploy(VeToken, "Vested StableUnitDAO", "veSuDAO", suDaoInstance.address,
