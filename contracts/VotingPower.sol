@@ -14,21 +14,70 @@ pragma solidity ^0.8.9;
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
+import "./utils/SuAccessControl.sol";
 
 
 /*
- * @title
+ * @title Abstract token that aggregates voting power of all tokens in SuDAO on particular chain
 */
-contract VotingPower is IERC20, IERC20Metadata {
+
+interface IBalanceable {
+    /**
+     * @dev Returns the amount of tokens owned by `account`.
+     */
+    function balanceOf(address account) external view returns (uint256);
+}
+
+contract VotingPower is IERC20, IERC20Metadata, SuAccessControl {
     string private _name;
     string private _symbol;
 
-    constructor(string memory name_, string memory symbol_, ERC20 token_)
-    {
+    IBalanceable[] public tokens;
+    uint256[] public multipliers;
+
+    constructor(
+        string memory name_,
+        string memory symbol_
+    ) {
         _name = name_;
         _symbol = symbol_;
     }
 
+    function addToken(IBalanceable token, uint256 multiplier) external onlyRole(DEFAULT_ADMIN_ROLE) {
+        tokens.push(token);
+        multipliers.push(multiplier);
+    }
+
+    function deleteToken(uint256 id, IBalanceable token) external onlyRole(DEFAULT_ADMIN_ROLE) {
+        require(tokens[id] == token, "wrong token id");
+        uint256 len = tokens.length;
+        // if id is not the last token
+        if (2 <= len && id < len-1) {
+            // copy the last on of the place of id
+            tokens[id] = tokens[len-1];
+            multipliers[id] = multipliers[len-1];
+        }
+        tokens.pop();
+        multipliers.pop();
+    }
+
+    function editToken(uint256 id, IBalanceable token, uint256 newMultiplier) external onlyRole(DEFAULT_ADMIN_ROLE) {
+        require(tokens[id] == token, "wrong token id");
+        multipliers[id] = newMultiplier;
+    }
+
+    /**
+    * @dev See {IERC20-balanceOf}.
+    */
+    function balanceOf(address account) public view virtual override returns (uint256) {
+        uint256 balance = 0;
+        for (uint256 i = 0; i < tokens.length; i++) {
+            balance = balance + tokens[i].balanceOf(account) * multipliers[i];
+        }
+        return balance;
+    }
+
+    // ==================== standard erc20 interface ==============================
     /**
     * @dev Returns the name of the token.
     */
@@ -68,12 +117,6 @@ contract VotingPower is IERC20, IERC20Metadata {
         revert("not implemented");
     }
 
-    /**
-    * @dev See {IERC20-balanceOf}.
-    */
-    function balanceOf(address account) public view virtual override returns (uint256) {
-        revert("not implemented");
-    }
 
     /**
     * @dev Mock {IERC20-transfer}
