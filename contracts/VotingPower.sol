@@ -29,11 +29,12 @@ interface IBalanceable {
 }
 
 contract VotingPower is IERC20, IERC20Metadata, SuAccessControl {
-    string private _name;
-    string private _symbol;
-
+    uint256 MAX_LEN = 50;
     IBalanceable[] public tokens;
     uint256[] public multipliers;
+
+    string private _name;
+    string private _symbol;
 
     constructor(
         string memory name_,
@@ -46,6 +47,7 @@ contract VotingPower is IERC20, IERC20Metadata, SuAccessControl {
     function addToken(IBalanceable token, uint256 multiplier) external onlyRole(DEFAULT_ADMIN_ROLE) {
         tokens.push(token);
         multipliers.push(multiplier);
+        require(tokens.length <= MAX_LEN, "too many tokens");
     }
 
     function deleteToken(uint256 id, IBalanceable token) external onlyRole(DEFAULT_ADMIN_ROLE) {

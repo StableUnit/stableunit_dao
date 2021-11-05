@@ -3,14 +3,21 @@ import {assert, web3, artifacts} from "hardhat";
 
 import chai, {expect} from 'chai'
 import {solidity} from "ethereum-waffle";
-import {BN_1E18} from "./utils/utils";
-import {TokenMockInstance, VestingTokenInstance, VotingPowerInstance} from "../types/truffle-contracts";
-
 chai.use(solidity);
+
+import {BN_1E18} from "./utils/utils";
+import {
+    NftMockInstance,
+    TokenMockInstance,
+    VestingTokenInstance,
+    VotingPowerInstance
+} from "../types/truffle-contracts";
+
 
 const {increaseTime, chainTimestamp} = require('./utils/timeManipulation');
 
 const TokenMock = artifacts.require("TokenMock");
+const NftMock = artifacts.require("NftMock");
 const VestingToken = artifacts.require("VestingToken");
 const VotingPower = artifacts.require("VotingPower");
 
@@ -28,6 +35,7 @@ describe("VotingPower", () => {
     let sudaoInstance: TokenMockInstance;
     let veSudaoInstance: VestingTokenInstance;
     let votingPowerInstance: VotingPowerInstance;
+    let nftInstance: NftMockInstance;
 
     beforeEach(async function () {
         accounts = await web3.eth.getAccounts();
@@ -35,12 +43,15 @@ describe("VotingPower", () => {
 
         sudaoInstance = await TokenMock.new("SuDAO mock", "mSuDao", 18);
         veSudaoInstance = await VestingToken.new("Vested SuDAO mock", "mVeSuDao", sudaoInstance.address);
+        nftInstance = await NftMock.new("NFT mock", "mNFT");
 
         await sudaoInstance.mint(owner, SUDAO_AMOUNT);
 
         await sudaoInstance.mint(owner, VESUDAO_AMOUNT);
         await sudaoInstance.approve(veSudaoInstance.address, VESUDAO_AMOUNT);
         await veSudaoInstance.lockUnderVesting(owner, VESUDAO_AMOUNT, VESTING_SECONDS, CLIFF_SECONDS);
+
+        await nftInstance.mint(owner);
 
         votingPowerInstance = await VotingPower.new("Voting Power SuDAO", "vpSuDao");
     });
@@ -95,19 +106,43 @@ describe("VotingPower", () => {
     describe("balanceOf", async () => {
 
         it("should count plain erc20 tokens", async () => {
-
+            await votingPowerInstance.addToken(sudaoInstance.address, "1");
+            expect(
+                (await votingPowerInstance.balanceOf(owner)).toString()
+            ).to.equal(
+                SUDAO_AMOUNT.toString()
+            );
         })
 
         it("should count vested erc20 tokens", async () => {
-
+            await votingPowerInstance.addToken(veSudaoInstance.address, "2");
+            expect(
+                (await votingPowerInstance.balanceOf(owner)).toString()
+            ).to.equal(
+                VESUDAO_AMOUNT.muln(2).toString()
+            );
         })
 
         it("should count vested nft tokens", async () => {
-
+            await votingPowerInstance.addToken(nftInstance.address, "11");
+            expect(
+                (await votingPowerInstance.balanceOf(owner)).toString()
+            ).to.equal(
+                '11'
+            );
         })
 
+        it("should count token, vested token and nfts", async () => {
+            await votingPowerInstance.addToken(sudaoInstance.address, "1");
+            await votingPowerInstance.addToken(veSudaoInstance.address, "3");
+            await votingPowerInstance.addToken(nftInstance.address, "11");
+            expect(
+                (await votingPowerInstance.balanceOf(owner)).toString()
+            ).to.equal(
+                SUDAO_AMOUNT.add(VESUDAO_AMOUNT.muln(3)).addn(11).toString()
+            );
+        })
     });
-
 
 
 });
