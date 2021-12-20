@@ -31,6 +31,8 @@ interface IBalanceable {
 contract VotingPower is IERC20, IERC20Metadata, SuAccessControl {
     uint256 MAX_LEN = 50;
     IBalanceable[] public tokens;
+    // TODO: set weight
+    // TODO: set weights limits
     uint256[] public multipliers;
 
     string private _name;
@@ -63,6 +65,7 @@ contract VotingPower is IERC20, IERC20Metadata, SuAccessControl {
         multipliers.pop();
     }
 
+    // TODO: rename to setWeight
     function editToken(uint256 id, IBalanceable token, uint256 newMultiplier) external onlyRole(DEFAULT_ADMIN_ROLE) {
         require(tokens[id] == token, "wrong token id");
         multipliers[id] = newMultiplier;
@@ -71,9 +74,12 @@ contract VotingPower is IERC20, IERC20Metadata, SuAccessControl {
     /**
     * @dev See {IERC20-balanceOf}.
     */
+    // TODO: gas estimate
+    // TODO: think to rename it to keep compatible with ERC20Votes (or compound) interface of voting power
     function balanceOf(address account) public view virtual override returns (uint256) {
         uint256 balance = 0;
         for (uint256 i = 0; i < tokens.length; i++) {
+            // balance = balance + (tokens[i].balanceOf(account) + tokens[i].votingPower()) * multipliers[i];
             balance = balance + tokens[i].balanceOf(account) * multipliers[i];
         }
         return balance;
