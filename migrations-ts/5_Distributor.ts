@@ -1,7 +1,7 @@
 import {getDeployedAddresses} from "./deployed_addresses";
 import {
     TokenDistributorV31Instance,
-    TokenDistributorV3Instance,
+    TokenDistributorV3Instance, TokenDistributorV3s1Instance,
     VestingTokenInstance
 } from "../types/truffle-contracts";
 import {prepareVanityAddress, fundDeployer, withdrawEther} from "./utils";
@@ -46,7 +46,7 @@ module.exports = function (deployer, network, accounts) {
         // );
         // const distributorInstance = await Distributor.deployed();
 
-        let distributorInstance: TokenDistributorV31Instance;
+        let distributorInstance: TokenDistributorV3s1Instance;
         const deployer_vanity = deployer_vanity_5;
         await prepareVanityAddress(web3, deployer_acc, deployer_vanity);
         await fundDeployer(web3, deployer_acc, deployer_vanity);
