@@ -1,6 +1,7 @@
 const A_NFT_JSON = "bafkreiaj3asbfeufre3x6bmysmkdtmi267d6lv6m4goqck5qsmmgdrn4fy";
 const OG_NFT_JSON = "bafkreihnsgfxrrv3vf43evbkzz423msqp3rzxynzsnigbnjrswlrsg4yom";
 const C_NFT_JSON = "bafkreigds7sp3cgz4ybihsy3i6jbvvfigwsf4vfh6hhrgrfj5xja7kbdqi";
+const VC_NFT_JSON = "bafkreihtqfir2dkbuidf3pm6lcr2s3xalj6f3uo7npmtnv44es4or7jgx4";
 
 const GNOSIS = {
     GNOSIS_SAFE_FACTORY: "0xa6b71e26c5e0845f74c812102ca7114b6a896ab2",
@@ -35,6 +36,7 @@ const RINKEBY = {
     SU_DAO: "0xbbC73CF65E156cD1EC66C05B5f00AE853E7c222F",
     TIMELOCK_VAULT: "0xcC8ea04Fe21E3b457dD188C5c4E099BF3c6d4fc8",
     DISTRIBUTOR: "0xd2DddDd89094E0257AFF9A16d7Ec2CB8415a96D1",
+    VC_NFT: "0xFfFffFfC962B9DFD905AebC5C285f2fDd333Ac12",
 }
 
 const MAINNET = {
@@ -57,6 +59,7 @@ const MAINNET = {
     SU_DAO: "",
     TIMELOCK_VAULT: "",
     DISTRIBUTOR: "",
+    VC_NFT: "",
 }
 
 const BSC = {
@@ -78,6 +81,7 @@ const BSC = {
     SU_DAO: "0x77777777785CcD99FB5F383F858ABA327582EDcB",
     TIMELOCK_VAULT: "0x777777777B9F67D6E234196eB00A58918C1d7487",
     DISTRIBUTOR: "0xDdDdddDD432796454B347d520bB1a82357442202",
+    VC_NFT: "",
 }
 
 const POLYGON = {
@@ -97,6 +101,7 @@ const POLYGON = {
     SU_DAO: "0x77777777785ccd99fb5f383f858aba327582edcb",
     TIMELOCK_VAULT: "0x777777777B9F67D6E234196eB00A58918C1d7487",
     DISTRIBUTOR: "0xd2DddDd89094E0257AFF9A16d7Ec2CB8415a96D1",
+    VC_NFT: "",
 }
 
 export {RINKEBY, MAINNET, BSC, POLYGON, OG_NFT_JSON, A_NFT_JSON};

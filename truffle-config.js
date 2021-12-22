@@ -11,6 +11,7 @@ const PRIVATE_KEYS = [
     process.env.PRIVATE_KEY_VANITY_4,
     process.env.PRIVATE_KEY_VANITY_5,
     process.env.PRIVATE_KEY_VANITY_6,
+    process.env.PRIVATE_KEY_VANITY_7,
 ];
 
 const PRIVATE_KEYS_TESTNET = [
@@ -21,6 +22,7 @@ const PRIVATE_KEYS_TESTNET = [
     process.env.PRIVATE_KEY_VANITY_4,
     process.env.PRIVATE_KEY_VANITY_5,
     process.env.PRIVATE_KEY_VANITY_6,
+    process.env.PRIVATE_KEY_VANITY_7,
 ];
 
 module.exports = {

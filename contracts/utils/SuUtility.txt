@@ -1,0 +1,24 @@
+pragma solidity ^0.4.0;
+
+contract SuUtils {
+    function writeUint32ToUint256(uint256 slot, int256 position, uint32 value) internal {
+
+    }
+
+
+    function insertLevelToId(uint256 id, uint256 level) public pure returns (uint256) {
+        require(BASE_LEVEL <= level && level <= MAX_LEVEL, "invalid level");
+        return id | (level << 128);
+    }
+
+    function extractLevelFromId(uint256 id) public pure returns (uint256) {
+        return uint256((id >> 128) & ((1 << 16) - 1));
+    }
+
+    function getLevel(address user) external view returns (uint256) {
+        require(balanceOf(user) > 0, "no aNFT");
+        require(balanceOf(user) == 1, " multiple aNFT found");
+        uint256 id = tokenOfOwnerByIndex(user, 0);
+        return extractLevelFromId(id);
+    }
+}

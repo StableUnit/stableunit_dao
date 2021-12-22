@@ -87,6 +87,7 @@ npm run coverage
 ```
 
 ## Deploy contracts
+if you add new/remove migrations-ts script - please delete all files from js folder so migrations-ts would be recompiled.
 ```
 npm run migrate -- --network rinkeby
 ```
