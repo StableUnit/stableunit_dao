@@ -12,11 +12,11 @@
 */
 pragma solidity ^0.8.7;
 
-import "@openzeppelin/contracts/access/Ownable.sol";
-import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
-import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
-import "@openzeppelin/contracts/token/ERC721/extensions/IERC721Enumerable.sol";
+import "../dependencies/openzeppelin-contracts/contracts/access/Ownable.sol";
+import "../dependencies/openzeppelin-contracts/contracts/token/ERC20/IERC20.sol";
+import "../dependencies/openzeppelin-contracts/contracts/token/ERC20/utils/SafeERC20.sol";
+import "../dependencies/openzeppelin-contracts/contracts/token/ERC721/IERC721.sol";
+import "../dependencies/openzeppelin-contracts/contracts/token/ERC721/extensions/IERC721Enumerable.sol";
 import "../TimelockVault.sol";
 
 /**
