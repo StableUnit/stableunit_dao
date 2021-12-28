@@ -16,7 +16,6 @@ import "../dependencies/openzeppelin-contracts/contracts/token/ERC721/ERC721.sol
 import "../dependencies/openzeppelin-contracts/contracts/token/ERC721/extensions/ERC721Enumerable.sol";
 import "../dependencies/openzeppelin-contracts/contracts/token/ERC721/extensions/draft-ERC721Votes.sol";
 import "../dependencies/openzeppelin-contracts/contracts/security/Pausable.sol";
-import "../dependencies/openzeppelin-contracts/contracts/utils/Counters.sol";
 import "../utils/SuAccessControl.sol";
 
 interface IERC721Burnable {
@@ -24,8 +23,6 @@ interface IERC721Burnable {
 }
 
 contract StableUnitDAOaNFTVotes is ERC721, ERC721Enumerable, ERC721Votes, Pausable, SuAccessControl {
-    using Counters for Counters.Counter;
-
     uint256 public constant BASE_LEVEL = 1000;
     uint256 public constant MAX_LEVEL = 10_000;
     address public immutable stableUnitDAOaNFT;
