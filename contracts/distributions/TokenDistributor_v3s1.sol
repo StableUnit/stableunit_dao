@@ -12,7 +12,7 @@
 */
 pragma solidity ^0.8.7;
 
-import "@openzeppelin/contracts/utils/math/Math.sol";
+import "../dependencies/openzeppelin-contracts/contracts/utils/math/Math.sol";
 import "./TokenDistributor_v2s1.sol";
 import "../NFT/StableUnitDAOaNFT.sol";
 

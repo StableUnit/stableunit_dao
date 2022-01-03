@@ -12,7 +12,7 @@
 */
 pragma solidity ^0.8.7;
 
-import "@openzeppelin/contracts/access/AccessControl.sol";
+import "../dependencies/openzeppelin-contracts/contracts/access/AccessControl.sol";
 
 contract SuAccessControl is AccessControl {
     bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");

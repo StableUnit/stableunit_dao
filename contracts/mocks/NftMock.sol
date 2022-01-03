@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.7;
 
-import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
-import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Enumerable.sol";
-import "@openzeppelin/contracts/utils/Counters.sol";
+import "../dependencies/openzeppelin-contracts/contracts/token/ERC721/ERC721.sol";
+import "../dependencies/openzeppelin-contracts/contracts/token/ERC721/extensions/ERC721Enumerable.sol";
+import "../dependencies/openzeppelin-contracts/contracts/utils/Counters.sol";
 
 contract NftMock is ERC721, ERC721Enumerable {
     using Counters for Counters.Counter;
