@@ -63,13 +63,6 @@ contract StableUnitDAOogNFTVotes is ERC721, ERC721Enumerable, ERC721Votes, Pausa
         _mint(msg.sender, tokenId);
     }
 
-    function _mint(address to, uint256 tokenId) internal override {
-        if(delegates(to) == address(0)) {
-            _delegate(to, to);
-        }
-        super._mint(to, tokenId);
-    }
-
     function _beforeTokenTransfer(address from, address to, uint256 tokenId)
     internal
     override(ERC721, ERC721Enumerable)
