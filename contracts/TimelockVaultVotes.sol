@@ -27,6 +27,13 @@ import "./utils/SuAccessControl.sol";
  *      after 6 months user can claim 3/9 of all tokens etc.
  * It's possible to claim tokens by parts during vesting, or claim all at once when vesting if over.
  *
+ * The voting units associated with any account are equal to the amount under vesting for the given account.
+ *      Whenever time-vesting is created for a user, voting rights are alloted to their address.
+ *      Whenever time-vesting is claimed by a user, voting rights are deducted from their address.
+ *      Whenever time-vesting is donated by a user to an admin, voting rights are also transferred.
+ * The total amount of voting rights in existence will always be equal to the amount of LOCKED_TOKEN
+ * locked in the vault at any point of time.
+ *
  * To make balance visible in the erc20 wallets, the contact "looks like" erc20 token by implementing its interface
  * however all non-view methods such as transfer or approve aren't active and will be reverted.
 */
@@ -123,6 +130,8 @@ contract TimelockVaultVotes is SuAccessControl, Votes {
 
     /**
     * @notice Adds more tokens to the existing (possibly zero) vesting account. Doesn't change cliff or vesting period!
+    *         This method allots voting rights to the beneficiary, equal to the amount of tokens being added to vesting.
+    *         This is to make up for the reduction of voting power by locking the LOCKED_TOKEN.
     * @param amount Amount of token to be send to user under vesting, which will be deducted from msg.sender.
     * @param to_user Beneficiary of the vesting account.
     */
@@ -162,6 +171,8 @@ contract TimelockVaultVotes is SuAccessControl, Votes {
 
     /**
      * @notice User can claim their vested tokens.
+     * This method reduces the voting rights of the sender by the amount of tokens being claimed.
+     * The LOCKED_TOKEN being sent will henceforth denote the voting rights.
      */
     function claim() external {
         uint256 claim_amount = availableToClaim(msg.sender);
@@ -173,6 +184,7 @@ contract TimelockVaultVotes is SuAccessControl, Votes {
 
     /**
      * @notice User can donate tokens under vesting to DAO or other admin contract as us treasury.
+     *         This method also transfers the voting power associated with the tokens being donated.
      */
     function donateTokens(address toAdmin) external {
         require(hasRole(DEFAULT_ADMIN_ROLE, toAdmin) == true, "invalid admin address");
