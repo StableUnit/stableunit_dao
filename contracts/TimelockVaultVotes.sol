@@ -130,7 +130,7 @@ contract TimelockVaultVotes is SuAccessControl, Votes {
         // because we store amounts with loss of the precision we need to truck last 12 digits
         LOCKED_TOKEN.safeTransferFrom(msg.sender, address(this), (amount / 1e12) * 1e12);
         accounts[to_user].amount_under_vesting_div1e12 = accounts[to_user].amount_under_vesting_div1e12 + uint64(amount / 1e12);
-        _transferVotingUnits(address(0), msg.sender, (amount / 1e12) * 1e12);
+        _transferVotingUnits(address(0), to_user, (amount / 1e12) * 1e12);
     }
 
     /**
