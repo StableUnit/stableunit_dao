@@ -44,10 +44,10 @@ contract VotingPower is IERC20, IERC20Metadata, SuAccessControl {
     uint256 MAX_LEN = 50;
     uint256 MAX_WEIGHT = 10000;
 
-    IBalanceable[] public tokens;
+    IBalanceable[] public listOfTokens;
     uint256[] public multipliers;
 
-    mapping(address => bool) private _tokens;
+    mapping(address => bool) public isTokenAdded;
 
     string private _name;
     string private _symbol;
@@ -61,28 +61,28 @@ contract VotingPower is IERC20, IERC20Metadata, SuAccessControl {
     }
 
     function addToken(IBalanceable token, uint256 multiplier) external onlyRole(DEFAULT_ADMIN_ROLE) {
-        require(tokens.length < MAX_LEN, "too many tokens");
-        require(!_tokens[address(token)], "already added");
+        require(listOfTokens.length < MAX_LEN, "too many tokens");
+        require(!isTokenAdded[address(token)], "already added");
 
-        _tokens[address(token)] = true;
-        tokens.push(token);
+        isTokenAdded[address(token)] = true;
+        listOfTokens.push(token);
         multipliers.push(multiplier);
     }
 
     function deleteToken(uint256 id, IBalanceable token) external onlyRole(DEFAULT_ADMIN_ROLE) {
-        uint256 lastId = tokens.length - 1;
-        require(tokens[id] == token, "wrong token id");
+        uint256 lastId = listOfTokens.length - 1;
+        require(listOfTokens[id] == token, "wrong token id");
 
-        tokens[id] = tokens[lastId];
+        listOfTokens[id] = listOfTokens[lastId];
         multipliers[id] = multipliers[lastId];
 
-        _tokens[address(token)] = false;
-        tokens.pop();
+        isTokenAdded[address(token)] = false;
+        listOfTokens.pop();
         multipliers.pop();
     }
 
     function setWeight(uint256 id, IBalanceable token, uint256 newMultiplier) external onlyRole(DEFAULT_ADMIN_ROLE) {
-        require(tokens[id] == token, "wrong token id");
+        require(listOfTokens[id] == token, "wrong token id");
         require(newMultiplier <= MAX_WEIGHT, "weight too high");
         multipliers[id] = newMultiplier;
     }
@@ -93,12 +93,12 @@ contract VotingPower is IERC20, IERC20Metadata, SuAccessControl {
      * Otherwise, it uses the voting power of the account.
      */
     function getVotes(address account) public view returns (uint256 votes) {
-        for (uint256 i = 0; i < tokens.length; i++) {
-            if(tokens[i].delegates(account) == address(0)) {
-                votes += tokens[i].balanceOf(account) * multipliers[i];
+        for (uint256 i = 0; i < listOfTokens.length; i++) {
+            if(listOfTokens[i].delegates(account) == address(0)) {
+                votes += listOfTokens[i].balanceOf(account) * multipliers[i];
             }
             else {
-                votes += tokens[i].getVotes(account) * multipliers[i];
+                votes += listOfTokens[i].getVotes(account) * multipliers[i];
             }
         }
     }
