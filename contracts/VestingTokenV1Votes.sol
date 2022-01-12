@@ -16,11 +16,14 @@ import "./dependencies/openzeppelin-contracts/contracts/token/ERC20/IERC20.sol";
 import "./dependencies/openzeppelin-contracts/contracts/token/ERC20/extensions/IERC20Metadata.sol";
 
 /*
- * @title Wallet visible storage of voting tokens for the underlying erc20 token with a low holder count.
+ * @title This is a wrapper over an existing, deployed veSuDAO time-lock contract.
+ * It provides wallet visible storage of voting tokens for the underlying erc20 token with a low holder count.
  *
  * @dev This contract tracks voting units, which are a measure of voting power that can be transferred, and provides
  * a system of vote delegation. The contract stores the complete list of delegators for each active delegatee,
  * so an arbitrarily large number of delegators will NOT be able to delegate their votes to a given delegatee.
+ *
+ * ----------------------------------------------------------------------------------------------------------------
  *
  * To make balance visible in the erc20 wallets, the contact "looks like" erc20 token by implementing its interface
  * however all non-view methods such as transfer or approve aren't active and will be reverted.
@@ -28,12 +31,24 @@ import "./dependencies/openzeppelin-contracts/contracts/token/ERC20/extensions/I
  * dev `turffle compile` would yield some warnings for unused parameters - that okay,
  * because we need to preserve the ERC20 interface without allowing transfer, allows etc.
 */
-contract VestingTokenV1Votes is IERC20, IERC20Metadata {
+contract VestingTokenVotesWrapperV1 is IERC20, IERC20Metadata {
+
+    /**
+     * @dev An arbitrary number, to protect against out-of-gas error when iterating over all delegators
+     */
+    uint256 public constant MAX_DELEGATES = 50;
 
     ERC20 public immutable veSuDAO;
 
+    /**
+     * @dev Stores the list of accounts that have delegatd their votes to a given address
+     */
     mapping(address => address[]) private _delegatorsOf;
-    mapping(address => address) private _delegation;
+
+    /**
+     * @dev Stores the delegate that `account` has chosen.
+     */
+    mapping(address => address) private _delegatedTo;
 
     event DelegateChanged(address indexed delegator, address indexed fromDelegate, address indexed toDelegate);
 
@@ -102,7 +117,7 @@ contract VestingTokenV1Votes is IERC20, IERC20Metadata {
      * @dev Returns the delegate that `account` has chosen.
      */
     function delegates(address account) public view returns (address) {
-        return _delegation[account];
+        return _delegatedTo[account];
     }
 
     /**
@@ -143,24 +158,34 @@ contract VestingTokenV1Votes is IERC20, IERC20Metadata {
     /**
      * @dev Delegate all of `account`'s voting units to `delegatee`.
      *
+     * The `account` is first removed from the list of it's current delegatee (if any),
+     * and then added to the list the new `delegatee`.
+     *
+     * Requirements:
+     *
+     * - `delegatee` cannot be the zero address.
+     * - `delegatee` cannot be the current delegatee.
+     * - `delegatee` cannot already have MAX_DELEGATES delegates.
+     *
      * Emits events {DelegateChanged} and {DelegateVotesChanged}.
      */
     function _delegate(address account, address delegatee) internal virtual {
         address oldDelegate = delegates(account);
-        
+
         require(delegatee != address(0), "Delegate to the zero address");
         require(delegatee != oldDelegate, "Delegate to current delegatee");
+        require(_delegatorsOf[delegatee].length < MAX_DELEGATES, "Too many delegators");
 
         uint256 length = _delegatorsOf[oldDelegate].length;
         for (uint256 i = 0; i < length; i++) {
             if (_delegatorsOf[oldDelegate][i] == account) {
-                _delegatorsOf[oldDelegate][i] = _delegatorsOf[oldDelegate][length - 1];                
+                _delegatorsOf[oldDelegate][i] = _delegatorsOf[oldDelegate][length - 1];
                 _delegatorsOf[oldDelegate].pop();
                 break;
             }
         }
 
-        _delegation[account] = delegatee;
+        _delegatedTo[account] = delegatee;
         _delegatorsOf[delegatee].push(account);
 
         emit DelegateChanged(account, oldDelegate, delegatee);
