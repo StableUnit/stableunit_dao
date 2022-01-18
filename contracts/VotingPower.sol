@@ -89,16 +89,16 @@ contract VotingPower is IERC20, IERC20Metadata, SuAccessControl {
 
     /**
      * @dev Returns the current amount of votes that `account` has.
-     * If account has not delegated their votes, it uses the token balance of the account.
-     * Otherwise, it uses the voting power of the account.
+     * It uses the voting power of the account.
+     * If account has not delegated their own votes, also adds the token balance of the account.
      */
     function getVotes(address account) public view returns (uint256 votes) {
         for (uint256 i = 0; i < listOfTokens.length; i++) {
+
+            votes += listOfTokens[i].getVotes(account) * multipliers[i];
+
             if(listOfTokens[i].delegates(account) == address(0)) {
                 votes += listOfTokens[i].balanceOf(account) * multipliers[i];
-            }
-            else {
-                votes += listOfTokens[i].getVotes(account) * multipliers[i];
             }
         }
     }

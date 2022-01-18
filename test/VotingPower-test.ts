@@ -7,20 +7,19 @@ chai.use(solidity);
 
 import {BN_1E18} from "./utils/utils";
 import {
-    NftMockInstance,
-    TokenMockInstance,
-    VestingTokenInstance,
+    NftVotesMockInstance,
+    TokenVotesMockInstance,
+    VestingTokenV2Instance,
     VotingPowerInstance
 } from "../types/truffle-contracts";
 
 
 const {increaseTime, chainTimestamp} = require('./utils/timeManipulation');
 
-const TokenMock = artifacts.require("TokenMock");
-const NftMock = artifacts.require("NftMock");
-const VestingToken = artifacts.require("VestingToken");
+const TokenVotesMock = artifacts.require("TokenVotesMock");
+const NftVotesMock = artifacts.require("NftVotesMock");
+const VestingTokenV2 = artifacts.require("VestingTokenV2");
 const VotingPower = artifacts.require("VotingPower");
-
 
 describe("VotingPower", () => {
     let accounts: string[];
@@ -32,18 +31,18 @@ describe("VotingPower", () => {
     const CLIFF_SECONDS = 100;
     const VESTING_SECONDS = 500;
 
-    let sudaoInstance: TokenMockInstance;
-    let veSudaoInstance: VestingTokenInstance;
+    let sudaoInstance: TokenVotesMockInstance;
+    let veSudaoInstance: VestingTokenV2Instance;
     let votingPowerInstance: VotingPowerInstance;
-    let nftInstance: NftMockInstance;
+    let nftInstance: NftVotesMockInstance;
 
     beforeEach(async function () {
         accounts = await web3.eth.getAccounts();
         [owner, patron, alice, bob, carl] = accounts;
 
-        sudaoInstance = await TokenMock.new("SuDAO mock", "mSuDao", 18);
-        veSudaoInstance = await VestingToken.new("Vested SuDAO mock", "mVeSuDao", sudaoInstance.address);
-        nftInstance = await NftMock.new("NFT mock", "mNFT");
+        sudaoInstance = await TokenVotesMock.new("SuDAO mock", "mSuDao", 18);
+        veSudaoInstance = await VestingTokenV2.new("Vested SuDAO mock", "mVeSuDao", sudaoInstance.address);
+        nftInstance = await NftVotesMock.new("NFT mock", "mNFT");
 
         await sudaoInstance.mint(owner, SUDAO_AMOUNT);
 
@@ -67,7 +66,7 @@ describe("VotingPower", () => {
             await votingPowerInstance.addToken(sudaoInstance.address, "1");
             await votingPowerInstance.addToken(veSudaoInstance.address, "2");
 
-            await votingPowerInstance.editToken(1, veSudaoInstance.address, 3);
+            await votingPowerInstance.setWeight(1, veSudaoInstance.address, 3);
         })
 
         it("fail to edit Token with wrong id", async () => {
@@ -75,24 +74,37 @@ describe("VotingPower", () => {
             await votingPowerInstance.addToken(veSudaoInstance.address, "2");
 
             await expect(
-                votingPowerInstance.editToken(0, veSudaoInstance.address, 3)
+                votingPowerInstance.setWeight(0, veSudaoInstance.address, 3)
             ).to.be.revertedWith("wrong token id");
 
             await expect(
-                votingPowerInstance.editToken(2, veSudaoInstance.address, 3)
+                votingPowerInstance.setWeight(2, veSudaoInstance.address, 3)
             ).to.be.revertedWith("reverted with panic code 0x32 (Array accessed at an out-of-bounds or negative index)");
+        })
+
+        it("fail to edit Token with wrong multiplier", async () => {
+            await votingPowerInstance.addToken(sudaoInstance.address, "1");
+            await votingPowerInstance.addToken(veSudaoInstance.address, "2");
+
+            await expect(
+                votingPowerInstance.setWeight(1, veSudaoInstance.address, 10001)
+            ).to.be.revertedWith("weight too high");
         })
 
         it("delete the last", async () => {
             await votingPowerInstance.addToken(sudaoInstance.address, "1");
             await votingPowerInstance.addToken(veSudaoInstance.address, "2");
             await votingPowerInstance.deleteToken(1, veSudaoInstance.address);
+
+            await expect(await votingPowerInstance.isTokenAdded(veSudaoInstance.address)).to.equal(false);
         })
 
         it("delete not the last", async () => {
             await votingPowerInstance.addToken(sudaoInstance.address, "1");
             await votingPowerInstance.addToken(veSudaoInstance.address, "2");
             await votingPowerInstance.deleteToken(0, sudaoInstance.address);
+
+            await expect(await votingPowerInstance.isTokenAdded(sudaoInstance.address)).to.equal(false);
         })
 
         it("delete all", async () => {
@@ -100,6 +112,9 @@ describe("VotingPower", () => {
             await votingPowerInstance.addToken(veSudaoInstance.address, "2");
             await votingPowerInstance.deleteToken(0, sudaoInstance.address);
             await votingPowerInstance.deleteToken(0, veSudaoInstance.address);
+
+            await expect(await votingPowerInstance.isTokenAdded(veSudaoInstance.address)).to.equal(false);
+            await expect(await votingPowerInstance.isTokenAdded(sudaoInstance.address)).to.equal(false);
         })
     });
 
@@ -142,10 +157,27 @@ describe("VotingPower", () => {
                 SUDAO_AMOUNT.add(VESUDAO_AMOUNT.muln(3)).addn(11).toString()
             );
         })
+
+        it("should count token, vested token and nfts after delegation", async () => {
+            await votingPowerInstance.addToken(sudaoInstance.address, "1");
+            await votingPowerInstance.addToken(veSudaoInstance.address, "3");
+            await votingPowerInstance.addToken(nftInstance.address, "11");
+
+            await sudaoInstance.delegate(patron);
+            await veSudaoInstance.delegate(patron);
+            await nftInstance.delegate(patron);
+
+            expect(
+                (await votingPowerInstance.balanceOf(owner)).toString()
+            ).to.equal(
+                web3.utils.toBN(0).toString()
+            );
+
+            expect(
+                (await votingPowerInstance.balanceOf(patron)).toString()
+            ).to.equal(
+                SUDAO_AMOUNT.add(VESUDAO_AMOUNT.muln(3)).addn(11).toString()
+            );
+        })
     });
-
-
 });
-
-
-
