@@ -3,9 +3,10 @@ pragma solidity ^0.8.7;
 
 import "../dependencies/openzeppelin-contracts/contracts/token/ERC721/ERC721.sol";
 import "../dependencies/openzeppelin-contracts/contracts/token/ERC721/extensions/ERC721Enumerable.sol";
+import "../dependencies/openzeppelin-contracts/contracts/token/ERC721/extensions/draft-ERC721Votes.sol";
 import "../dependencies/openzeppelin-contracts/contracts/utils/Counters.sol";
 
-contract NftMock is ERC721, ERC721Enumerable {
+contract NftVotesMock is ERC721, ERC721Enumerable, ERC721Votes {
     using Counters for Counters.Counter;
     Counters.Counter private _tokenIdCounter;
 
@@ -14,7 +15,7 @@ contract NftMock is ERC721, ERC721Enumerable {
     constructor(
         string memory name,
         string memory symbol
-    ) ERC721(name, symbol) {
+    ) ERC721(name, symbol) EIP712("NftVotesMock", "1") {
     }
 
     function _baseURI() internal view override returns (string memory) {
@@ -30,15 +31,18 @@ contract NftMock is ERC721, ERC721Enumerable {
         _tokenIdCounter.increment();
     }
 
-    function burn(uint256 tokenId) public {
-        _burn(tokenId);
-    }
-
     function _beforeTokenTransfer(address from, address to, uint256 tokenId)
     internal
     override(ERC721, ERC721Enumerable)
     {
         super._beforeTokenTransfer(from, to, tokenId);
+    }
+
+    function _afterTokenTransfer(address from, address to, uint256 tokenId)
+    internal
+    override(ERC721, ERC721Votes)
+    {
+        super._afterTokenTransfer(from, to, tokenId);
     }
 
     function supportsInterface(bytes4 interfaceId)

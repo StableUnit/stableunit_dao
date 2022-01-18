@@ -12,7 +12,7 @@ const AdvisorNft = artifacts.require("StableUnitDAOaNFT");
 const BN_1E18 = web3.utils.toBN(1e18);
 
 
-describe("StableUnitDAOaNFT", () => {
+describe("StableUnitDAO aNFT", () => {
     let accounts: string[];
     let [owner, patron, alice, bob, carl]: string[] = [];
     let aNftInstance: StableUnitDAOaNFTInstance;
