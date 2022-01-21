@@ -23,6 +23,10 @@ describe("StableUnitDAO aNFTVotes", () => {
         [owner, patron, alice, bob, carl] = accounts;
         nftMockInstance = await MockNft.new("NFT mock", "mNFT");
         aNftVotesInstance = await AdvisorNftVotes.new(nftMockInstance.address);
+
+        await nftMockInstance.mint(alice);
+        await nftMockInstance.setApprovalForAll(aNftVotesInstance.address, true, {from: alice});
+        await aNftVotesInstance.mint({from: alice});
     });
 
     describe("getLevel", async () => {
@@ -37,10 +41,6 @@ describe("StableUnitDAO aNFTVotes", () => {
 
     describe("mint", async () => {
         it("mint one", async () => {
-            await nftMockInstance.mint(alice);
-            await nftMockInstance.setApprovalForAll(aNftVotesInstance.address, true, {from: alice});
-            await aNftVotesInstance.mint({from: alice});
-
             assert.equal(Number((await nftMockInstance.totalSupply()).toString()), 0);
             assert.equal(Number((await aNftVotesInstance.totalSupply()).toString()), 1);
         })
@@ -49,10 +49,6 @@ describe("StableUnitDAO aNFTVotes", () => {
     describe("burn", async () => {
 
         it("burn(alice) by owner", async () => {
-            await nftMockInstance.mint(alice);
-            await nftMockInstance.setApprovalForAll(aNftVotesInstance.address, true, {from: alice});
-            await aNftVotesInstance.mint({from: alice});
-
             const id = await aNftVotesInstance.tokenOfOwnerByIndex(alice, 0);
             await aNftVotesInstance.burn(id);
             await expect(
@@ -61,10 +57,6 @@ describe("StableUnitDAO aNFTVotes", () => {
         })
 
         it("burn(alice) by alice", async () => {
-            await nftMockInstance.mint(alice);
-            await nftMockInstance.setApprovalForAll(aNftVotesInstance.address, true, {from: alice});
-            await aNftVotesInstance.mint({from: alice});
-
             const id = await aNftVotesInstance.tokenOfOwnerByIndex(alice, 0);
             await aNftVotesInstance.burn(id, {from: alice});
             await expect(
@@ -73,10 +65,6 @@ describe("StableUnitDAO aNFTVotes", () => {
         })
 
         it("can't burn(alice) by bob", async () => {
-            await nftMockInstance.mint(alice);
-            await nftMockInstance.setApprovalForAll(aNftVotesInstance.address, true, {from: alice});
-            await aNftVotesInstance.mint({from: alice});
-
             const id = await aNftVotesInstance.tokenOfOwnerByIndex(alice, 0);
             await expect(
                  aNftVotesInstance.burn(id, {from: bob})
