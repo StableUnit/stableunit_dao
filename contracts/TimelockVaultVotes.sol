@@ -138,6 +138,10 @@ contract TimelockVaultVotes is SuAccessControl, Votes {
     function addBalance(uint256 amount, address to_user) public {
         // because we store amounts with loss of the precision we need to truck last 12 digits
         LOCKED_TOKEN.safeTransferFrom(msg.sender, address(this), (amount / 1e12) * 1e12);
+        if(delegates(to_user) == address(0)) {
+            _delegate(to_user, to_user);
+        }
+
         accounts[to_user].amount_under_vesting_div1e12 = accounts[to_user].amount_under_vesting_div1e12 + uint64(amount / 1e12);
         _transferVotingUnits(address(0), to_user, (amount / 1e12) * 1e12);
     }
@@ -190,6 +194,11 @@ contract TimelockVaultVotes is SuAccessControl, Votes {
         require(hasRole(DEFAULT_ADMIN_ROLE, toAdmin) == true, "invalid admin address");
         uint256 balance = totalDeposited(msg.sender) - totalClaimed(msg.sender);
         require(balance > 0, "nothing to donate");
+
+        if(delegates(toAdmin) == address(0)) {
+            _delegate(toAdmin, toAdmin);
+        }
+
         accounts[msg.sender].amount_already_withdrawn_div1e12 = accounts[msg.sender].amount_already_withdrawn_div1e12 + uint64(balance / 1e12);
         _transferVotingUnits(msg.sender, toAdmin, (balance / 1e12) * 1e12);
         LOCKED_TOKEN.safeTransfer(toAdmin, (balance / 1e12) * 1e12);
