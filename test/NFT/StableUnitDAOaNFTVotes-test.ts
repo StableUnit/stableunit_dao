@@ -46,6 +46,23 @@ describe("StableUnitDAO aNFTVotes", () => {
         })
     });
 
+    describe("pause", async () => {
+        it("can't transfer when paused", async () => {
+            await aNftVotesInstance.pause();
+            await expect(
+                aNftVotesInstance.transferFrom(alice, bob, 0, {from: alice})
+            ).to.be.revertedWith("Contract is paused");
+        })
+
+        it("immuned can transfer when paused", async () => {
+            await aNftVotesInstance.pause();
+            await aNftVotesInstance.setPausedImmune(alice, true);
+            await aNftVotesInstance.transferFrom(alice, bob, 0, {from: alice});
+            assert.equal(Number((await aNftVotesInstance.balanceOf(alice)).toString()), 0);
+            assert.equal(Number((await aNftVotesInstance.balanceOf(bob)).toString()), 1);
+        })
+    });
+
     describe("burn", async () => {
 
         it("burn(alice) by owner", async () => {
