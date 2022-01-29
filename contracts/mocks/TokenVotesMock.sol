@@ -2,15 +2,15 @@
 pragma solidity ^0.8.0;
 
 import "../dependencies/openzeppelin-contracts/contracts/access/Ownable.sol";
-import "../dependencies/openzeppelin-contracts/contracts/token/ERC20/ERC20.sol";
+import "../dependencies/openzeppelin-contracts/contracts/token/ERC20/extensions/ERC20Votes.sol";
 
-contract TokenMock is ERC20, Ownable {
+contract TokenVotesMock is ERC20Votes, Ownable {
     constructor(
         string memory name,
         string memory symbol,
         uint8 decimals
     )
-    ERC20(name, symbol) {}
+    ERC20(name, symbol) ERC20Permit("TokenVotesMock") {}
 
     function mint(address account, uint256 amount) external {
         _mint(account, amount);

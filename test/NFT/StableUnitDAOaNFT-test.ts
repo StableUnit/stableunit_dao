@@ -12,7 +12,7 @@ const AdvisorNft = artifacts.require("StableUnitDAOaNFT");
 const BN_1E18 = web3.utils.toBN(1e18);
 
 
-describe("StableUnitDAOaNFT", () => {
+describe("StableUnitDAO aNFT", () => {
     let accounts: string[];
     let [owner, patron, alice, bob, carl]: string[] = [];
     let aNftInstance: StableUnitDAOaNFTInstance;
@@ -85,6 +85,25 @@ describe("StableUnitDAOaNFT", () => {
             await expect(
                 aNftInstance.mintBatchWithLevel([alice, bob], [1000, 12345])
             ).to.be.revertedWith("invalid level");
+        })
+    });
+
+    describe("pause", async () => {
+        it("can't transfer when paused", async () => {
+            await aNftInstance.mint(alice, 1);
+            await aNftInstance.pause();
+            await expect(
+                aNftInstance.transferFrom(alice, bob, 1, {from: alice})
+            ).to.be.revertedWith("Contract is paused");
+        })
+
+        it("immuned can transfer when paused", async () => {
+            await aNftInstance.mint(alice, 1);
+            await aNftInstance.pause();
+            await aNftInstance.setPausedImmune(alice, true);
+            await aNftInstance.transferFrom(alice, bob, 1, {from: alice});
+            assert.equal(Number((await aNftInstance.balanceOf(alice)).toString()), 0);
+            assert.equal(Number((await aNftInstance.balanceOf(bob)).toString()), 1);
         })
     });
 
