@@ -61,6 +61,25 @@ describe("StableUnitDAO aNFTVotes", () => {
             assert.equal(Number((await aNftVotesInstance.balanceOf(alice)).toString()), 0);
             assert.equal(Number((await aNftVotesInstance.balanceOf(bob)).toString()), 1);
         })
+
+        it("Should be able to mint NFTs when paused", async function () {
+            await aNftVotesInstance.pause();
+
+            await nftMockInstance.mint(alice);
+            await aNftVotesInstance.mint({from: alice});
+
+            assert.equal(Number((await aNftVotesInstance.totalSupply()).toString()), 2);
+        });
+
+        // it should be able to mint after you pause and unpause
+        it("Should mint NFT when paused and unpaused", async function () {
+            await aNftVotesInstance.pause();
+            await aNftVotesInstance.unpause();
+            await nftMockInstance.mint(alice);
+            await aNftVotesInstance.mint({from: alice});
+
+            assert.equal(Number((await aNftVotesInstance.totalSupply()).toString()), 2);
+        });
     });
 
     describe("burn", async () => {
@@ -87,5 +106,16 @@ describe("StableUnitDAO aNFTVotes", () => {
                  aNftVotesInstance.burn(id, {from: bob})
             ).to.be.revertedWith("ERC721Burnable: caller is not owner nor approved");
         })
+    });
+
+    describe("uri", async () => {
+        // owner should be able to change baseURI using setBaseURI method, test that uri is changed
+        it("Should be able to change uri", async function () {
+            await aNftVotesInstance.setBaseURI("https://example.com/");
+
+            const uri = await aNftVotesInstance.tokenURI(0);
+
+            expect(uri).to.equal("https://example.com/0");
+        });
     });
 });
