@@ -11,9 +11,9 @@ pragma solidity ^0.8.7;
      \______/  \______/ |_______/ |__/  |__/ \______/
 
 */
-import "./dependencies/openzeppelin-contracts/contracts/token/ERC20/ERC20.sol";
-import "./dependencies/openzeppelin-contracts/contracts/token/ERC20/utils/SafeERC20.sol";
-import "./dependencies/openzeppelin-contracts/contracts/governance/utils/Votes.sol";
+import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
+import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+import "@openzeppelin/contracts/governance/utils/Votes.sol";
 import "./utils/SuAccessControl.sol";
 
 /*

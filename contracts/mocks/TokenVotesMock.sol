@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-import "../dependencies/openzeppelin-contracts/contracts/access/Ownable.sol";
-import "../dependencies/openzeppelin-contracts/contracts/token/ERC20/extensions/ERC20Votes.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
+import "@openzeppelin/contracts/token/ERC20/extensions/ERC20Votes.sol";
 
 contract TokenVotesMock is ERC20Votes, Ownable {
     constructor(

@@ -12,10 +12,10 @@ pragma solidity ^0.8.7;
 
 */
 
-import "../dependencies/openzeppelin-contracts/contracts/token/ERC721/ERC721.sol";
-import "../dependencies/openzeppelin-contracts/contracts/token/ERC721/extensions/ERC721Enumerable.sol";
-import "../dependencies/openzeppelin-contracts/contracts/token/ERC721/extensions/draft-ERC721Votes.sol";
-import "../dependencies/openzeppelin-contracts/contracts/security/Pausable.sol";
+import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
+import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Enumerable.sol";
+import "@openzeppelin/contracts/token/ERC721/extensions/draft-ERC721Votes.sol";
+import "@openzeppelin/contracts/security/Pausable.sol";
 import "../utils/SuAccessControl.sol";
 
 contract StableUnitDAOogNFTVotes is ERC721, ERC721Enumerable, ERC721Votes, Pausable, SuAccessControl {

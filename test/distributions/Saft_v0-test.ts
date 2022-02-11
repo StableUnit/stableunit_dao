@@ -119,7 +119,7 @@ describe("SAFT", () => {
     it("Should not be able to add purchaser due to saft contract doesn't have enough tokens to sell", async () => {
         await truffleAssert.reverts(
           saftInstance.addPurchaser(accounts[1], tokenAllocation, paymentAmount, daiTokenInstance.address, paymentPeriodSeconds, cliffSeconds, vestingPeriodSeconds),
-          "ERC20: transfer amount exceeds allowance"
+          "ERC20: insufficient allowance"
         );
     });
 
@@ -256,7 +256,7 @@ describe("SAFT", () => {
 
       await truffleAssert.reverts(
         saftInstance.purchase(purchaser, paymentAmount, { from: purchaser }),
-        "ERC20: transfer amount exceeds allowance"
+        "ERC20: insufficient allowance"
       );
   });
   });
@@ -303,7 +303,7 @@ describe("SAFT", () => {
 
       await truffleAssert.reverts(
         saftInstance.increaseAllocation(purchaser, web3.utils.toBN(tokenAllocation).muln(2), paymentAmount.muln(2)),
-        "ERC20: transfer amount exceeds allowance"
+        "ERC20: insufficient allowance"
       );
     });
 
