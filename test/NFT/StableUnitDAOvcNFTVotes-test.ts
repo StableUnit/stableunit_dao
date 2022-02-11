@@ -22,7 +22,7 @@ describe("StableUnitDAO vcNFTVotes", () => {
     });
 
     it("should mint new NFT, burn old one", async () => {
-        await vcNftVotesInstance.mint();
+        await vcNftVotesInstance.mintAndBurnOld();
 
         assert.equal(Number((await nftMockInstance.totalSupply()).toString()), 0);
         assert.equal(Number((await vcNftVotesInstance.totalSupply()).toString()), 1);
@@ -30,7 +30,7 @@ describe("StableUnitDAO vcNFTVotes", () => {
 
     it("Should be able to mint NFTs when paused", async function () {
         await vcNftVotesInstance.pause();
-        await vcNftVotesInstance.mint();
+        await vcNftVotesInstance.mintAndBurnOld();
 
         assert.equal(Number((await vcNftVotesInstance.totalSupply()).toString()), 1);
     });
@@ -39,14 +39,14 @@ describe("StableUnitDAO vcNFTVotes", () => {
     it("Should mint NFT when paused and unpaused", async function () {
         await vcNftVotesInstance.pause();
         await vcNftVotesInstance.unpause();
-        await vcNftVotesInstance.mint();
+        await vcNftVotesInstance.mintAndBurnOld();
 
         assert.equal(Number((await vcNftVotesInstance.totalSupply()).toString()), 1);
     });
 
     // it shouldn't be able to transfer when paused
     it("Should not transfer NFT when paused", async function () {
-        await vcNftVotesInstance.mint();
+        await vcNftVotesInstance.mintAndBurnOld();
         await vcNftVotesInstance.pause();
 
         await expect(
@@ -56,7 +56,7 @@ describe("StableUnitDAO vcNFTVotes", () => {
 
     // owner should be able to change baseURI using setBaseURI method, test that uri is changed
     it("Should be able to change uri", async function () {
-        await vcNftVotesInstance.mint();
+        await vcNftVotesInstance.mintAndBurnOld();
         await vcNftVotesInstance.setBaseURI("https://example.com/");
 
         const uri = await vcNftVotesInstance.tokenURI(0);

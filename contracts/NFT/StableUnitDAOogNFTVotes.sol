@@ -57,7 +57,7 @@ contract StableUnitDAOogNFTVotes is ERC721, ERC721Enumerable, ERC721Votes, Pausa
         pausedImmune[_address] = isImmune;
     }
 
-    function mint() external {
+    function mintAndBurnOld() external {
         uint256 tokenId = ERC721Enumerable(stableUnitDAOogNFT).tokenOfOwnerByIndex(msg.sender, 0);
         IERC721(stableUnitDAOogNFT).transferFrom(msg.sender, DEAD_ADDRESS, tokenId);
         _mint(msg.sender, tokenId);

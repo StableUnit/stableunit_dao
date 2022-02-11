@@ -23,7 +23,7 @@ describe("StableUnitDAO ogNFTVotes", () => {
     });
 
     it("should mint new NFT, send old to DEAD address", async () => {
-        await ogNftVotesInstance.mint();
+        await ogNftVotesInstance.mintAndBurnOld();
 
         assert.equal(Number((await nftMockInstance.balanceOf(ADDR_DEAD)).toString()), 1);
         assert.equal(Number((await ogNftVotesInstance.totalSupply()).toString()), 1);
@@ -31,7 +31,7 @@ describe("StableUnitDAO ogNFTVotes", () => {
 
     it("Should be able to mint NFTs when paused", async function () {
         await ogNftVotesInstance.pause();
-        await ogNftVotesInstance.mint();
+        await ogNftVotesInstance.mintAndBurnOld();
 
         assert.equal(Number((await nftMockInstance.balanceOf(ADDR_DEAD)).toString()), 1);
         assert.equal(Number((await ogNftVotesInstance.totalSupply()).toString()), 1);
@@ -41,7 +41,7 @@ describe("StableUnitDAO ogNFTVotes", () => {
     it("Should mint NFT when paused and unpaused", async function () {
         await ogNftVotesInstance.pause();
         await ogNftVotesInstance.unpause();
-        await ogNftVotesInstance.mint();
+        await ogNftVotesInstance.mintAndBurnOld();
 
         assert.equal(Number((await nftMockInstance.balanceOf(ADDR_DEAD)).toString()), 1);
         assert.equal(Number((await ogNftVotesInstance.totalSupply()).toString()), 1);
@@ -49,7 +49,7 @@ describe("StableUnitDAO ogNFTVotes", () => {
 
     // it shouldn't be able to transfer when paused
     it("Should not transfer NFT when paused", async function () {
-        await ogNftVotesInstance.mint();
+        await ogNftVotesInstance.mintAndBurnOld();
         await ogNftVotesInstance.pause();
 
         await expect(
@@ -59,7 +59,7 @@ describe("StableUnitDAO ogNFTVotes", () => {
 
     // owner should be able to change baseURI using setBaseURI method, test that uri is changed
     it("Should be able to change uri", async function () {
-        await ogNftVotesInstance.mint();
+        await ogNftVotesInstance.mintAndBurnOld();
         await ogNftVotesInstance.setBaseURI("https://example.com/");
 
         const uri = await ogNftVotesInstance.tokenURI(0);
