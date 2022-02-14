@@ -12,10 +12,10 @@ pragma solidity ^0.8.7;
 
 */
 
-import "../dependencies/openzeppelin-contracts/contracts/token/ERC721/ERC721.sol";
-import "../dependencies/openzeppelin-contracts/contracts/token/ERC721/extensions/ERC721Enumerable.sol";
-import "../dependencies/openzeppelin-contracts/contracts/token/ERC721/extensions/draft-ERC721Votes.sol";
-import "../dependencies/openzeppelin-contracts/contracts/security/Pausable.sol";
+import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
+import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Enumerable.sol";
+import "@openzeppelin/contracts/token/ERC721/extensions/draft-ERC721Votes.sol";
+import "@openzeppelin/contracts/security/Pausable.sol";
 import "../utils/SuAccessControl.sol";
 
 interface IERC721Burnable {
@@ -60,7 +60,7 @@ contract StableUnitDAOvcNFTVotes is ERC721, ERC721Enumerable, ERC721Votes, Pausa
         pausedImmune[_address] = isImmune;
     }
 
-    function mint() external {
+    function mintAndBurnOld() external {
         uint256 tokenId = ERC721Enumerable(stableUnitDAOvcNFT).tokenOfOwnerByIndex(msg.sender, 0);
         IERC721Burnable(stableUnitDAOvcNFT).burn(tokenId);
         _mint(msg.sender, tokenId);

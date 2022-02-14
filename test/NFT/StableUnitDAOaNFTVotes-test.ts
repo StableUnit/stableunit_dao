@@ -26,7 +26,7 @@ describe("StableUnitDAO aNFTVotes", () => {
 
         await nftMockInstance.mint(alice);
         await nftMockInstance.setApprovalForAll(aNftVotesInstance.address, true, {from: alice});
-        await aNftVotesInstance.mint({from: alice});
+        await aNftVotesInstance.mintAndBurnOld({from: alice});
     });
 
     describe("getLevel", async () => {
@@ -66,7 +66,7 @@ describe("StableUnitDAO aNFTVotes", () => {
             await aNftVotesInstance.pause();
 
             await nftMockInstance.mint(alice);
-            await aNftVotesInstance.mint({from: alice});
+            await aNftVotesInstance.mintAndBurnOld({from: alice});
 
             assert.equal(Number((await aNftVotesInstance.totalSupply()).toString()), 2);
         });
@@ -76,7 +76,7 @@ describe("StableUnitDAO aNFTVotes", () => {
             await aNftVotesInstance.pause();
             await aNftVotesInstance.unpause();
             await nftMockInstance.mint(alice);
-            await aNftVotesInstance.mint({from: alice});
+            await aNftVotesInstance.mintAndBurnOld({from: alice});
 
             assert.equal(Number((await aNftVotesInstance.totalSupply()).toString()), 2);
         });

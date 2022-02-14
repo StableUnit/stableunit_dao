@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.7;
 
-import "../dependencies/openzeppelin-contracts/contracts/token/ERC721/ERC721.sol";
-import "../dependencies/openzeppelin-contracts/contracts/token/ERC721/extensions/ERC721Enumerable.sol";
-import "../dependencies/openzeppelin-contracts/contracts/token/ERC721/extensions/draft-ERC721Votes.sol";
-import "../dependencies/openzeppelin-contracts/contracts/utils/Counters.sol";
+import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
+import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Enumerable.sol";
+import "@openzeppelin/contracts/token/ERC721/extensions/draft-ERC721Votes.sol";
+import "@openzeppelin/contracts/utils/Counters.sol";
 
 contract NftVotesMock is ERC721, ERC721Enumerable, ERC721Votes {
     using Counters for Counters.Counter;

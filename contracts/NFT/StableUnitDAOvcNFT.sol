@@ -11,10 +11,10 @@ pragma solidity ^0.8.9;
      \______/  \______/ |_______/ |__/  |__/ \______/
 
 */
-import "../dependencies/openzeppelin-contracts/contracts/token/ERC721/ERC721.sol";
-import "../dependencies/openzeppelin-contracts/contracts/token/ERC721/extensions/ERC721Enumerable.sol";
-import "../dependencies/openzeppelin-contracts/contracts/security/Pausable.sol";
-import "../dependencies/openzeppelin-contracts/contracts/utils/Counters.sol";
+import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
+import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Enumerable.sol";
+import "@openzeppelin/contracts/security/Pausable.sol";
+import "@openzeppelin/contracts/utils/Counters.sol";
 import "../utils/SuAccessControl.sol";
 
 contract StableUnitDAOvcNFT is ERC721, ERC721Enumerable, Pausable, SuAccessControl {

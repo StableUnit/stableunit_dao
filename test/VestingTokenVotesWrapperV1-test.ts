@@ -79,6 +79,12 @@ describe("VestingTokenVotesWrapperV1", () => {
             expect(bobVotes.toString()).to.equal("0");
         })
 
+        it("should not delegate 0 balances", async () => {
+            await expect(
+                vestWrapperV1Instance.delegate(owner, {from: carl})
+            ).to.be.revertedWith("Cannot delegate zero balance");
+        })
+
         it("should delegate votes", async () => {
             await vestWrapperV1Instance.delegate(owner, {from: alice});
             let ownerVotes = await vestWrapperV1Instance.getVotes(owner);

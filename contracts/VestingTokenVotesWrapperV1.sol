@@ -11,9 +11,9 @@ pragma solidity ^0.8.7;
      \______/  \______/ |_______/ |__/  |__/ \______/
 
 */
-import "./dependencies/openzeppelin-contracts/contracts/token/ERC20/ERC20.sol";
-import "./dependencies/openzeppelin-contracts/contracts/token/ERC20/IERC20.sol";
-import "./dependencies/openzeppelin-contracts/contracts/token/ERC20/extensions/IERC20Metadata.sol";
+import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
+import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
 
 /*
  * @title This is a wrapper over an existing, deployed veSuDAO time-lock contract.
@@ -174,6 +174,7 @@ contract VestingTokenVotesWrapperV1 is IERC20, IERC20Metadata {
 
         require(delegatee != address(0), "Delegate to the zero address");
         require(delegatee != oldDelegate, "Delegate to current delegatee");
+        require(balanceOf(account) > 0, "Cannot delegate zero balance");
         require(_delegatorsOf[delegatee].length < MAX_DELEGATES, "Too many delegators");
 
         uint256 length = _delegatorsOf[oldDelegate].length;

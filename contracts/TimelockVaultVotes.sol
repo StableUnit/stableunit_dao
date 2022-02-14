@@ -11,9 +11,9 @@ pragma solidity ^0.8.7;
      \______/  \______/ |_______/ |__/  |__/ \______/
 
 */
-import "./dependencies/openzeppelin-contracts/contracts/token/ERC20/ERC20.sol";
-import "./dependencies/openzeppelin-contracts/contracts/token/ERC20/utils/SafeERC20.sol";
-import "./dependencies/openzeppelin-contracts/contracts/governance/utils/Votes.sol";
+import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
+import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+import "@openzeppelin/contracts/governance/utils/Votes.sol";
 import "./utils/SuAccessControl.sol";
 
 /*
@@ -43,7 +43,7 @@ contract TimelockVaultVotes is SuAccessControl, Votes {
 
     struct Account {
         // we keep all data in one 256 bits slot to safe on gas usage
-        uint64 amount_under_vesting_div1e12;
+        uint64 amount_under_vesting_div1e12; // total deposits, without considering withdrawals
         uint64 amount_already_withdrawn_div1e12;
         uint32 cliff_timestamp;
         uint32 vesting_ends_timestamp;
@@ -138,11 +138,14 @@ contract TimelockVaultVotes is SuAccessControl, Votes {
     function addBalance(uint256 amount, address to_user) public {
         // because we store amounts with loss of the precision we need to truck last 12 digits
         LOCKED_TOKEN.safeTransferFrom(msg.sender, address(this), (amount / 1e12) * 1e12);
+
+        // We initialize the user's voting power
         if(delegates(to_user) == address(0)) {
             _delegate(to_user, to_user);
         }
 
         accounts[to_user].amount_under_vesting_div1e12 = accounts[to_user].amount_under_vesting_div1e12 + uint64(amount / 1e12);
+        // minting voting power
         _transferVotingUnits(address(0), to_user, (amount / 1e12) * 1e12);
     }
 
@@ -182,6 +185,7 @@ contract TimelockVaultVotes is SuAccessControl, Votes {
         uint256 claim_amount = availableToClaim(msg.sender);
         require(claim_amount > 0, "Can't claim 0 tokens");
         accounts[msg.sender].amount_already_withdrawn_div1e12 = accounts[msg.sender].amount_already_withdrawn_div1e12 + uint64(claim_amount / 1e12);
+        // burning voting power
         _transferVotingUnits(msg.sender, address(0), (claim_amount / 1e12) * 1e12);
         LOCKED_TOKEN.safeTransfer(msg.sender, (claim_amount / 1e12) * 1e12);
     }
@@ -195,11 +199,13 @@ contract TimelockVaultVotes is SuAccessControl, Votes {
         uint256 balance = totalDeposited(msg.sender) - totalClaimed(msg.sender);
         require(balance > 0, "nothing to donate");
 
+        // We initialize the admin's voting power
         if(delegates(toAdmin) == address(0)) {
             _delegate(toAdmin, toAdmin);
         }
 
         accounts[msg.sender].amount_already_withdrawn_div1e12 = accounts[msg.sender].amount_already_withdrawn_div1e12 + uint64(balance / 1e12);
+        // transferring voting power
         _transferVotingUnits(msg.sender, toAdmin, (balance / 1e12) * 1e12);
         LOCKED_TOKEN.safeTransfer(toAdmin, (balance / 1e12) * 1e12);
     }
@@ -221,7 +227,7 @@ contract TimelockVaultVotes is SuAccessControl, Votes {
      * @dev Returns the amount under vesting for `account`.
      */
     function _getVotingUnits(address account) internal virtual override returns (uint256) {
-        return uint256(accounts[account].amount_under_vesting_div1e12) * 1e12;
+        return totalDeposited(account) - totalClaimed(account);
     }
 
     receive() external payable {}
