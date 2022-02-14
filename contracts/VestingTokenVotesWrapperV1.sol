@@ -174,6 +174,7 @@ contract VestingTokenVotesWrapperV1 is IERC20, IERC20Metadata {
 
         require(delegatee != address(0), "Delegate to the zero address");
         require(delegatee != oldDelegate, "Delegate to current delegatee");
+        require(balanceOf(account) > 0, "Cannot delegate zero balance");
         require(_delegatorsOf[delegatee].length < MAX_DELEGATES, "Too many delegators");
 
         uint256 length = _delegatorsOf[oldDelegate].length;
