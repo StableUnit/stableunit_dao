@@ -26,11 +26,17 @@ describe("VotingPower", () => {
     let accounts: string[];
     let owner: string, patron: string, alice: string, bob: string, carl: string;
 
-
     const SUDAO_AMOUNT = BN_1E18.muln(100);
     const VESUDAO_AMOUNT = BN_1E18.muln(50);
     const CLIFF_SECONDS = 100;
     const VESTING_SECONDS = 500;
+    const DEFAULT_DECIMALS = 18;
+
+    const VESUDAO_NAME = "Vested SuDAO mock";
+    const VESUDAO_SYMBOL = "mVeSuDao";
+
+    const VOTING_POWER_NAME = "Voting Power SuDAO";
+    const VOTING_POWER_SYMBOL = "vpSuDao";
 
     let sudaoInstance: TokenMockInstance;
     let veSudaoInstance: VestingTokenInstance;
@@ -42,7 +48,7 @@ describe("VotingPower", () => {
         [owner, patron, alice, bob, carl] = accounts;
 
         sudaoInstance = await TokenMock.new("SuDAO mock", "mSuDao", 18);
-        veSudaoInstance = await VestingToken.new("Vested SuDAO mock", "mVeSuDao", sudaoInstance.address);
+        veSudaoInstance = await VestingToken.new(VESUDAO_NAME, VESUDAO_SYMBOL, sudaoInstance.address);
         nftInstance = await NftMock.new("NFT mock", "mNFT");
 
         await sudaoInstance.mint(owner, SUDAO_AMOUNT);
@@ -53,7 +59,30 @@ describe("VotingPower", () => {
 
         await nftInstance.mint(owner);
 
-        votingPowerInstance = await VotingPower.new("Voting Power SuDAO", "vpSuDao");
+        votingPowerInstance = await VotingPower.new(VOTING_POWER_NAME, VOTING_POWER_SYMBOL);
+    });
+
+    describe("name/symbol/decimals", async () => {
+
+        it("Vested SuDAO", async () => {
+            const name = await veSudaoInstance.name();
+            const symbol = await veSudaoInstance.symbol();
+            const decimals = await veSudaoInstance.decimals();
+
+            expect(name).to.equal(VESUDAO_NAME);
+            expect(symbol).to.equal(VESUDAO_SYMBOL);
+            expect(decimals.toNumber()).to.equal(DEFAULT_DECIMALS);
+        })
+
+        it("Voting Power", async () => {
+            const symbol = await votingPowerInstance.symbol();
+            const name = await votingPowerInstance.name();
+            const decimals = await votingPowerInstance.decimals();
+
+            expect(symbol).to.equal(VOTING_POWER_SYMBOL);
+            expect(name).to.equal(VOTING_POWER_NAME);
+            expect(decimals.toNumber()).to.equal(DEFAULT_DECIMALS);
+        })
     });
 
     describe("add/edit/delete tokens&multipliers", async () => {
