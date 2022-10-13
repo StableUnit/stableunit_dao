@@ -12,10 +12,12 @@ pragma solidity ^0.8.9;
 
 */
 import "./interfaces/IBonus.sol";
+import "./access-control/SuAuthenticated.sol";
 
-// TODO: add onlyAdmin and onlyOwner modificators
+// TODO: add onlyCommunityAdmin, onlyAdmin, onlyOwner modificators by accessControl
 contract Bonus is IBonus {
     mapping(address => UserInfo) public userInfo;
+    mapping(address => CommunityAdminInfo) public communityAdminInfo;
     mapping(address => AdminInfo) public adminInfo;
 
     function getLevel(address user) public override {
@@ -107,13 +109,28 @@ contract Bonus is IBonus {
         return 1;
     }
 
-    function addAdmin(address admin, uint256 xpLimit, uint16 levelLimit) public onlyOwner override {
-        adminInfo[admin].xpLimit = xpLimit;
-        adminInfo[admin].levelLimit = levelLimit;
+    function setAdmin(address admin, bool isAdmin) public onlyOwner override {
+        adminInfo[admin].isAdmin = isAdmin;
     }
 
-    function distribute(address user, uint256 xp) onlyAdmin override {
-        require(xp <= adminInfo[msg.sender].xpLimit, "XP to distribute shouldn't be more than admin xpLimit");
-        // implementation
+    function setCommunityAdmin(address communityAdmin, uint256 xpLimit, uint16 levelLimit) public onlyAdmin override {
+        require(adminInfo[msg.sender].isAdmin, "Need admin rights");
+        adminInfo[communityAdmin].xpLimit = xpLimit;
+        adminInfo[communityAdmin].levelLimit = levelLimit;
+    }
+
+    function distribute(address user, uint256 xp) onlyCommunityAdmin override {
+        require(
+            xp <= communityAdminInfo[msg.sender].xpLimit,
+            "XP to distribute shouldn't be more than admin xpLimit"
+        );
+        communityAdminInfo[msg.sender].xpLimit = communityAdminInfo[msg.sender].xpLimit - xp;
+        userInfo[user].xp = userInfo[user].xp + xp;
+
+        uint16 newUserLevel = getLevel(userInfo[user].xp);
+        require(
+            newUserLevel <= communityAdminInfo[msg.sender].levelLimit,
+            "User level should be les than admin levelLimit"
+        );
     }
 }

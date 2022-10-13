@@ -18,11 +18,19 @@ interface IBonus {
     }
 
     /**
-     * @notice Info of each admin.
+     * @notice Info of each admin (Can setup communityAdmin)
+     * `isAdmin` Boolean if it's admin
+    **/
+    struct AdminInfo {
+        bool isAdmin;
+    }
+
+    /**
+     * @notice Info of each community admin (Can distribute XP).
      * `xpLimit` The amount of XP that admin can distribute over other users
      * `levelLimit` Admins can't distribute tokens so that (user level > levelLimit)
     **/
-    struct AdminInfo {
+    struct CommunityAdminInfo {
         uint256 xpLimit;
         uint16 levelLimit;
     }
@@ -34,12 +42,18 @@ interface IBonus {
     function getLevel(address user) external view returns ( uint16 );
 
     /**
-     * @notice Add new admin or replace it
+     * @notice Add or remove new admin
+     * `isAdmin` Address of admin
+    **/
+    function setAdmin(address admin, bool isAdmin) external;
+
+    /**
+     * @notice Set new community admin parameters
      * `admin` Address of admin
      * `xpLimit` The amount of XP that admin can distribute over other users
-     * `levelLimit` Admins can't distribute tokens so that (user level > levelLimit)
+     * `levelLimit` Admins can't distribute tokens so that (user level >= levelLimit)
     **/
-    function addAdmin(address admin, uint256 xpLimit, uint16 levelLimit) external;
+    function setCommunityAdmin(address admin, uint256 xpLimit, uint16 levelLimit) external;
 
     /**
      * @notice Admin can give xp points to user
