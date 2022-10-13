@@ -11,14 +11,19 @@ pragma solidity ^0.8.9;
      \______/  \______/ |_______/ |__/  |__/ \______/
 
 */
+import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+
 import "./interfaces/IBonus.sol";
 import "./access-control/SuAuthenticated.sol";
 
-// TODO: add onlyCommunityAdmin, onlyAdmin, onlyOwner modificators by accessControl
-contract Bonus is IBonus {
+contract Bonus is IBonus, SuAuthenticated {
     mapping(address => UserInfo) public userInfo;
     mapping(address => CommunityAdminInfo) public communityAdminInfo;
     mapping(address => AdminInfo) public adminInfo;
+
+    function initialize(address _authControl) public initializer {
+        __SuAuthenticated_init(_authControl);
+    }
 
     function getLevel(address user) public override {
         uint256 xp = userInfo[user].xp;
@@ -133,4 +138,11 @@ contract Bonus is IBonus {
             "User level should be les than admin levelLimit"
         );
     }
+
+    /**
+     * @dev This empty reserved space is put in place to allow future versions to add new
+     * variables without shifting down storage in the inheritance chain.
+     * See https://docs.openzeppelin.com/contracts/4.x/upgradeable#storage_gaps
+     */
+    uint256[45] private __gap;
 }
