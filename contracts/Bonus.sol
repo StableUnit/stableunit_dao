@@ -25,9 +25,7 @@ contract Bonus is IBonus, SuAuthenticated {
         __SuAuthenticated_init(_authControl);
     }
 
-    function getLevel(address user) public override {
-        uint256 xp = userInfo[user].xp;
-
+    function _getLevelByXP(uint256 xp) internal pure returns (uint16) {
         if (xp < 1000) return 1;
         if (xp < 2000) return 2;
         if (xp < 3200) return 3;
@@ -114,17 +112,21 @@ contract Bonus is IBonus, SuAuthenticated {
         return 1;
     }
 
+    function getLevel(address user) public view override returns (uint16) {
+        return _getLevelByXP(userInfo[user].xp);
+    }
+
     function setAdmin(address admin, bool isAdmin) public onlyOwner override {
         adminInfo[admin].isAdmin = isAdmin;
     }
 
     function setCommunityAdmin(address communityAdmin, uint256 xpLimit, uint16 levelLimit) public onlyAdmin override {
         require(adminInfo[msg.sender].isAdmin, "Need admin rights");
-        adminInfo[communityAdmin].xpLimit = xpLimit;
-        adminInfo[communityAdmin].levelLimit = levelLimit;
+        communityAdminInfo[communityAdmin].xpLimit = xpLimit;
+        communityAdminInfo[communityAdmin].levelLimit = levelLimit;
     }
 
-    function distribute(address user, uint256 xp) onlyCommunityAdmin override {
+    function distribute(address user, uint256 xp) public onlyCommunityAdmin override {
         require(
             xp <= communityAdminInfo[msg.sender].xpLimit,
             "XP to distribute shouldn't be more than admin xpLimit"
@@ -132,7 +134,7 @@ contract Bonus is IBonus, SuAuthenticated {
         communityAdminInfo[msg.sender].xpLimit = communityAdminInfo[msg.sender].xpLimit - xp;
         userInfo[user].xp = userInfo[user].xp + xp;
 
-        uint16 newUserLevel = getLevel(userInfo[user].xp);
+        uint16 newUserLevel = _getLevelByXP(userInfo[user].xp);
         require(
             newUserLevel <= communityAdminInfo[msg.sender].levelLimit,
             "User level should be les than admin levelLimit"

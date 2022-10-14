@@ -14,6 +14,9 @@ abstract contract SuAuthenticated is Initializable{
     bytes32 public constant COMMUNITY_ADMIN_ROLE = keccak256("COMMUNITY_ADMIN_ROLE");
     bytes32 private constant DEFAULT_ADMIN_ROLE = 0x00;
 
+    /// @dev the address of SuAccessControlSingleton - it should be one for all contract that inherits SuAuthenticated
+    ISuAccessControl public ACCESS_CONTROL_SINGLETON;
+
     /// @dev should be passed in constructor
     function __SuAuthenticated_init(address _accessControlSingleton) internal onlyInitializing {
         // Do we need SuAccessControlSingleton?
