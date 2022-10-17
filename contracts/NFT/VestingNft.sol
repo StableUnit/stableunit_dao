@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: MIT
+// In base of OpenZeppelin Contract: token/ERC20/utils/TokenTimelock.sol
 
 pragma solidity ^0.8.9;
 
@@ -18,20 +19,20 @@ contract VestingNft is IVestingNft {
         IERC721 _nft,
         uint256 _tokenId,
         address _beneficiary,
-        uint256 _releaseTime
+        uint256 _releaseTimestamp
     ) public override {
         require(
-            _releaseTime > block.timestamp,
-            "VestingNft: releaseTime_ has to be in the future"
+            _releaseTimestamp > block.timestamp,
+            "VestingNft: releaseTimestamp has to be in the future"
         );
         require(
-            userInfo[_beneficiary].releaseTime == 0,
+            userInfo[_beneficiary].releaseTimestamp == 0,
             "VestingNft: user already have nft"
         );
 
         userInfo[_beneficiary].nft = _nft;
         userInfo[_beneficiary].tokenId = _tokenId;
-        userInfo[_beneficiary].releaseTime = _releaseTime;
+        userInfo[_beneficiary].releaseTimestamp = _releaseTimestamp;
     }
 
     function nft(address user) public view virtual override returns (IERC721) {
@@ -42,8 +43,8 @@ contract VestingNft is IVestingNft {
         return userInfo[user].tokenId;
     }
 
-    function releaseTime(address user) public view virtual override returns (uint256) {
-        return userInfo[user].releaseTime;
+    function releaseTimestamp(address user) public view virtual override returns (uint256) {
+        return userInfo[user].releaseTimestamp;
     }
 
     function getUserInfo(address user) public view virtual override returns (UserInfo memory) {
@@ -53,11 +54,11 @@ contract VestingNft is IVestingNft {
     function release(address user) public virtual override {
         IERC721 _nft = userInfo[user].nft;
         uint256 _tokenId = userInfo[user].tokenId;
-        uint256 _releaseTime = userInfo[user].releaseTime;
+        uint256 _releaseTimestamp = userInfo[user].releaseTimestamp;
 
         // Check if current time is after release time
         require(
-            block.timestamp >= _releaseTime,
+            block.timestamp >= _releaseTimestamp,
             "VestingNft: current time is before release time"
         );
 

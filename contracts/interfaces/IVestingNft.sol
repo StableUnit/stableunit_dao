@@ -14,7 +14,7 @@ interface IVestingNft {
     struct UserInfo {
         IERC721 nft;
         uint256 tokenId;
-        uint256 releaseTime;
+        uint256 releaseTimestamp;
     }
 
     /**
@@ -31,7 +31,7 @@ interface IVestingNft {
     /**
      * @dev Returns the time when the NFT are released in seconds since Unix epoch (i.e. Unix timestamp).
      */
-    function releaseTime(address user) external view returns (uint256);
+    function releaseTimestamp(address user) external view returns (uint256);
 
     /**
      * @dev Returns all user info
@@ -42,6 +42,7 @@ interface IVestingNft {
      * @dev Add a timelock instance that is able to hold the token specified, and will only release it to
      * `beneficiary` when {release} is invoked after `releaseTime`. The cliff period is specified as a Unix timestamp
      * (in seconds).
+     * Also you should transfer nft to that contract to be able to transfer it in release().
      * `nft` ERC721 basic token smart contract
      * `tokenId` ERC721 basic token ID of contract being held
      * `beneficiary` Beneficiary of token after they are released
@@ -55,5 +56,4 @@ interface IVestingNft {
      * Reverts if transfer of NFT fails.
      */
     function release(address user) external;
-
 }
