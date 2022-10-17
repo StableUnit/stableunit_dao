@@ -22,8 +22,13 @@ contract VestingNft is IVestingNft {
     ) public override {
         require(
             _releaseTime > block.timestamp,
-            "NftTimelock: releaseTime_ has to be in the future"
+            "VestingNft: releaseTime_ has to be in the future"
         );
+        require(
+            userInfo[_beneficiary].releaseTime == 0,
+            "VestingNft: user already have nft"
+        );
+
         userInfo[_beneficiary].nft = _nft;
         userInfo[_beneficiary].tokenId = _tokenId;
         userInfo[_beneficiary].releaseTime = _releaseTime;
@@ -56,7 +61,7 @@ contract VestingNft is IVestingNft {
             "VestingNft: current time is before release time"
         );
 
-        // Check if the NFT is already released
+        // Check if contract have the NFT to release
         require(
             _nft.ownerOf(_tokenId) == address(this),
             "VestingNft: no NFT to release"
@@ -70,5 +75,8 @@ contract VestingNft is IVestingNft {
             _nft.ownerOf(_tokenId) != address(this),
             "VestingNft: NFT still owned by this contract"
         );
+
+        // Remove nft for user to be able to add another nft for him
+        delete userInfo[user];
     }
 }
