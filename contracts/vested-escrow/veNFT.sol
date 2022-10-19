@@ -4,18 +4,24 @@
 pragma solidity ^0.8.9;
 
 import "../interfaces/IVestingNft.sol";
+import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 
 /**
- * @dev A single NFT holder contract that will allow a beneficiary to extract the
- * NFT after a given lock period.
+ * @dev vested escrow NFT contract, allow a beneficiary to extract NFT after a given lock schdule.
  *
  * Useful for simple vesting schedules like "whitelisted addresses get their NFT
  * after 1 year".
  */
-contract VestingNft is IVestingNft {
-    mapping(address => UserInfo) public userInfo;
+ // TODO: make contract look like ERC721 token but without ability to tranfer tokens etc
+contract veNFT is IVestingNft, IERC721 {
+    // TODO: rename type to Erc721Info
+    mapping(address => UserInfo[]) public userInfo;
 
-    function addNft(
+    // TODO: implement IERC721 interface, see oz.ERC721 implementation
+    // function balanceOf(address owner) external view returns (uint256 balance);
+    // function ownerOf(uint256 tokenId) external view returns (address owner);
+
+    function lockNFT(
         IERC721 _nft,
         uint256 _tokenId,
         address _beneficiary,
@@ -80,4 +86,5 @@ contract VestingNft is IVestingNft {
         // Remove nft for user to be able to add another nft for him
         delete userInfo[user];
     }
+    ///===================erc721-like interfacee=======================
 }
