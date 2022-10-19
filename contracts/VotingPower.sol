@@ -28,8 +28,16 @@ interface IBalanceable {
     function balanceOf(address account) external view returns (uint256);
 }
 
+interface IVoteDelegatable {
+    /**
+     * @dev Returns the amount of tokens owned by `account`.
+     */
+    function getVotes(address account) external view returns (uint256);
+}
+// TODO: implements IVotes
 contract VotingPower is IERC20, IERC20Metadata, SuAccessControl {
     uint256 MAX_LEN = 50;
+    // TODO: make structure {address, type{balancable/voteDelegatable}, weight}
     IBalanceable[] public tokens;
     // TODO: set weight
     // TODO: set weights limits
@@ -45,6 +53,8 @@ contract VotingPower is IERC20, IERC20Metadata, SuAccessControl {
         _name = name_;
         _symbol = symbol_;
     }
+
+    // TODO: function delegate(address delegatee) public {for all tokens: call delegateOnBehalf(msg.sender,...) }
 
     function addToken(IBalanceable token, uint256 multiplier) external onlyRole(DEFAULT_ADMIN_ROLE) {
         tokens.push(token);
