@@ -13,6 +13,7 @@ import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
  * after 1 year".
  */
  // TODO: make contract look like ERC721 token but without ability to tranfer tokens etc
+ // TODO: delegate on behalf
 contract veNFT is IVestingNft, IERC721 {
     // TODO: rename type to Erc721Info
     mapping(address => UserInfo[]) public userInfo;
