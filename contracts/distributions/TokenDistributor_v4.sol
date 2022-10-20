@@ -17,7 +17,7 @@ import "@openzeppelin/contracts/utils/math/Math.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
-import "../vested-escrow/TimelockVault.sol";
+import "../vested-escrow/VeERC20.sol";
 import "../utils/SuAccessControl.sol";
 import "../utils/BancorFormula.sol";
 
@@ -28,8 +28,9 @@ contract TokenDistributor_v4 is BancorFormula, SuAccessControl {
     using SafeERC20 for IERC20;
     using Math for *;
 
-    TimelockVault public immutable TIMELOCK_VAULT;
+    VeERC20 public immutable VE_ERC_20;
     IERC20 public immutable SU_DAO;
+    address public immutable BONUS_CONTRACT;
 
     struct DistributionInfo {
         uint64 startTimestamp;                 // the date when participation is available
@@ -55,10 +56,11 @@ contract TokenDistributor_v4 is BancorFormula, SuAccessControl {
 
     mapping(uint256 => DistributionInfo) public distributions;
 
-    constructor (IERC20 _suDAO, TimelockVault _timelockVault) {
+    constructor (IERC20 _suDAO, VeERC20 _veErc20, address _bonusContract) {
         SU_DAO = _suDAO;
-        TIMELOCK_VAULT = _timelockVault;
-        _suDAO.approve(address(_timelockVault), type(uint256).max);
+        VE_ERC_20 = _veErc20;
+        BONUS_CONTRACT = _bonusContract;
+        _suDAO.approve(address(_veErc20), type(uint256).max);
         _setupRole(MINTER_ROLE, msg.sender);
     }
 
@@ -85,10 +87,20 @@ contract TokenDistributor_v4 is BancorFormula, SuAccessControl {
         require(block.timestamp >= distribution.startTimestamp, "participation has not started yet");
         require(block.timestamp <= distribution.deadlineTimestamp, "participation is over");
         require(IERC721(distribution.nftRequirement).balanceOf(msg.sender) > 0, "caller doesn't have required NFT");
+        require(
+            donationAmount > distribution.minimumDonationUsd,
+            "Your donation should be greater than minimum donation"
+        );
 
-        uint256 rewardAmount = getBondingCurvePrice(donationAmount);
-        // uint256 totalRewardAmount = TIMELOCK_VAULT.totalDeposited(msg.sender) + rewardAmount;
-        // should we check totalRewardAmount for user bonus.allocation?
+        uint256 bonusAllocation = IBonus(BONUS_CONTRACT).userInfo[msg.sender].allocation;
+        uint256 maxAllocation = bonusAllocation == 0 ? distribution.maximumDonationUsd : bonusAllocation;
+        require(
+            donations[msg.sender] + donationAmount < maxAllocation,
+            "Your donations should be less than max donation"
+        );
+
+        uint256 bonusDiscountRatio = IBonus(BONUS_CONTRACT).userInfo[msg.sender].discountRatioPresale;
+        uint256 rewardAmount = getBondingCurvePrice(donationAmount) * (1e18 + bonusDiscountRatio) / 1e18;
 
         // get donation from the user
         IERC20(distribution.donationMethod).safeTransferFrom(msg.sender, address(this), donationAmount);
@@ -97,7 +109,7 @@ contract TokenDistributor_v4 is BancorFormula, SuAccessControl {
 
         // give reward to the user
         require(SU_DAO.balanceOf(address(this)) >= rewardAmount, "not enough reward left");
-        TIMELOCK_VAULT.safeLockUnderVesting(
+        VE_ERC_20.safeLockUnderVesting(
             msg.sender,
             rewardAmount,
             distribution.fullVestingSeconds,
@@ -124,12 +136,9 @@ contract TokenDistributor_v4 is BancorFormula, SuAccessControl {
 
         require(block.timestamp >= distribution.deadlineTimestamp, "Participation has not yet ended");
         require(distribution.totalDonations < distribution.donationGoalMin, "Min goal reached");
+        require(VE_ERC_20.balanceOf(msg.sender) == 0, "You should donate all your tokens in veERC20");
 
         uint256 donationAmount = distribution.donations(msg.sender);
-        uint256 rewardAmount = TIMELOCK_VAULT.totalDeposited(msg.sender);
-
-        // TODO
-        IERC20().safeTransferFrom(msg.sender, address(this), rewardAmount);
         IERC20(distribution.donationMethod).safeTransferFrom(address(this), msg.sender, donationAmount);
         distribution.totalDonations = distribution.totalDonations - donationAmount;
     }

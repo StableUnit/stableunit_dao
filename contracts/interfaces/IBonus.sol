@@ -14,7 +14,7 @@ interface IBonus {
     struct UserInfo {
         uint256 xp;
         uint256 allocation;
-        uint256 discountPresale;
+        uint256 discountRatioPresale;
     }
 
     /**
