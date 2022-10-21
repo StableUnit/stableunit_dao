@@ -17,19 +17,19 @@ import "@openzeppelin/contracts/utils/math/Math.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
-import "../vested-escrow/veERC20.sol";
+import "../interfaces/IBonus.sol";
+import "../interfaces/IveERC20.sol";
 import "../utils/SuAccessControl.sol";
-import "../utils/BancorFormula.sol";
 
 /**
  * @title The contract that distribute suDAO tokens for community based on NFT membership
  */
-contract TokenDistributor_v4 is BancorFormula, SuAccessControl {
+contract TokenDistributor_v4 is SuAccessControl {
     using SafeERC20 for IERC20;
     using Math for *;
 
-    veERC20 public immutable VE_ERC_20;
-    IERC20 public immutable SU_DAO;
+    address public immutable VE_ERC_20;
+    address public immutable SU_DAO;
     address public immutable BONUS_CONTRACT;
 
     uint64 startTimestamp;                 // The date when participation is available
@@ -47,25 +47,28 @@ contract TokenDistributor_v4 is BancorFormula, SuAccessControl {
 
     uint64 fullVestingSeconds;             // Default vesting period is 12 months
     uint64 cliffSeconds;                   // With 3 months cliff.
+    uint64 tgeUnlockRatio1e18;
+    uint64 vestingFrequencySeconds;
 
-    address[] nftRequirement;                // User should have certain NFT to be able to participate
+    address[] nftRequirement;              // User should have certain NFT to be able to participate
 
-    constructor (IERC20 _suDAO, veERC20 _veErc20, address _bonusContract) {
+    constructor (address _suDAO, address _veErc20, address _bonusContract) {
         SU_DAO = _suDAO;
         VE_ERC_20 = _veErc20;
         BONUS_CONTRACT = _bonusContract;
-        _suDAO.approve(address(_veErc20), type(uint256).max);
+        IERC20(_suDAO).approve(address(_veErc20), type(uint256).max);
         _setupRole(MINTER_ROLE, msg.sender);
     }
 
     // TODO: get clear function that: start from p0, at minGoal is p1, at maxGoal is p2. super safe and unhackable
     function getBondingCurvePrice(uint256 donationAmount) public returns (uint256) {
-        return calculatePurchaseReturn(
-            donationGoalMax,
-            totalDonations,
-            reserveRatio,
-            donationAmount
-        );
+//        return calculatePurchaseReturn(
+//            donationGoalMax,
+//            totalDonations,
+//            reserveRatio,
+//            donationAmount
+//        );
+        return 123;
     }
 
     /**
@@ -74,24 +77,26 @@ contract TokenDistributor_v4 is BancorFormula, SuAccessControl {
      */
     // TODO: pass access nft address as the last argument
     function participate(uint256 donationAmount) payable external {
-        require(maximumDonationAmount > 0, "distribution doesn't exit");
+        require(minimumDonationUsd > 0, "distribution doesn't exit");
         require(block.timestamp >= startTimestamp, "participation has not started yet");
         require(block.timestamp <= deadlineTimestamp, "participation is over");
         // TODO: nft requirement is an array
-        require(IERC721(nftRequirement).balanceOf(msg.sender) > 0, "caller doesn't have required NFT");
+        for (uint256 i = 0; i < nftRequirement.length; i++) {
+            require(IERC721(nftRequirement[i]).balanceOf(msg.sender) > 0, string.concat("caller doesn't have required NFT with id ", i));
+        }
         require(
             donationAmount > minimumDonationUsd,
             "Your donation should be greater than minimum donation"
         );
 
-        uint256 bonusAllocation = IBonus(BONUS_CONTRACT).userInfo[msg.sender].allocation;
+        uint256 bonusAllocation = IBonus(BONUS_CONTRACT).getAllocation(msg.sender);
         uint256 maxAllocation = bonusAllocation == 0 ? maximumDonationUsd : bonusAllocation;
         require(
             donations[msg.sender] + donationAmount < maxAllocation,
             "Your donations should be less than max donation"
         );
 
-        uint256 bonusDiscountRatio = IBonus(BONUS_CONTRACT).userInfo[msg.sender].discountRatioPresale;
+        uint256 bonusDiscountRatio = IBonus(BONUS_CONTRACT).getDiscount(msg.sender);
         uint256 rewardAmount = getBondingCurvePrice(donationAmount) * (1e18 + bonusDiscountRatio) / 1e18;
 
         // get donation from the user
@@ -100,12 +105,14 @@ contract TokenDistributor_v4 is BancorFormula, SuAccessControl {
         donations[msg.sender] = donations[msg.sender] + donationAmount;
 
         // give reward to the user
-        require(SU_DAO.balanceOf(address(this)) >= rewardAmount, "not enough reward left");
-        VE_ERC_20.safeLockUnderVesting(
+        require(IERC20(SU_DAO).balanceOf(address(this)) >= rewardAmount, "not enough reward left");
+        IveERC20(VE_ERC_20).lockUnderVesting(
             msg.sender,
             rewardAmount,
             fullVestingSeconds,
-            cliffSeconds
+            cliffSeconds,
+            tgeUnlockRatio1e18,
+            vestingFrequencySeconds
         );
         emit Participated(msg.sender, donationAmount);
     }
@@ -125,7 +132,7 @@ contract TokenDistributor_v4 is BancorFormula, SuAccessControl {
     function takeDonationBack() public {
         require(block.timestamp >= deadlineTimestamp, "Participation has not yet ended");
         require(totalDonations < donationGoalMin, "Min goal reached");
-        require(VE_ERC_20.balanceOf(msg.sender) == 0, "You should donate all your tokens in veERC20");
+        require(IveERC20(VE_ERC_20).balanceOf(msg.sender) == 0, "You should donate all your tokens in veERC20");
 
         uint256 donationAmount = donations[msg.sender];
         donations[msg.sender] = 0;
@@ -137,8 +144,8 @@ contract TokenDistributor_v4 is BancorFormula, SuAccessControl {
      * @notice The owner can set new or edit existing token distribution with no restrictions
      */
     function setDistributionInfo(
-        uint256 _startTimestamp,
-        uint256 _deadlineTimestamp,
+        uint64 _startTimestamp,
+        uint64 _deadlineTimestamp,
         uint256 _reserveRatio,
         uint256 _donationGoalMin,
         uint256 _donationGoalMax,
@@ -147,17 +154,22 @@ contract TokenDistributor_v4 is BancorFormula, SuAccessControl {
         address _donationToken,
         uint64 _fullVestingSeconds,
         uint64 _cliffSeconds,
-        address[] _nftRequirement
+        uint64 _tgeUnlockRatio1e18,
+        uint64 _vestingFrequencySeconds,
+        address[] calldata _nftRequirement
     ) external onlyRole(MINTER_ROLE) {
-        require(cliffSeconds < fullVestingSeconds, "!cliff seconds < vesting seconds");
-        require(minimumRewardAllocation <= maximumRewardAllocation, "!min < max rewards");
-        require(startTimestamp < deadlineTimestamp, "!startTimestamp < deadlineTimestamp");
-        require(donationGoalMin <= donationGoalMax, "!donationGoalMin <= donationGoalMax");
-        require(minimumDonationUsd <= maximumDonationUsd, "!minimumDonationUsd <= maximumDonationUsd");
+        require(_startTimestamp < _deadlineTimestamp, "!_startTimestamp < _deadlineTimestamp");
+        require(_reserveRatio > 0, "_reserveRatio <= 0");
+        require(_donationGoalMin <= _donationGoalMax, "!donationGoalMin <= donationGoalMax");
+        require(_minimumDonationUsd <= _maximumDonationUsd, "!minimumDonationUsd <= maximumDonationUsd");
+        require(_donationToken != address(0), "donationToken is null");
+        require(_cliffSeconds < _fullVestingSeconds, "!cliff seconds < vesting seconds");
+        require(_nftRequirement.length > 0, "nftRequirement is empty");
+        require(_tgeUnlockRatio1e18 <= 1e18, "tgeUnlockRatio should be less than 1");
 
         startTimestamp  = _startTimestamp;
         deadlineTimestamp = _deadlineTimestamp;
-        rewardRatioPolynom1E18 = _reserveRatio;
+        reserveRatio = _reserveRatio;
         donationGoalMin = _donationGoalMin;
         donationGoalMax = _donationGoalMax;
         minimumDonationUsd = _minimumDonationUsd;
@@ -165,6 +177,8 @@ contract TokenDistributor_v4 is BancorFormula, SuAccessControl {
         donationToken = _donationToken;
         fullVestingSeconds = _fullVestingSeconds;
         cliffSeconds = _cliffSeconds;
+        tgeUnlockRatio1e18 = _tgeUnlockRatio1e18;
+        vestingFrequencySeconds = _vestingFrequencySeconds;
         nftRequirement = _nftRequirement;
 
         emit SetDistribution(
@@ -178,6 +192,8 @@ contract TokenDistributor_v4 is BancorFormula, SuAccessControl {
             _donationToken,
             _fullVestingSeconds,
             _cliffSeconds,
+            _tgeUnlockRatio1e18,
+            _vestingFrequencySeconds,
             _nftRequirement
         );
     }
@@ -198,8 +214,8 @@ contract TokenDistributor_v4 is BancorFormula, SuAccessControl {
 
     event Participated(address msg_sender, uint256 donationAmount);
     event SetDistribution(
-        uint256 _startTimestamp,
-        uint256 _deadlineTimestamp,
+        uint64 _startTimestamp,
+        uint64 _deadlineTimestamp,
         uint256 _reserveRatio,
         uint256 _donationGoalMin,
         uint256 _donationGoalMax,
@@ -208,6 +224,8 @@ contract TokenDistributor_v4 is BancorFormula, SuAccessControl {
         address _donationToken,
         uint64 _fullVestingSeconds,
         uint64 _cliffSeconds,
+        uint64 _tgeUnlockRatio1e18,
+        uint64 _vestingFrequencySeconds,
         address[] _nftRequirement
     );
 }

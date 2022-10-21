@@ -152,6 +152,14 @@ contract Bonus is IBonus, SuAuthenticated {
         );
     }
 
+    function getAllocation(address user) public view override returns (uint256) {
+        return userInfo[user].allocation;
+    }
+
+    function getDiscount(address user) public view override returns (uint256) {
+        return userInfo[user].discountRatioPresale;
+    }
+
     /**
      * @dev This empty reserved space is put in place to allow future versions to add new
      * variables without shifting down storage in the inheritance chain.

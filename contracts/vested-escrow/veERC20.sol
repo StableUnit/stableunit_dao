@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.7;
+pragma solidity ^0.8.12;
 /*
       /$$$$$$            /$$$$$$$   /$$$$$$   /$$$$$$
      /$$__  $$          | $$__  $$ /$$__  $$ /$$__  $$
@@ -18,6 +18,7 @@ import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts-upgradeable/utils/math/SafeCastUpgradeable.sol";
 import "../access-control/SuAccessControlModifiers.sol";
 import "./TimelockVault.sol";
+import "../interfaces/IveERC20.sol";
 
 /*
  * @title The contact enables the storage of erc20 tokens under the linear time-vesting with the cliff time-lock.
@@ -33,8 +34,10 @@ import "./TimelockVault.sol";
  * To make balance visible in the erc20 wallets, the contact "looks like" erc20 token by implementing its interface
  * however all non-view methods such as transfer or approve aren't active and will be reverted.
 */
-contract veERC20 is ERC20, ERC20Votes, SuAccessControlModifiers {
+contract veERC20 is ERC20, ERC20Votes, SuAccessControlModifiers, IveERC20 {
     using SafeERC20 for ERC20;
+    using SafeCastUpgradeable for uint256;
+
     ERC20 public immutable LOCKED_TOKEN;
     uint32 public immutable TGE_MAX_TIMESTAMP = 1685577600; // Unix Timestamp	1685577600 = GMT+0 Thu Jun 01 2023 00:00:00 GMT+0000
     uint32 public tgeTimestamp;
@@ -50,7 +53,7 @@ contract veERC20 is ERC20, ERC20Votes, SuAccessControlModifiers {
     mapping(address => VestingInfo) public vestingInfo;
 
     constructor(ERC20 _lockedToken)
-        ERC20("vested escrow "+_lockedToken.name(), "ve"+_lockedToken.symbol()) {
+        ERC20(string.concat("vested escrow ", _lockedToken.name()), string.concat("ve", _lockedToken.symbol())) {
         LOCKED_TOKEN = _lockedToken;
         _setupRole(DEFAULT_ADMIN_ROLE, msg.sender);
         tgeTimestamp = TGE_MAX_TIMESTAMP;
@@ -95,10 +98,10 @@ contract veERC20 is ERC20, ERC20Votes, SuAccessControlModifiers {
         uint256 cliffSeconds,
         uint256 tgeUnlockRatio1e18,
         uint256 vestingFrequencySeconds
-    ) external onlyOwner
+    ) external onlyOwner override
     {
         _mergeVesting(account, vestingSeconds, cliffSeconds, tgeUnlockRatio1e18, vestingFrequencySeconds);
-        addBalance(amount, account);
+        addBalance(account, amount);
     }
 
     /**
@@ -155,40 +158,40 @@ contract veERC20 is ERC20, ERC20Votes, SuAccessControlModifiers {
      * @return Returns amount of tokens the users can withdraw right now.
      */
     function availableToClaim(address user) public view returns (uint256) {
-        VestingInfo memory account = vestingInfo[user];
+        VestingInfo memory info = vestingInfo[user];
         uint256 t = block.timestamp;
         // if the time is before the TGE - there's nothing vested yet
         if (t < tgeTimestamp) return 0;
 
         // if it's past TGE, there's at lest tgeUnlockRatio is vested
-         uint256 vested = _balances[account] * vestingInfo[account].tgeUnlockRatio1e18/1e18;
+         uint256 vested = super.balanceOf(user) * info.tgeUnlockRatio1e18/1e18;
 
         // if the time is before the cliff
-        if (t < (tgeTimestamp + account.cliffSeconds)) {
+        if (t < (tgeTimestamp + info.cliffSeconds)) {
             // there's nothing additional vested yet
         } else {
             // if after the cliff
 
             // if it's beyond vesting time
-            if ((tgeTimestamp + account.vestingSeconds) < t) {
+            if ((tgeTimestamp + info.vestingSeconds) < t) {
                 // everything is vested
-                vested = _balances[account];
+                vested = super.balanceOf(user);
             } else {
                 // otherwise the amount is proportional to the amount after the cliff before end of vesting
-                uint256 x = _balances[account];
+                uint256 x = super.balanceOf(user);
                 // how much second passed after cliff
-                uint256 y = (t - (tgeTimestamp + account.cliffSeconds));
+                uint256 y = (t - (tgeTimestamp + info.cliffSeconds));
                 // how much seconds from cliff to end of vesting
-                uint256 z = (uint256(account.vestingSeconds) - uint256(account.cliffSeconds));
+                uint256 z = (uint256(info.vestingSeconds) - uint256(info.cliffSeconds));
                 // y2 := max y2 : vestingFrequencySeconds*N <= y
-                uint256 y2 = y / vestingInfo[account].vestingFrequencySeconds * vestingInfo[account].vestingFrequencySeconds;
+                uint256 y2 = y / info.vestingFrequencySeconds * info.vestingFrequencySeconds;
 
                 vested = x * y2 / z;
             }
         }
 
         // the answer is how much is vested in total minute how much already withdrawn
-        return vested - uint256(account.amountAlreadyWithdrawn);
+        return vested - uint256(info.amountAlreadyWithdrawn);
     }
 
     /**
@@ -213,7 +216,7 @@ contract veERC20 is ERC20, ERC20Votes, SuAccessControlModifiers {
     }
 
     function balanceOf(address account) public view virtual override returns (uint256) {
-        return _balances[account] - vestingInfo[account].amountAlreadyWithdrawn;
+        return super.balanceOf(account) - vestingInfo[account].amountAlreadyWithdrawn;
     }
 
     /**
@@ -229,4 +232,27 @@ contract veERC20 is ERC20, ERC20Votes, SuAccessControlModifiers {
         }
     }
     receive() external payable {}
+
+    // The following functions are overrides required by Solidity.
+
+    function _afterTokenTransfer(address from, address to, uint256 amount)
+    internal
+    override(ERC20, ERC20Votes)
+    {
+        super._afterTokenTransfer(from, to, amount);
+    }
+
+    function _mint(address to, uint256 amount)
+    internal
+    override(ERC20, ERC20Votes)
+    {
+        super._mint(to, amount);
+    }
+
+    function _burn(address account, uint256 amount)
+    internal
+    override(ERC20, ERC20Votes)
+    {
+        super._burn(account, amount);
+    }
 }

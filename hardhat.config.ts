@@ -35,7 +35,7 @@ const accountsMainnet = PRIVATE_KEY
  * @type import('hardhat/config').HardhatUserConfig
  */
 export default {
-    solidity: "0.8.9",
+    solidity: "0.8.12",
     networks: {
         hardhat: {},
         mainnet: {

@@ -83,4 +83,16 @@ interface IBonus {
      * `xp` The amount of XP that admin want to give user (xp <= admin.xpLimit && levelAfter(user) <= admin.levelLimit)
     **/
     function distribute(address user, uint256 xp) external;
+
+    /**
+     * @notice Get user allocation
+     * `user` Address of user
+    **/
+    function getAllocation(address user) external view returns ( uint256 );
+
+    /**
+     * @notice Get user discount ratio for presale
+     * `user` Address of user
+    **/
+    function getDiscount(address user) external view returns ( uint256 );
 }
