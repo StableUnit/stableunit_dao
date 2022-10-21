@@ -20,6 +20,7 @@ contract Bonus is IBonus, SuAuthenticated {
     mapping(address => UserInfo) public userInfo;
     mapping(address => CommunityAdminInfo) public communityAdminInfo;
     mapping(address => AdminInfo) public adminInfo;
+    // TODO: make bonus struct and two maps: one for group (nft) and another for individual
 
     function initialize(address _authControl) public initializer {
         __SuAuthenticated_init(_authControl);

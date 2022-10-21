@@ -157,7 +157,7 @@ contract veERC20 is ERC20, ERC20Votes, SuAuthenticated {
 
         // if it's past TGE, there's at lest tgeUnlockRatio is vested
          uint256 vested = _balances[account] * vestingInfo[account].tgeUnlockRatio1e18/1e18;
-        
+
         // if the time is before the cliff
         if (t < (tgeTimestamp + account.cliffSeconds)) {
             // there's nothing additional vested yet

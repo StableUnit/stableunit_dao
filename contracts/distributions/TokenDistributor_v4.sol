@@ -64,6 +64,7 @@ contract TokenDistributor_v4 is BancorFormula, SuAccessControl {
         _setupRole(MINTER_ROLE, msg.sender);
     }
 
+    // TODO: get clear function that: start from p0, at minGoal is p1, at maxGoal is p2. super safe and unhackable
     function getBondingCurvePrice(uint256 distributionId, uint256 donationAmount) public returns (uint256) {
         DistributionInfo storage distribution = distributions[distributionId];
 
@@ -80,17 +81,22 @@ contract TokenDistributor_v4 is BancorFormula, SuAccessControl {
      * param distributionId The id of distribution, set in setDistribution method
      * param donationAmount The amount of tokens specified in distributions[distributionId].donationMethod
      */
+    // TODO: pass access nft address as the last argument
     function participate(uint256 distributionId, uint256 donationAmount) payable external {
         DistributionInfo storage distribution = distributions[distributionId];
+
+        // TODO: think about new bonus logic and all corner cases, use new struct logic
 
         require(distribution.maximumDonationAmount > 0, "distribution doesn't exit");
         require(block.timestamp >= distribution.startTimestamp, "participation has not started yet");
         require(block.timestamp <= distribution.deadlineTimestamp, "participation is over");
+        // TODO: nft requirement is an array
         require(IERC721(distribution.nftRequirement).balanceOf(msg.sender) > 0, "caller doesn't have required NFT");
         require(
             donationAmount > distribution.minimumDonationUsd,
             "Your donation should be greater than minimum donation"
         );
+
 
         uint256 bonusAllocation = IBonus(BONUS_CONTRACT).userInfo[msg.sender].allocation;
         uint256 maxAllocation = bonusAllocation == 0 ? distribution.maximumDonationUsd : bonusAllocation;
@@ -105,7 +111,7 @@ contract TokenDistributor_v4 is BancorFormula, SuAccessControl {
         // get donation from the user
         IERC20(distribution.donationMethod).safeTransferFrom(msg.sender, address(this), donationAmount);
         distribution.totalDonations = distribution.totalDonations + donationAmount;
-        donations[msg.sender] = donations[msg.sender] + donationAmount;
+        distribution.donations[msg.sender] = distribution.donations[msg.sender] + donationAmount;
 
         // give reward to the user
         require(SU_DAO.balanceOf(address(this)) >= rewardAmount, "not enough reward left");
@@ -127,7 +133,7 @@ contract TokenDistributor_v4 is BancorFormula, SuAccessControl {
 
         return Math.min(
             distribution.maximumDonationUsd - distribution.donations[user],
-            distribution.donationGoalMax - distribution.donations[user]
+            distribution.donationGoalMax - distribution.totalDonations
         );
     }
 
@@ -138,9 +144,10 @@ contract TokenDistributor_v4 is BancorFormula, SuAccessControl {
         require(distribution.totalDonations < distribution.donationGoalMin, "Min goal reached");
         require(VE_ERC_20.balanceOf(msg.sender) == 0, "You should donate all your tokens in veERC20");
 
-        uint256 donationAmount = distribution.donations(msg.sender);
-        IERC20(distribution.donationMethod).safeTransferFrom(address(this), msg.sender, donationAmount);
+        uint256 donationAmount = distribution.donations[msg.sender];
+        distribution.donations[msg.sender] = 0;
         distribution.totalDonations = distribution.totalDonations - donationAmount;
+        IERC20(distribution.donationMethod).safeTransferFrom(address(this), msg.sender, donationAmount);
     }
 
     /**
