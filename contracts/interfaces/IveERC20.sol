@@ -4,9 +4,9 @@ pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
-interface IveERC20 is IERC20 {
+interface IveERC20 {
     /**
-* @notice Creates an account with time-vesting for the user and withdraws these tokens from msg.sender.
+    * @notice Creates an account with time-vesting for the user and withdraws these tokens from msg.sender.
     * @param account Beneficiary of the vesting account.
     * @param amount Amount of tokens to be send, which will be deducted from msg.sender.
     * @param vestingSeconds Amount of seconds when linear vesting would be over. Starts from cliff.

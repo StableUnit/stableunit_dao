@@ -13,7 +13,9 @@ pragma solidity ^0.8.12;
 */
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
-import "@openzeppelin/contracts/token/ERC20/extensions/ERC20Votes.sol";
+import "@openzeppelin/contracts-upgradeable/token/ERC20/extensions/ERC20VotesUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20Upgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/token/ERC20/IERC20Upgradeable.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts-upgradeable/utils/math/SafeCastUpgradeable.sol";
 import "../access-control/SuAccessControlModifiers.sol";
@@ -34,11 +36,11 @@ import "../interfaces/IveERC20.sol";
  * To make balance visible in the erc20 wallets, the contact "looks like" erc20 token by implementing its interface
  * however all non-view methods such as transfer or approve aren't active and will be reverted.
 */
-contract veERC20 is ERC20, ERC20Votes, SuAccessControlModifiers, IveERC20 {
+contract veERC20 is ERC20VotesUpgradeable, SuAccessControlModifiers, IveERC20 {
     using SafeERC20 for ERC20;
     using SafeCastUpgradeable for uint256;
 
-    ERC20 public immutable LOCKED_TOKEN;
+    ERC20 public LOCKED_TOKEN;
     uint32 public immutable TGE_MAX_TIMESTAMP = 1685577600; // Unix Timestamp	1685577600 = GMT+0 Thu Jun 01 2023 00:00:00 GMT+0000
     uint32 public tgeTimestamp;
 
@@ -52,8 +54,8 @@ contract veERC20 is ERC20, ERC20Votes, SuAccessControlModifiers, IveERC20 {
     }
     mapping(address => VestingInfo) public vestingInfo;
 
-    constructor(ERC20 _lockedToken)
-        ERC20(string.concat("vested escrow ", _lockedToken.name()), string.concat("ve", _lockedToken.symbol())) {
+    function initialize(ERC20 _lockedToken) initializer public {
+        __ERC20_init(string.concat("vested escrow ", _lockedToken.name()), string.concat("ve", _lockedToken.symbol()));
         LOCKED_TOKEN = _lockedToken;
         _setupRole(DEFAULT_ADMIN_ROLE, msg.sender);
         tgeTimestamp = TGE_MAX_TIMESTAMP;
@@ -72,7 +74,7 @@ contract veERC20 is ERC20, ERC20Votes, SuAccessControlModifiers, IveERC20 {
     * @notice Total amount of token was deposited under vesting on behalf of the user.
     */
     function totalDeposited(address user) public view returns (uint256) {
-        return IERC20(this).balanceOf(user);
+        return IERC20Upgradeable(this).balanceOf(user);
     }
 
     /**
@@ -232,27 +234,4 @@ contract veERC20 is ERC20, ERC20Votes, SuAccessControlModifiers, IveERC20 {
         }
     }
     receive() external payable {}
-
-    // The following functions are overrides required by Solidity.
-
-    function _afterTokenTransfer(address from, address to, uint256 amount)
-    internal
-    override(ERC20, ERC20Votes)
-    {
-        super._afterTokenTransfer(from, to, amount);
-    }
-
-    function _mint(address to, uint256 amount)
-    internal
-    override(ERC20, ERC20Votes)
-    {
-        super._mint(to, amount);
-    }
-
-    function _burn(address account, uint256 amount)
-    internal
-    override(ERC20, ERC20Votes)
-    {
-        super._burn(account, amount);
-    }
 }

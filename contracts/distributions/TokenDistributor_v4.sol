@@ -98,9 +98,11 @@ contract TokenDistributor_v4 is SuAccessControl {
         require(minimumDonationUsd > 0, "distribution doesn't exit");
         require(block.timestamp >= startTimestamp, "participation has not started yet");
         require(block.timestamp <= deadlineTimestamp, "participation is over");
-        // TODO: nft requirement is an array
         for (uint256 i = 0; i < nftRequirement.length; i++) {
-            require(IERC721(nftRequirement[i]).balanceOf(msg.sender) > 0, string.concat("caller doesn't have required NFT with id ", i));
+            require(
+                IERC721(nftRequirement[i]).balanceOf(msg.sender) > 0,
+                string.concat("caller doesn't have required NFT with id ", Strings.toString(i))
+            );
         }
         require(
             donationAmount > minimumDonationUsd,
@@ -139,18 +141,22 @@ contract TokenDistributor_v4 is SuAccessControl {
      * @notice Get the max donation that user can do
      */
     function getMaximumDonationAmount(address user) view external returns (uint256) {
-        if (IERC721(nftRequirement).balanceOf(user) == 0) return 0;
+        for (uint256 i = 0; i < nftRequirement.length; i++) {
+            if (IERC721(nftRequirement[i]).balanceOf(msg.sender) > 0) {
+                return Math.min(
+                    maximumDonationUsd - donations[user],
+                    donationGoalMax - totalDonations
+                );
+            }
+        }
 
-        return Math.min(
-            maximumDonationUsd - donations[user],
-            donationGoalMax - totalDonations
-        );
+        return 0;
     }
 
     function takeDonationBack() public {
         require(block.timestamp >= deadlineTimestamp, "Participation has not yet ended");
         require(totalDonations < donationGoalMin, "Min goal reached");
-        require(IveERC20(VE_ERC_20).balanceOf(msg.sender) == 0, "You should donate all your tokens in veERC20");
+        require(IERC20(VE_ERC_20).balanceOf(msg.sender) == 0, "You should donate all your tokens in veERC20");
 
         uint256 donationAmount = donations[msg.sender];
         donations[msg.sender] = 0;
@@ -164,7 +170,6 @@ contract TokenDistributor_v4 is SuAccessControl {
     function setDistributionInfo(
         uint64 _startTimestamp,
         uint64 _deadlineTimestamp,
-        uint256 _reserveRatio,
         uint256 _donationGoalMin,
         uint256 _donationGoalMax,
         uint256 _minimumDonationUsd,
@@ -177,7 +182,6 @@ contract TokenDistributor_v4 is SuAccessControl {
         address[] calldata _nftRequirement
     ) external onlyRole(MINTER_ROLE) {
         require(_startTimestamp < _deadlineTimestamp, "!_startTimestamp < _deadlineTimestamp");
-        require(_reserveRatio > 0, "_reserveRatio <= 0");
         require(_donationGoalMin <= _donationGoalMax, "!donationGoalMin <= donationGoalMax");
         require(_minimumDonationUsd <= _maximumDonationUsd, "!minimumDonationUsd <= maximumDonationUsd");
         require(_donationToken != address(0), "donationToken is null");
@@ -187,7 +191,6 @@ contract TokenDistributor_v4 is SuAccessControl {
 
         startTimestamp  = _startTimestamp;
         deadlineTimestamp = _deadlineTimestamp;
-        reserveRatio = _reserveRatio;
         donationGoalMin = _donationGoalMin;
         donationGoalMax = _donationGoalMax;
         minimumDonationUsd = _minimumDonationUsd;
@@ -202,7 +205,6 @@ contract TokenDistributor_v4 is SuAccessControl {
         emit SetDistribution(
             _startTimestamp,
             _deadlineTimestamp,
-            _reserveRatio,
             _donationGoalMin,
             _donationGoalMax,
             _minimumDonationUsd,
@@ -234,7 +236,6 @@ contract TokenDistributor_v4 is SuAccessControl {
     event SetDistribution(
         uint64 _startTimestamp,
         uint64 _deadlineTimestamp,
-        uint256 _reserveRatio,
         uint256 _donationGoalMin,
         uint256 _donationGoalMax,
         uint256 _minimumDonationUsd,
