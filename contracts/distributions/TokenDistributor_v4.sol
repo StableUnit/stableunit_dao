@@ -37,7 +37,7 @@ contract TokenDistributor_v4 is SuAccessControl {
 
     uint256 minimumDonationUsd;            // Let's think that price(donationToken) = $1
     uint256 maximumDonationUsd;
-    uint256 reserveRatio;                  // Reserve ratio for Bancor formula, represented in ppm, 1-1000000
+    uint256[] bondingCurvePolynomial1e18;                  // Reserve ratio for Bancor formula, represented in ppm, 1-1000000
 
     uint256 donationGoalMin;
     uint256 donationGoalMax;
@@ -60,16 +60,34 @@ contract TokenDistributor_v4 is SuAccessControl {
         _setupRole(MINTER_ROLE, msg.sender);
     }
 
-    // TODO: get clear function that: start from p0, at minGoal is p1, at maxGoal is p2. super safe and unhackable
-    function getBondingCurvePrice(uint256 donationAmount) public returns (uint256) {
-//        return calculatePurchaseReturn(
-//            donationGoalMax,
-//            totalDonations,
-//            reserveRatio,
-//            donationAmount
-//        );
-        return 123;
+    function bondingCurvePolynomial1e18At(uint256 x) public view returns (uint256) {
+        uint256 l = bondingCurvePolynomial1e18.length;
+        uint256 x_ = 1;
+        uint256 px = 0;
+        for (uint256 i = 0; i < l; i++) {
+            px = px + bondingCurvePolynomial1e18[i]*x_ / 1e18;
+            x_ = x_*x;
+        }
+        return px;
     }
+
+    function antiderivativeOfBondingCurvePolynomial1e18At(uint256 x) public view returns (uint256) {
+        uint256 l = bondingCurvePolynomial1e18.length;
+        uint256 x_ = x;
+        uint256 px = 0;
+        for (uint256 i = 0; i < l; i++) {
+            px = px + bondingCurvePolynomial1e18[i]*x_ / (i+1);
+            x_ = x_*x;
+        }
+        return px;
+    }
+
+    function getBondingCurveRewardAmountFromDonation(uint256 donationAmount) public view returns (uint256) {
+        uint256 S1 = antiderivativeOfBondingCurvePolynomial1e18At(totalDonations);
+        uint256 S2 = antiderivativeOfBondingCurvePolynomial1e18At(totalDonations + donationAmount);
+        return Math.min(IERC20(SU_DAO).balanceOf(address(this)), S2-S1);
+    }
+
 
     /**
      * notice Allows to participate for users with required NFT
@@ -97,7 +115,7 @@ contract TokenDistributor_v4 is SuAccessControl {
         );
 
         uint256 bonusDiscountRatio = IBonus(BONUS_CONTRACT).getDiscount(msg.sender);
-        uint256 rewardAmount = getBondingCurvePrice(donationAmount) * (1e18 + bonusDiscountRatio) / 1e18;
+        uint256 rewardAmount = getBondingCurveRewardAmountFromDonation(donationAmount) * (1e18 + bonusDiscountRatio) / 1e18;
 
         // get donation from the user
         IERC20(donationToken).safeTransferFrom(msg.sender, address(this), donationAmount);
