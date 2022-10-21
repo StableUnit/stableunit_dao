@@ -17,10 +17,10 @@ import "./interfaces/IBonus.sol";
 import "./access-control/SuAuthenticated.sol";
 
 contract Bonus is IBonus, SuAuthenticated {
+    mapping(address => NFTInfo) public nftInfo;
     mapping(address => UserInfo) public userInfo;
     mapping(address => CommunityAdminInfo) public communityAdminInfo;
     mapping(address => AdminInfo) public adminInfo;
-    // TODO: make bonus struct and two maps: one for group (nft) and another for individual
 
     function initialize(address _authControl) public initializer {
         __SuAuthenticated_init(_authControl);
@@ -125,6 +125,16 @@ contract Bonus is IBonus, SuAuthenticated {
         require(adminInfo[msg.sender].isAdmin, "Need admin rights");
         communityAdminInfo[communityAdmin].xpLimit = xpLimit;
         communityAdminInfo[communityAdmin].levelLimit = levelLimit;
+    }
+
+    function setNftInfo(address nft, uint256 allocation, uint256 discountRatioPresale) public onlyAdmin override {
+        nftInfo[nft].allocation = allocation;
+        nftInfo[nft].discountRatioPresale = discountRatioPresale;
+    }
+
+    function setUserInfo(address user, uint256 allocation, uint256 discountRatioPresale) public onlyAdmin override {
+        userInfo[user].allocation = allocation;
+        userInfo[user].discountRatioPresale = discountRatioPresale;
     }
 
     function distribute(address user, uint256 xp) public onlyCommunityAdmin override {

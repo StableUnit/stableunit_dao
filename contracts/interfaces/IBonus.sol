@@ -6,6 +6,16 @@ import "@openzeppelin/contracts-upgradeable/token/ERC20/IERC20Upgradeable.sol";
 
 interface IBonus {
     /**
+     * @notice Info for each nft.
+     * `allocation` User allocation
+     * `discountPresale` Discount during presale
+    **/
+    struct NFTInfo {
+        uint256 allocation;
+        uint256 discountRatioPresale;
+    }
+
+    /**
      * @notice Info of each user.
      * `xp` The amount of XP.
      * `allocation` User allocation
@@ -34,6 +44,18 @@ interface IBonus {
         uint256 xpLimit;
         uint16 levelLimit;
     }
+
+    /**
+     * @notice Set allocation and discountRatioPresale for NFT
+     * `isAdmin` Address of admin
+    **/
+    function setNftInfo(address nft, uint256 allocation, uint256 discountRatioPresale) external;
+
+    /**
+     * @notice Set allocation and discountRatioPresale for user
+     * `isAdmin` Address of admin
+    **/
+    function setUserInfo(address user, uint256 allocation, uint256 discountRatioPresale) external;
 
     /**
      * @notice Get user level according to constant distribution. Max value: 65535

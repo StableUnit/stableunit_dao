@@ -17,7 +17,8 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import "@openzeppelin/contracts/token/ERC721/extensions/IERC721Enumerable.sol";
-import "../TimelockVault.sol";
+import "../vested-escrow/TimelockVault.sol";
+import "../utils/SuAccessControl.sol";
 
 /**
  * @title The contract that distribute suDAO tokens for community based on NFT membership

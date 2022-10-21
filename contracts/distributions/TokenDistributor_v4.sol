@@ -17,7 +17,7 @@ import "@openzeppelin/contracts/utils/math/Math.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
-import "../vested-escrow/VeERC20.sol";
+import "../vested-escrow/veERC20.sol";
 import "../utils/SuAccessControl.sol";
 import "../utils/BancorFormula.sol";
 
@@ -28,7 +28,7 @@ contract TokenDistributor_v4 is BancorFormula, SuAccessControl {
     using SafeERC20 for IERC20;
     using Math for *;
 
-    VeERC20 public immutable VE_ERC_20;
+    veERC20 public immutable VE_ERC_20;
     IERC20 public immutable SU_DAO;
     address public immutable BONUS_CONTRACT;
 
@@ -56,7 +56,7 @@ contract TokenDistributor_v4 is BancorFormula, SuAccessControl {
 
     mapping(uint256 => DistributionInfo) public distributions;
 
-    constructor (IERC20 _suDAO, VeERC20 _veErc20, address _bonusContract) {
+    constructor (IERC20 _suDAO, veERC20 _veErc20, address _bonusContract) {
         SU_DAO = _suDAO;
         VE_ERC_20 = _veErc20;
         BONUS_CONTRACT = _bonusContract;

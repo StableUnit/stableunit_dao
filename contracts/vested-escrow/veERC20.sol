@@ -13,6 +13,7 @@ pragma solidity ^0.8.7;
 */
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
+import "@openzeppelin/contracts/token/ERC20/extensions/ERC20Votes.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts-upgradeable/utils/math/SafeCastUpgradeable.sol";
 import "../access-control/SuAuthenticated.sol";
@@ -58,7 +59,7 @@ contract veERC20 is ERC20, ERC20Votes, SuAuthenticated {
     /**
     * @notice owner of the contract can set up TGE date within set limits.
     */
-    function updateTgeTimestamp(uint32 newTgeTimestamp) external onlyRole(DEFAULT_ADMIN_ROLE) {
+    function updateTgeTimestamp(uint32 newTgeTimestamp) external onlyOwner {
         require(uint32(block.timestamp) <= newTgeTimestamp, "veERC20: TGE date can't be in the past");
         require(newTgeTimestamp <= TGE_MAX_TIMESTAMP, "veERC20: new TGE date is beyond limit");
         tgeTimestamp = newTgeTimestamp;
@@ -94,7 +95,7 @@ contract veERC20 is ERC20, ERC20Votes, SuAuthenticated {
         uint256 cliffSeconds,
         uint256 tgeUnlockRatio1e18,
         uint256 vestingFrequencySeconds
-    ) external onlyRole(DEFAULT_ADMIN_ROLE)
+    ) external onlyOwner
     {
         _mergeVesting(account, vestingSeconds, cliffSeconds, tgeUnlockRatio1e18, vestingFrequencySeconds);
         addBalance(amount, account);
@@ -218,7 +219,7 @@ contract veERC20 is ERC20, ERC20Votes, SuAuthenticated {
     /**
     * @notice The owner of the contact can take away tokens accidentally sent to the contract.
     */
-    function rescue(ERC20 token) external onlyRole(DEFAULT_ADMIN_ROLE) {
+    function rescue(ERC20 token) external onlyOwner {
         require(token != LOCKED_TOKEN, "No allowed to rescue this token");
         // allow to rescue ether
         if (address(token) == address(0)) {
