@@ -16,7 +16,7 @@ import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/extensions/ERC20Votes.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts-upgradeable/utils/math/SafeCastUpgradeable.sol";
-import "../access-control/SuAuthenticated.sol";
+import "../access-control/SuAccessControlModifiers.sol";
 import "./TimelockVault.sol";
 
 /*
@@ -33,7 +33,7 @@ import "./TimelockVault.sol";
  * To make balance visible in the erc20 wallets, the contact "looks like" erc20 token by implementing its interface
  * however all non-view methods such as transfer or approve aren't active and will be reverted.
 */
-contract veERC20 is ERC20, ERC20Votes, SuAuthenticated {
+contract veERC20 is ERC20, ERC20Votes, SuAccessControlModifiers {
     using SafeERC20 for ERC20;
     ERC20 public immutable LOCKED_TOKEN;
     uint32 public immutable TGE_MAX_TIMESTAMP = 1685577600; // Unix Timestamp	1685577600 = GMT+0 Thu Jun 01 2023 00:00:00 GMT+0000
