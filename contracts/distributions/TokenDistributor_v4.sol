@@ -10,7 +10,7 @@
      \______/  \______/ |_______/ |__/  |__/ \______/
 
 */
-pragma solidity ^0.8.7;
+pragma solidity ^0.8.12;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/math/Math.sol";
@@ -178,15 +178,13 @@ contract TokenDistributor_v4 is SuAccessControl {
         uint64 _fullVestingSeconds,
         uint64 _cliffSeconds,
         uint64 _tgeUnlockRatio1e18,
-        uint64 _vestingFrequencySeconds,
-        address[] calldata _nftRequirement
+        uint64 _vestingFrequencySeconds
     ) external onlyRole(MINTER_ROLE) {
         require(_startTimestamp < _deadlineTimestamp, "!_startTimestamp < _deadlineTimestamp");
         require(_donationGoalMin <= _donationGoalMax, "!donationGoalMin <= donationGoalMax");
         require(_minimumDonationUsd <= _maximumDonationUsd, "!minimumDonationUsd <= maximumDonationUsd");
         require(_donationToken != address(0), "donationToken is null");
         require(_cliffSeconds < _fullVestingSeconds, "!cliff seconds < vesting seconds");
-        require(_nftRequirement.length > 0, "nftRequirement is empty");
         require(_tgeUnlockRatio1e18 <= 1e18, "tgeUnlockRatio should be less than 1");
 
         startTimestamp  = _startTimestamp;
@@ -200,7 +198,6 @@ contract TokenDistributor_v4 is SuAccessControl {
         cliffSeconds = _cliffSeconds;
         tgeUnlockRatio1e18 = _tgeUnlockRatio1e18;
         vestingFrequencySeconds = _vestingFrequencySeconds;
-        nftRequirement = _nftRequirement;
 
         emit SetDistribution(
             _startTimestamp,
@@ -213,9 +210,12 @@ contract TokenDistributor_v4 is SuAccessControl {
             _fullVestingSeconds,
             _cliffSeconds,
             _tgeUnlockRatio1e18,
-            _vestingFrequencySeconds,
-            _nftRequirement
+            _vestingFrequencySeconds
         );
+    }
+
+    function setNftAccess(address[] calldata _nftRequirement) external onlyRole(MINTER_ROLE) {
+        nftRequirement = _nftRequirement;
     }
 
     receive() external payable {}
@@ -244,7 +244,6 @@ contract TokenDistributor_v4 is SuAccessControl {
         uint64 _fullVestingSeconds,
         uint64 _cliffSeconds,
         uint64 _tgeUnlockRatio1e18,
-        uint64 _vestingFrequencySeconds,
-        address[] _nftRequirement
+        uint64 _vestingFrequencySeconds
     );
 }

@@ -6,7 +6,6 @@ dotenv.config({ path: envPath });
 import "@nomiclabs/hardhat-truffle5";
 
 require("@nomiclabs/hardhat-web3");
-import {task} from "hardhat/config";
 import "solidity-coverage";
 import "@nomiclabs/hardhat-waffle";
 
@@ -18,8 +17,6 @@ import "./tasks/renounce-role.ts";
 
 const {
     INFURA_API_KEY,
-    ALCHEMY_API_KEY,
-    ETHERSCAN_API_KEY,
     PRIVATE_KEY_TESTNET_DEPLOYER,
     PRIVATE_KEY_TESTNET_OWNER
 } = process.env;
@@ -32,7 +29,7 @@ const accountsMainnet = accountsTestnet;
  * @type import('hardhat/config').HardhatUserConfig
  */
 export default {
-    solidity: "0.8.12",
+    solidity: "0.8.15",
     networks: {
         hardhat: {},
         mainnet: {
