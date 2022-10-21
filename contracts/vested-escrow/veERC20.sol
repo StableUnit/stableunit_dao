@@ -35,7 +35,7 @@ import "./TimelockVault.sol";
 contract veERC20 is ERC20, ERC20Votes, SuAuthenticated {
     using SafeERC20 for ERC20;
     ERC20 public immutable LOCKED_TOKEN;
-    uint32 public immutable TGE_DEADLINE = 1685577600; // Unix Timestamp	1685577600 = GMT+0 Thu Jun 01 2023 00:00:00 GMT+0000
+    uint32 public immutable TGE_MAX_TIMESTAMP = 1685577600; // Unix Timestamp	1685577600 = GMT+0 Thu Jun 01 2023 00:00:00 GMT+0000
     uint32 public tgeTimestamp;
 
     struct VestingInfo {
@@ -52,7 +52,7 @@ contract veERC20 is ERC20, ERC20Votes, SuAuthenticated {
         ERC20("vested escrow "+_lockedToken.name(), "ve"+_lockedToken.symbol()) {
         LOCKED_TOKEN = _lockedToken;
         _setupRole(DEFAULT_ADMIN_ROLE, msg.sender);
-        tgeTimestamp = TGE_DEADLINE;
+        tgeTimestamp = TGE_MAX_TIMESTAMP;
     }
 
     /**
@@ -60,7 +60,7 @@ contract veERC20 is ERC20, ERC20Votes, SuAuthenticated {
     */
     function updateTgeTimestamp(uint32 newTgeTimestamp) external onlyRole(DEFAULT_ADMIN_ROLE) {
         require(uint32(block.timestamp) <= newTgeTimestamp, "veERC20: TGE date can't be in the past");
-        require(newTgeTimestamp <= TGE_DEADLINE, "veERC20: new TGE date is beyond limit");
+        require(newTgeTimestamp <= TGE_MAX_TIMESTAMP, "veERC20: new TGE date is beyond limit");
         tgeTimestamp = newTgeTimestamp;
     }
 
@@ -115,6 +115,9 @@ contract veERC20 is ERC20, ERC20Votes, SuAuthenticated {
         uint256 tgeUnlockRatio1e18,
         uint256 vestingFrequencySeconds
     ) internal {
+        require(cliffSeconds <= vestingSeconds, "cliffTime should be less then vestingTime");
+        require(tgeUnlockRatio1e18 <= 1e18, "tgeUnlockRatio should be less than 1");
+
         uint32 newVestingSeconds = vestingSeconds.toUint32();
         if (vestingInfo[account].vestingSeconds < newVestingSeconds) {
             vestingInfo[account].vestingSeconds = newVestingSeconds;
@@ -129,8 +132,9 @@ contract veERC20 is ERC20, ERC20Votes, SuAuthenticated {
             vestingInfo[account].tgeUnlockRatio1e18 = tgeUnlockRatio1e18.toUint64();
         }
 
-        if (vestingInfo[account].vestingFrequencySeconds < vestingFrequencySeconds) {
-            vestingInfo[account].vestingFrequencySeconds = vestingFrequencySeconds.toUint32();
+        uint32 newVestingFrequencySeconds = vestingFrequencySeconds.toUint32();
+        if (vestingInfo[account].vestingFrequencySeconds < newVestingFrequencySeconds) {
+            vestingInfo[account].vestingFrequencySeconds = newVestingFrequencySeconds;
         }
     }
 
@@ -203,12 +207,12 @@ contract veERC20 is ERC20, ERC20Votes, SuAuthenticated {
         require(hasRole(DEFAULT_ADMIN_ROLE, toAdmin) == true, "invalid admin address");
         uint256 balance = balanceOf(msg.sender);
         require(balance > 0, "nothing to donate");
-        vestingInfo[msg.sender].amount_already_withdrawn_div1e12 = vestingInfo[msg.sender].amount_already_withdrawn_div1e12 + uint64(balance / 1e12);
-        LOCKED_TOKEN.safeTransfer(toAdmin, (balance / 1e12) * 1e12);
+        vestingInfo[msg.sender].amountAlreadyWithdrawn = vestingInfo[msg.sender].amountAlreadyWithdrawn + uint64(balance);
+        LOCKED_TOKEN.safeTransfer(toAdmin, balance);
     }
 
     function balanceOf(address account) public view virtual override returns (uint256) {
-        return _balances[account] - vestingInfo[account].amount_already_withdrawn_div1e12*1e12;
+        return _balances[account] - vestingInfo[account].amountAlreadyWithdrawn;
     }
 
     /**
