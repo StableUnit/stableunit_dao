@@ -12,11 +12,4 @@ interface ISuAccessControl {
     function renounceRole(bytes32 role, address account) external;
 
     function supportsInterface(bytes4 interfaceId) external view returns (bool);
-
-    // TODO: remove legacy functionality
-    function setVault(address _vault, bool _isVault) external;
-    function setCdpManager(address _cdpManager, bool _isCdpManager) external;
-    function setDAO(address _dao, bool _isDAO) external;
-    function setManagerParameters(address _address, bool _permit) external;
-    function transferOwnership(address newOwner) external;
 }

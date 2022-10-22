@@ -20,11 +20,13 @@ import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import "../interfaces/IBonus.sol";
 import "../interfaces/IveERC20.sol";
 import "../utils/SuAccessControl.sol";
+import "../access-control/SuAccessControlUpgradable.sol";
+import "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 
 /**
  * @title The contract that distribute suDAO tokens for community based on NFT membership
  */
-contract TokenDistributor_v4 is SuAccessControl {
+contract TokenDistributor_v4 is SuAccessControlUpgradable {
     using SafeERC20 for IERC20;
     using Math for *;
 
@@ -50,14 +52,22 @@ contract TokenDistributor_v4 is SuAccessControl {
     uint64 tgeUnlockRatio1e18;
     uint64 vestingFrequencySeconds;
 
-    address[] nftRequirement;              // User should have certain NFT to be able to participate
+    using EnumerableSet for EnumerableSet.AddressSet;
+    EnumerableSet.AddressSet private nftRequirement;
 
-    constructor (address _suDAO, address _veErc20, address _bonusContract) {
+
+    error NoActiveDistributionError();
+    error DistributionTimeframeError();
+    error AccessNftNotValidError(address accessNft);
+    error NoAccessNftError(address account, address accessNft);
+
+
+    constructor (address _accessControlSingleton, address _suDAO, address _veErc20, address _bonusContract) {
+        __SuAuthenticated_init(_accessControlSingleton);
         SU_DAO = _suDAO;
         VE_ERC_20 = _veErc20;
         BONUS_CONTRACT = _bonusContract;
         IERC20(_suDAO).approve(address(_veErc20), type(uint256).max);
-        _setupRole(MINTER_ROLE, msg.sender);
     }
 
     function bondingCurvePolynomial1e18At(uint256 x) public view returns (uint256) {
@@ -85,25 +95,35 @@ contract TokenDistributor_v4 is SuAccessControl {
     function getBondingCurveRewardAmountFromDonation(uint256 donationAmount) public view returns (uint256) {
         uint256 S1 = antiderivativeOfBondingCurvePolynomial1e18At(totalDonations);
         uint256 S2 = antiderivativeOfBondingCurvePolynomial1e18At(totalDonations + donationAmount);
-        return Math.min(IERC20(SU_DAO).balanceOf(address(this)), S2-S1);
+        return Math.min(IERC20(SU_DAO).balanceOf(address(this)), S2 - S1);
     }
 
+    function getAccessNftsForUser(address account) external returns (address[] memory) {
+        address[] memory nfts = nftRequirement.values();
+        uint256 l = nfts.length;
+        address[] memory answer = new address[](l);
+        for (uint256 i = 0; i < l; i++) {
+            if (IERC721(nfts[i]).balanceOf(msg.sender) > 0) {
+                answer[i] = nfts[i];
+            }
+        }
+        return answer;
+    }
 
     /**
      * notice Allows to participate for users with required NFT
      * param donationAmount The amount of tokens specified in donationToken
      */
-    // TODO: pass access nft address as the last argument
-    function participate(uint256 donationAmount) payable external {
-        require(minimumDonationUsd > 0, "distribution doesn't exit");
-        require(block.timestamp >= startTimestamp, "participation has not started yet");
-        require(block.timestamp <= deadlineTimestamp, "participation is over");
-        for (uint256 i = 0; i < nftRequirement.length; i++) {
-            require(
-                IERC721(nftRequirement[i]).balanceOf(msg.sender) > 0,
-                string.concat("caller doesn't have required NFT with id ", Strings.toString(i))
-            );
-        }
+    function participate(uint256 donationAmount, address accessNft) payable external {
+        if (donationGoalMax == 0)
+            revert NoActiveDistributionError();
+        if (block.timestamp < startTimestamp || deadlineTimestamp < block.timestamp)
+            revert DistributionTimeframeError();
+        if (!nftRequirement.contains(accessNft))
+            revert AccessNftNotValidError(accessNft);
+        if (IERC721(accessNft).balanceOf(msg.sender) == 0)
+            revert NoAccessNftError(msg.sender, accessNft);
+
         require(
             donationAmount > minimumDonationUsd,
             "Your donation should be greater than minimum donation"
@@ -140,20 +160,17 @@ contract TokenDistributor_v4 is SuAccessControl {
     /**
      * @notice Get the max donation that user can do
      */
-    function getMaximumDonationAmount(address user) view external returns (uint256) {
-        for (uint256 i = 0; i < nftRequirement.length; i++) {
-            if (IERC721(nftRequirement[i]).balanceOf(msg.sender) > 0) {
-                return Math.min(
-                    maximumDonationUsd - donations[user],
-                    donationGoalMax - totalDonations
-                );
-            }
+    function getMaximumDonationAmount(address user, address accessNft) view external returns (uint256) {
+        if (IERC721(accessNft).balanceOf(msg.sender) > 0) {
+            return Math.min(
+                maximumDonationUsd - donations[user],
+                donationGoalMax - totalDonations
+            );
         }
-
         return 0;
     }
 
-    function takeDonationBack() public {
+    function takeDonationBack() external {
         require(block.timestamp >= deadlineTimestamp, "Participation has not yet ended");
         require(totalDonations < donationGoalMin, "Min goal reached");
         require(IERC20(VE_ERC_20).balanceOf(msg.sender) == 0, "You should donate all your tokens in veERC20");
@@ -179,7 +196,7 @@ contract TokenDistributor_v4 is SuAccessControl {
         uint64 _cliffSeconds,
         uint64 _tgeUnlockRatio1e18,
         uint64 _vestingFrequencySeconds
-    ) external onlyRole(MINTER_ROLE) {
+    ) external onlyRole(ADMIN_ROLE) {
         require(_startTimestamp < _deadlineTimestamp, "!_startTimestamp < _deadlineTimestamp");
         require(_donationGoalMin <= _donationGoalMax, "!donationGoalMin <= donationGoalMax");
         require(_minimumDonationUsd <= _maximumDonationUsd, "!minimumDonationUsd <= maximumDonationUsd");
@@ -187,7 +204,7 @@ contract TokenDistributor_v4 is SuAccessControl {
         require(_cliffSeconds < _fullVestingSeconds, "!cliff seconds < vesting seconds");
         require(_tgeUnlockRatio1e18 <= 1e18, "tgeUnlockRatio should be less than 1");
 
-        startTimestamp  = _startTimestamp;
+        startTimestamp = _startTimestamp;
         deadlineTimestamp = _deadlineTimestamp;
         donationGoalMin = _donationGoalMin;
         donationGoalMax = _donationGoalMax;
@@ -214,8 +231,12 @@ contract TokenDistributor_v4 is SuAccessControl {
         );
     }
 
-    function setNftAccess(address[] calldata _nftRequirement) external onlyRole(MINTER_ROLE) {
-        nftRequirement = _nftRequirement;
+    function setNftAccess(address accessNft, bool valid) external onlyRole(ADMIN_ROLE) {
+        if (valid) {
+            nftRequirement.add(accessNft);
+        } else {
+            nftRequirement.remove(accessNft);
+        }
     }
 
     receive() external payable {}
@@ -224,7 +245,7 @@ contract TokenDistributor_v4 is SuAccessControl {
      * @notice The owner of the contact can take away tokens sent to the contract.
      * @dev The owner can't take away SuDAO token already distributed to users, because they are stored on timelockVault
      */
-    function adminWithdraw(IERC20 token) external onlyRole(DEFAULT_ADMIN_ROLE) {
+    function adminWithdraw(IERC20 token) external onlyRole(DAO_ROLE) {
         if (token == IERC20(address(0))) {
             payable(msg.sender).transfer(address(this).balance);
         } else {

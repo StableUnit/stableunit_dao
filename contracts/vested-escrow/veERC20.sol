@@ -15,8 +15,9 @@ import "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20Upgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/IERC20Upgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/utils/SafeERC20Upgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/math/SafeCastUpgradeable.sol";
-import "../access-control/SuAccessControlModifiers.sol";
+import "../access-control/SuAccessControlUpgradable.sol";
 import "../interfaces/IveERC20.sol";
+
 
 /*
  * @title The contact enables the storage of erc20 tokens under the linear time-vesting with the cliff time-lock.
@@ -32,7 +33,7 @@ import "../interfaces/IveERC20.sol";
  * To make balance visible in the erc20 wallets, the contact "looks like" erc20 token by implementing its interface
  * however all non-view methods such as transfer or approve aren't active and will be reverted.
 */
-contract veERC20 is ERC20Upgradeable, SuAccessControlModifiers, IveERC20 {
+contract veERC20 is ERC20Upgradeable, SuAccessControlUpgradable, IveERC20 {
     using SafeERC20Upgradeable for ERC20Upgradeable;
 
     ERC20Upgradeable public LOCKED_TOKEN;
@@ -49,10 +50,10 @@ contract veERC20 is ERC20Upgradeable, SuAccessControlModifiers, IveERC20 {
     }
     mapping(address => VestingInfo) public vestingInfo;
 
-    function initialize(ERC20Upgradeable _lockedToken) initializer public {
+    function initialize(address _accessControlSingleton, ERC20Upgradeable _lockedToken) initializer public {
+        __SuAuthenticated_init(_accessControlSingleton);
         __ERC20_init(string.concat("vested escrow ", _lockedToken.name()), string.concat("ve", _lockedToken.symbol()));
         LOCKED_TOKEN = _lockedToken;
-        _setupRole(DEFAULT_ADMIN_ROLE, msg.sender);
         TGE_MAX_TIMESTAMP = 1685577600; // Unix Timestamp	1685577600 = GMT+0 Thu Jun 01 2023 00:00:00 GMT+0000
         tgeTimestamp = TGE_MAX_TIMESTAMP;
     }
@@ -60,7 +61,7 @@ contract veERC20 is ERC20Upgradeable, SuAccessControlModifiers, IveERC20 {
     /**
     * @notice owner of the contract can set up TGE date within set limits.
     */
-    function updateTgeTimestamp(uint32 newTgeTimestamp) external onlyOwner {
+    function updateTgeTimestamp(uint32 newTgeTimestamp) external onlyRole(DAO_ROLE) {
         require(uint32(block.timestamp) <= newTgeTimestamp, "veERC20: TGE date can't be in the past");
         require(newTgeTimestamp <= TGE_MAX_TIMESTAMP, "veERC20: new TGE date is beyond limit");
         tgeTimestamp = newTgeTimestamp;
@@ -96,7 +97,7 @@ contract veERC20 is ERC20Upgradeable, SuAccessControlModifiers, IveERC20 {
         uint256 cliffSeconds,
         uint256 tgeUnlockRatio1e18,
         uint256 vestingFrequencySeconds
-    ) external onlyOwner override
+    ) external onlyRole(ADMIN_ROLE) override
     {
         _mergeVesting(account, vestingSeconds, cliffSeconds, tgeUnlockRatio1e18, vestingFrequencySeconds);
         addBalance(account, amount);
@@ -203,7 +204,7 @@ contract veERC20 is ERC20Upgradeable, SuAccessControlModifiers, IveERC20 {
      * @notice User can donate tokens under vesting to DAO or other admin contract as us treasury.
      */
     function donateTokens(address toAdmin) external {
-        require(hasRole(DEFAULT_ADMIN_ROLE, toAdmin) == true, "invalid admin address");
+        require(hasRole(ADMIN_ROLE, toAdmin) == true, "invalid admin address");
         uint256 balance = balanceOf(msg.sender);
         require(balance > 0, "nothing to donate");
         vestingInfo[msg.sender].amountAlreadyWithdrawn = vestingInfo[msg.sender].amountAlreadyWithdrawn + uint64(balance);
@@ -217,7 +218,7 @@ contract veERC20 is ERC20Upgradeable, SuAccessControlModifiers, IveERC20 {
     /**
     * @notice The owner of the contact can take away tokens accidentally sent to the contract.
     */
-    function rescue(ERC20Upgradeable token) external onlyOwner {
+    function rescue(ERC20Upgradeable token) external onlyRole(DAO_ROLE) {
         require(token != LOCKED_TOKEN, "No allowed to rescue this token");
         // allow to rescue ether
         if (address(token) == address(0)) {
