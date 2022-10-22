@@ -14,16 +14,16 @@ pragma solidity ^0.8.9;
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 
 import "./interfaces/IBonus.sol";
-import "./access-control/SuAuthenticated.sol";
+import "./access-control/SuAccessControlModifiers.sol";
 
-contract Bonus is IBonus, SuAuthenticated {
+contract Bonus is IBonus, SuAccessControlModifiers {
     mapping(address => NFTInfo) public nftInfo;
     mapping(address => UserInfo) public userInfo;
     mapping(address => CommunityAdminInfo) public communityAdminInfo;
     mapping(address => AdminInfo) public adminInfo;
 
-    function initialize(address _authControl) public initializer {
-        __SuAuthenticated_init(_authControl);
+    function initialize() public initializer {
+        __SuAccessControlModifiers_init();
     }
 
     function _getLevelByXP(uint256 xp) internal pure returns (uint16) {

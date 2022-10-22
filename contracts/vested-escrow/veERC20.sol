@@ -11,15 +11,12 @@ pragma solidity ^0.8.12;
      \______/  \______/ |_______/ |__/  |__/ \______/
 
 */
-import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/extensions/ERC20VotesUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20Upgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/IERC20Upgradeable.sol";
-import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+import "@openzeppelin/contracts-upgradeable/token/ERC20/utils/SafeERC20Upgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/math/SafeCastUpgradeable.sol";
 import "../access-control/SuAccessControlModifiers.sol";
-import "./TimelockVault.sol";
 import "../interfaces/IveERC20.sol";
 
 /*
@@ -37,11 +34,11 @@ import "../interfaces/IveERC20.sol";
  * however all non-view methods such as transfer or approve aren't active and will be reverted.
 */
 contract veERC20 is ERC20VotesUpgradeable, SuAccessControlModifiers, IveERC20 {
-    using SafeERC20 for ERC20;
+    using SafeERC20Upgradeable for ERC20Upgradeable;
     using SafeCastUpgradeable for uint256;
 
-    ERC20 public LOCKED_TOKEN;
-    uint32 public immutable TGE_MAX_TIMESTAMP = 1685577600; // Unix Timestamp	1685577600 = GMT+0 Thu Jun 01 2023 00:00:00 GMT+0000
+    ERC20Upgradeable public LOCKED_TOKEN;
+    uint32 public TGE_MAX_TIMESTAMP;
     uint32 public tgeTimestamp;
 
     struct VestingInfo {
@@ -54,10 +51,11 @@ contract veERC20 is ERC20VotesUpgradeable, SuAccessControlModifiers, IveERC20 {
     }
     mapping(address => VestingInfo) public vestingInfo;
 
-    function initialize(ERC20 _lockedToken) initializer public {
+    function initialize(ERC20Upgradeable _lockedToken) initializer public {
         __ERC20_init(string.concat("vested escrow ", _lockedToken.name()), string.concat("ve", _lockedToken.symbol()));
         LOCKED_TOKEN = _lockedToken;
         _setupRole(DEFAULT_ADMIN_ROLE, msg.sender);
+        TGE_MAX_TIMESTAMP = 1685577600; // Unix Timestamp	1685577600 = GMT+0 Thu Jun 01 2023 00:00:00 GMT+0000
         tgeTimestamp = TGE_MAX_TIMESTAMP;
     }
 
@@ -224,7 +222,7 @@ contract veERC20 is ERC20VotesUpgradeable, SuAccessControlModifiers, IveERC20 {
     /**
     * @notice The owner of the contact can take away tokens accidentally sent to the contract.
     */
-    function rescue(ERC20 token) external onlyOwner {
+    function rescue(ERC20Upgradeable token) external onlyOwner {
         require(token != LOCKED_TOKEN, "No allowed to rescue this token");
         // allow to rescue ether
         if (address(token) == address(0)) {

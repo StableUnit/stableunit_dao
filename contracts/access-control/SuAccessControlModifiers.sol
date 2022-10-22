@@ -10,6 +10,7 @@ import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol"
  */
 abstract contract SuAccessControlModifiers is AccessControlUpgradeable {
     bytes32 public constant ADMIN_ROLE = keccak256("ADMIN_ROLE");
+    bytes32 public constant COMMUNITY_ADMIN_ROLE = keccak256("COMMUNITY_ADMIN_ROLE");
 
     /**
      * @dev Initialize the contract with initial owner to be deployer
@@ -28,6 +29,12 @@ abstract contract SuAccessControlModifiers is AccessControlUpgradeable {
     /// @dev check ADMIN_ROLE
     modifier onlyAdmin() {
         require(hasRole(ADMIN_ROLE, msg.sender), "SuAuth: onlyAdmin AUTH_FAILED");
+        _;
+    }
+
+    /// @dev check COMMUNITY_ADMIN_ROLE
+    modifier onlyCommunityAdmin() {
+        require(hasRole(COMMUNITY_ADMIN_ROLE, msg.sender), "SuAuth: onlyCommunityAdmin AUTH_FAILED");
         _;
     }
 }
