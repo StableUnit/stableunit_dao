@@ -35,7 +35,6 @@ import "../interfaces/IveERC20.sol";
 */
 contract veERC20 is ERC20VotesUpgradeable, SuAccessControlModifiers, IveERC20 {
     using SafeERC20Upgradeable for ERC20Upgradeable;
-    using SafeCastUpgradeable for uint256;
 
     ERC20Upgradeable public LOCKED_TOKEN;
     uint32 public TGE_MAX_TIMESTAMP;
@@ -43,11 +42,11 @@ contract veERC20 is ERC20VotesUpgradeable, SuAccessControlModifiers, IveERC20 {
 
     struct VestingInfo {
         // we keep all data in one 256 bits slot to safe on gas usage
-        uint96 amountAlreadyWithdrawn;
-        uint32 cliffSeconds;
-        uint32 vestingSeconds;
-        uint64 tgeUnlockRatio1e18; // [0..1], uint64 is enough because log2(1e18) ~= 60
-        uint32 vestingFrequencySeconds;
+        uint256 amountAlreadyWithdrawn;
+        uint256 cliffSeconds;
+        uint256 vestingSeconds;
+        uint256 tgeUnlockRatio1e18; // [0..1], uint64 is enough because log2(1e18) ~= 60
+        uint256 vestingFrequencySeconds;
     }
     mapping(address => VestingInfo) public vestingInfo;
 
@@ -122,23 +121,20 @@ contract veERC20 is ERC20VotesUpgradeable, SuAccessControlModifiers, IveERC20 {
         require(cliffSeconds <= vestingSeconds, "cliffTime should be less then vestingTime");
         require(tgeUnlockRatio1e18 <= 1e18, "tgeUnlockRatio should be less than 1");
 
-        uint32 newVestingSeconds = vestingSeconds.toUint32();
-        if (vestingInfo[account].vestingSeconds < newVestingSeconds) {
-            vestingInfo[account].vestingSeconds = newVestingSeconds;
+        if (vestingInfo[account].vestingSeconds < vestingSeconds) {
+            vestingInfo[account].vestingSeconds = vestingSeconds;
         }
 
-        uint32 newCliffSeconds = cliffSeconds.toUint32();
-        if (vestingInfo[account].cliffSeconds < newCliffSeconds) {
-            vestingInfo[account].cliffSeconds = newCliffSeconds;
+        if (vestingInfo[account].cliffSeconds < cliffSeconds) {
+            vestingInfo[account].cliffSeconds = cliffSeconds;
         }
 
         if (vestingInfo[account].tgeUnlockRatio1e18 > tgeUnlockRatio1e18) {
-            vestingInfo[account].tgeUnlockRatio1e18 = tgeUnlockRatio1e18.toUint64();
+            vestingInfo[account].tgeUnlockRatio1e18 = tgeUnlockRatio1e18;
         }
 
-        uint32 newVestingFrequencySeconds = vestingFrequencySeconds.toUint32();
-        if (vestingInfo[account].vestingFrequencySeconds < newVestingFrequencySeconds) {
-            vestingInfo[account].vestingFrequencySeconds = newVestingFrequencySeconds;
+        if (vestingInfo[account].vestingFrequencySeconds < vestingFrequencySeconds) {
+            vestingInfo[account].vestingFrequencySeconds = vestingFrequencySeconds;
         }
     }
 
@@ -200,7 +196,7 @@ contract veERC20 is ERC20VotesUpgradeable, SuAccessControlModifiers, IveERC20 {
     function claim() external {
         uint256 claimAmount = availableToClaim(msg.sender);
         require(claimAmount > 0, "Can't claim 0 tokens");
-        vestingInfo[msg.sender].amountAlreadyWithdrawn = vestingInfo[msg.sender].amountAlreadyWithdrawn + claimAmount.toUint96();
+        vestingInfo[msg.sender].amountAlreadyWithdrawn = vestingInfo[msg.sender].amountAlreadyWithdrawn + claimAmount;
         LOCKED_TOKEN.safeTransfer(msg.sender, claimAmount);
     }
 
