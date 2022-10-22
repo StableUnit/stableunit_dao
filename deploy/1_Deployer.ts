@@ -36,11 +36,14 @@ const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
   };
 
   const bonusAddress = await deployProxy("Bonus");
-
   const suDAO = await hre.deployments.deploy("SuDAO", {...deployOptions, args: [10000]});
-
   const veERC20Address = await deployProxy("veERC20", [suDAO.address]);
-  await deployProxy("TokenDistributor_v4", [suDAO.address, veERC20Address, bonusAddress]);
+  await hre.deployments.deploy(
+    "TokenDistributor_v4", {
+      ...deployOptions,
+      args: [suDAO.address, veERC20Address, bonusAddress]
+    }
+  );
 };
 export default func;
 func.tags = ["Deployer"];

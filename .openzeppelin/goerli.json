@@ -24,6 +24,31 @@
       "address": "0xE720370930622Dc5456A20C04192F18CD81644Af",
       "txHash": "0x5d9ca19ec6b582118e5589923859c141d0cbd196f2c2db3f84c5b23e745937a7",
       "kind": "transparent"
+    },
+    {
+      "address": "0x859d9f603B628Ea8E2C62B1439e4f4c0d5252701",
+      "txHash": "0x2f5b01a9cf2e0a01fcfb841b41d5a80b57764401d227fa476b8f4bbad51dfbef",
+      "kind": "transparent"
+    },
+    {
+      "address": "0x8Ad219C28AbeF7717cf387497a36465bbf4fE103",
+      "txHash": "0x868bc4b0ba6c093e9dc1ed2d480860a5187dc6a5270695fc129950aa1d76d78f",
+      "kind": "transparent"
+    },
+    {
+      "address": "0xefe6bDdb38Cde099A23049BFB51206b5630E68cb",
+      "txHash": "0xf271a9e91499739cc71f75dd6da7c344687e4c60ecf80b8196609cd9b9f61f12",
+      "kind": "transparent"
+    },
+    {
+      "address": "0x3548B029b1365B5c72a7E857e6763B0A0EC577b1",
+      "txHash": "0x806adc04e1af1c6974d224d4a5728c139fc39016ac9354bc93e3647fd11ecef5",
+      "kind": "transparent"
+    },
+    {
+      "address": "0xf2640C4CD4815F9dd698a47BC17f3cd1bc67dA69",
+      "txHash": "0x6aa574f72db78f2d3fec4a264cd36f234546a949e958279a8860194dc595099e",
+      "kind": "transparent"
     }
   ],
   "impls": {
@@ -461,6 +486,264 @@
           "t_uint256": {
             "label": "uint256",
             "numberOfBytes": "32"
+          },
+          "t_uint8": {
+            "label": "uint8",
+            "numberOfBytes": "1"
+          }
+        }
+      }
+    },
+    "cb662c8efb91971639a6e021b95b75b4b56c25f409ab98f635c05c6259cc37dc": {
+      "address": "0xbc68035e99EA2f01DA81370225A7c6F6b2f8fE42",
+      "txHash": "0x2084a419e3c6dd5c269f9f2a5c3145db567edf844cde46bdbb521dcb0b6183eb",
+      "layout": {
+        "solcVersion": "0.8.15",
+        "storage": [
+          {
+            "label": "_initialized",
+            "offset": 0,
+            "slot": "0",
+            "type": "t_uint8",
+            "contract": "Initializable",
+            "src": "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol:62",
+            "retypedFrom": "bool"
+          },
+          {
+            "label": "_initializing",
+            "offset": 1,
+            "slot": "0",
+            "type": "t_bool",
+            "contract": "Initializable",
+            "src": "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol:67"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "1",
+            "type": "t_array(t_uint256)50_storage",
+            "contract": "ContextUpgradeable",
+            "src": "@openzeppelin/contracts-upgradeable/utils/ContextUpgradeable.sol:36"
+          },
+          {
+            "label": "_balances",
+            "offset": 0,
+            "slot": "51",
+            "type": "t_mapping(t_address,t_uint256)",
+            "contract": "ERC20Upgradeable",
+            "src": "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20Upgradeable.sol:37"
+          },
+          {
+            "label": "_allowances",
+            "offset": 0,
+            "slot": "52",
+            "type": "t_mapping(t_address,t_mapping(t_address,t_uint256))",
+            "contract": "ERC20Upgradeable",
+            "src": "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20Upgradeable.sol:39"
+          },
+          {
+            "label": "_totalSupply",
+            "offset": 0,
+            "slot": "53",
+            "type": "t_uint256",
+            "contract": "ERC20Upgradeable",
+            "src": "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20Upgradeable.sol:41"
+          },
+          {
+            "label": "_name",
+            "offset": 0,
+            "slot": "54",
+            "type": "t_string_storage",
+            "contract": "ERC20Upgradeable",
+            "src": "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20Upgradeable.sol:43"
+          },
+          {
+            "label": "_symbol",
+            "offset": 0,
+            "slot": "55",
+            "type": "t_string_storage",
+            "contract": "ERC20Upgradeable",
+            "src": "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20Upgradeable.sol:44"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "56",
+            "type": "t_array(t_uint256)45_storage",
+            "contract": "ERC20Upgradeable",
+            "src": "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20Upgradeable.sol:394"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "101",
+            "type": "t_array(t_uint256)50_storage",
+            "contract": "ERC165Upgradeable",
+            "src": "@openzeppelin/contracts-upgradeable/utils/introspection/ERC165Upgradeable.sol:41"
+          },
+          {
+            "label": "_roles",
+            "offset": 0,
+            "slot": "151",
+            "type": "t_mapping(t_bytes32,t_struct(RoleData)34_storage)",
+            "contract": "AccessControlUpgradeable",
+            "src": "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol:61"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "152",
+            "type": "t_array(t_uint256)49_storage",
+            "contract": "AccessControlUpgradeable",
+            "src": "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol:259"
+          },
+          {
+            "label": "LOCKED_TOKEN",
+            "offset": 0,
+            "slot": "201",
+            "type": "t_contract(ERC20Upgradeable)1174",
+            "contract": "veERC20",
+            "src": "contracts/vested-escrow/veERC20.sol:38"
+          },
+          {
+            "label": "TGE_MAX_TIMESTAMP",
+            "offset": 20,
+            "slot": "201",
+            "type": "t_uint32",
+            "contract": "veERC20",
+            "src": "contracts/vested-escrow/veERC20.sol:39"
+          },
+          {
+            "label": "tgeTimestamp",
+            "offset": 24,
+            "slot": "201",
+            "type": "t_uint32",
+            "contract": "veERC20",
+            "src": "contracts/vested-escrow/veERC20.sol:40"
+          },
+          {
+            "label": "vestingInfo",
+            "offset": 0,
+            "slot": "202",
+            "type": "t_mapping(t_address,t_struct(VestingInfo)4221_storage)",
+            "contract": "veERC20",
+            "src": "contracts/vested-escrow/veERC20.sol:50"
+          }
+        ],
+        "types": {
+          "t_address": {
+            "label": "address",
+            "numberOfBytes": "20"
+          },
+          "t_array(t_uint256)45_storage": {
+            "label": "uint256[45]",
+            "numberOfBytes": "1440"
+          },
+          "t_array(t_uint256)49_storage": {
+            "label": "uint256[49]",
+            "numberOfBytes": "1568"
+          },
+          "t_array(t_uint256)50_storage": {
+            "label": "uint256[50]",
+            "numberOfBytes": "1600"
+          },
+          "t_bool": {
+            "label": "bool",
+            "numberOfBytes": "1"
+          },
+          "t_bytes32": {
+            "label": "bytes32",
+            "numberOfBytes": "32"
+          },
+          "t_contract(ERC20Upgradeable)1174": {
+            "label": "contract ERC20Upgradeable",
+            "numberOfBytes": "20"
+          },
+          "t_mapping(t_address,t_bool)": {
+            "label": "mapping(address => bool)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_address,t_mapping(t_address,t_uint256))": {
+            "label": "mapping(address => mapping(address => uint256))",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_address,t_struct(VestingInfo)4221_storage)": {
+            "label": "mapping(address => struct veERC20.VestingInfo)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_address,t_uint256)": {
+            "label": "mapping(address => uint256)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_bytes32,t_struct(RoleData)34_storage)": {
+            "label": "mapping(bytes32 => struct AccessControlUpgradeable.RoleData)",
+            "numberOfBytes": "32"
+          },
+          "t_string_storage": {
+            "label": "string",
+            "numberOfBytes": "32"
+          },
+          "t_struct(RoleData)34_storage": {
+            "label": "struct AccessControlUpgradeable.RoleData",
+            "members": [
+              {
+                "label": "members",
+                "type": "t_mapping(t_address,t_bool)",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "adminRole",
+                "type": "t_bytes32",
+                "offset": 0,
+                "slot": "1"
+              }
+            ],
+            "numberOfBytes": "64"
+          },
+          "t_struct(VestingInfo)4221_storage": {
+            "label": "struct veERC20.VestingInfo",
+            "members": [
+              {
+                "label": "amountAlreadyWithdrawn",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "cliffSeconds",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "1"
+              },
+              {
+                "label": "vestingSeconds",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "2"
+              },
+              {
+                "label": "tgeUnlockRatio1e18",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "3"
+              },
+              {
+                "label": "vestingFrequencySeconds",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "4"
+              }
+            ],
+            "numberOfBytes": "160"
+          },
+          "t_uint256": {
+            "label": "uint256",
+            "numberOfBytes": "32"
+          },
+          "t_uint32": {
+            "label": "uint32",
+            "numberOfBytes": "4"
           },
           "t_uint8": {
             "label": "uint8",
