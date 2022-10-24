@@ -12,43 +12,35 @@
 */
 pragma solidity ^0.8.7;
 
-import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
-import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
-import "@openzeppelin/contracts/token/ERC20/extensions/draft-ERC20Permit.sol";
-import "@openzeppelin/contracts/token/ERC20/extensions/ERC20Votes.sol";
-import "@openzeppelin/contracts/token/ERC20/extensions/ERC20Burnable.sol";
-import "./utils/SuAccessControl.sol";
+import "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20Upgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/token/ERC20/extensions/ERC20VotesUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/token/ERC20/extensions/ERC20BurnableUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/token/ERC20/utils/SafeERC20Upgradeable.sol";
+import "./access-control/SuAccessControlUpgradable.sol";
 
 /**
  * @title Governance token for StableUnit Decentralized Autonomous Organisation
  */
-contract SuDAO is ERC20, ERC20Permit, ERC20Votes, ERC20Burnable, SuAccessControl {
-    using SafeERC20 for IERC20;
+contract SuDAO is ERC20VotesUpgradeable, ERC20BurnableUpgradeable, SuAccessControlUpgradable {
+    using SafeERC20Upgradeable for ERC20Upgradeable;
 
     uint256 public constant MAX_SUPPLY = 21_000_000 * 1e18;
 
-    constructor(uint256 _initMint) ERC20("StableUnit DAO", "SuDAO") ERC20Permit("StableUnit DAO") {
-        _setupRole(DEFAULT_ADMIN_ROLE, msg.sender);
-        _setupRole(MINTER_ROLE, msg.sender);
+    function initialize(address _accessControlSingleton, uint256 _initMint) initializer public {
+        __SuAuthenticated_init(_accessControlSingleton);
+        __ERC20_init("StableUnit DAO", "SuDAO");
         _mint(msg.sender, _initMint);
     }
 
-    function mint(address account, uint256 amount) external onlyRole(MINTER_ROLE) {
+    function mint(address account, uint256 amount) external onlyRole(DEFAULT_ADMIN_ROLE) {
         require(totalSupply() + amount <= MAX_SUPPLY, "max supply is exceeded");
         _mint(account, amount);
     }
 
-    function setMinter(address _minterAddress, bool _isMinter) public onlyRole(DEFAULT_ADMIN_ROLE) {
-        if (_isMinter) {
-            grantRole(MINTER_ROLE, _minterAddress);
-        } else {
-            revokeRole(MINTER_ROLE, _minterAddress);
-        }
-    }
     /**
      * @notice The owner of the contact can take away tokens accidentally sent to the contract.
      */
-    function rescueTokens(IERC20 token) external onlyRole(DEFAULT_ADMIN_ROLE) {
+    function rescueTokens(ERC20Upgradeable token) external onlyRole(DEFAULT_ADMIN_ROLE) {
         // allow to rescue ether
         if (address(token) == address(0)) {
             payable(msg.sender).transfer(address(this).balance);
@@ -63,22 +55,29 @@ contract SuDAO is ERC20, ERC20Permit, ERC20Votes, ERC20Burnable, SuAccessControl
 
     function _afterTokenTransfer(address from, address to, uint256 amount)
     internal
-    override(ERC20, ERC20Votes)
+    override(ERC20Upgradeable, ERC20VotesUpgradeable)
     {
         super._afterTokenTransfer(from, to, amount);
     }
 
     function _mint(address to, uint256 amount)
     internal
-    override(ERC20, ERC20Votes)
+    override(ERC20Upgradeable, ERC20VotesUpgradeable)
     {
         super._mint(to, amount);
     }
 
     function _burn(address account, uint256 amount)
     internal
-    override(ERC20, ERC20Votes)
+    override(ERC20Upgradeable, ERC20VotesUpgradeable)
     {
         super._burn(account, amount);
     }
+
+    /**
+     * @dev This empty reserved space is put in place to allow future versions to add new
+     * variables without shifting down storage in the inheritance chain.
+     * See https://docs.openzeppelin.com/contracts/4.x/upgradeable#storage_gaps
+     */
+    uint256[49] private __gap;
 }

@@ -12,27 +12,27 @@
 */
 pragma solidity ^0.8.12;
 
-import "@openzeppelin/contracts/access/Ownable.sol";
-import "@openzeppelin/contracts/utils/math/Math.sol";
-import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+import "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20Upgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/token/ERC20/IERC20Upgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/token/ERC20/utils/SafeERC20Upgradeable.sol";
 import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
+import "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
+import "@openzeppelin/contracts/utils/math/Math.sol";
+
+import "../access-control/SuAccessControlUpgradable.sol";
 import "../interfaces/IBonus.sol";
 import "../interfaces/IveERC20.sol";
-import "../utils/SuAccessControl.sol";
-import "../access-control/SuAccessControlUpgradable.sol";
-import "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 
 /**
  * @title The contract that distribute suDAO tokens for community based on NFT membership
  */
 contract TokenDistributor_v4 is SuAccessControlUpgradable {
-    using SafeERC20 for IERC20;
+    using SafeERC20Upgradeable for IERC20Upgradeable;
     using Math for *;
 
-    address public immutable VE_ERC_20;
-    address public immutable SU_DAO;
-    address public immutable BONUS_CONTRACT;
+    address public VE_ERC_20;
+    address public SU_DAO;
+    address public BONUS_CONTRACT;
 
     uint64 startTimestamp;                 // The date when participation is available
     uint64 deadlineTimestamp;              // Ultimate date when participation is available
@@ -62,12 +62,12 @@ contract TokenDistributor_v4 is SuAccessControlUpgradable {
     error NoAccessNftError(address account, address accessNft);
 
 
-    constructor (address _accessControlSingleton, address _suDAO, address _veErc20, address _bonusContract) {
+    function initialize (address _accessControlSingleton, address _suDAO, address _veErc20, address _bonusContract) initializer public {
         __SuAuthenticated_init(_accessControlSingleton);
         SU_DAO = _suDAO;
         VE_ERC_20 = _veErc20;
         BONUS_CONTRACT = _bonusContract;
-        IERC20(_suDAO).approve(address(_veErc20), type(uint256).max);
+        IERC20Upgradeable(_suDAO).approve(address(_veErc20), type(uint256).max);
     }
 
     function bondingCurvePolynomial1e18At(uint256 x) public view returns (uint256) {
@@ -95,7 +95,7 @@ contract TokenDistributor_v4 is SuAccessControlUpgradable {
     function getBondingCurveRewardAmountFromDonation(uint256 donationAmount) public view returns (uint256) {
         uint256 S1 = antiderivativeOfBondingCurvePolynomial1e18At(totalDonations);
         uint256 S2 = antiderivativeOfBondingCurvePolynomial1e18At(totalDonations + donationAmount);
-        return Math.min(IERC20(SU_DAO).balanceOf(address(this)), S2 - S1);
+        return Math.min(IERC20Upgradeable(SU_DAO).balanceOf(address(this)), S2 - S1);
     }
 
     function getAccessNftsForUser(address account) external returns (address[] memory) {
@@ -140,12 +140,12 @@ contract TokenDistributor_v4 is SuAccessControlUpgradable {
         uint256 rewardAmount = getBondingCurveRewardAmountFromDonation(donationAmount) * (1e18 + bonusDiscountRatio) / 1e18;
 
         // get donation from the user
-        IERC20(donationToken).safeTransferFrom(msg.sender, address(this), donationAmount);
+        IERC20Upgradeable(donationToken).safeTransferFrom(msg.sender, address(this), donationAmount);
         totalDonations = totalDonations + donationAmount;
         donations[msg.sender] = donations[msg.sender] + donationAmount;
 
         // give reward to the user
-        require(IERC20(SU_DAO).balanceOf(address(this)) >= rewardAmount, "not enough reward left");
+        require(IERC20Upgradeable(SU_DAO).balanceOf(address(this)) >= rewardAmount, "not enough reward left");
         IveERC20(VE_ERC_20).lockUnderVesting(
             msg.sender,
             rewardAmount,
@@ -173,12 +173,12 @@ contract TokenDistributor_v4 is SuAccessControlUpgradable {
     function takeDonationBack() external {
         require(block.timestamp >= deadlineTimestamp, "Participation has not yet ended");
         require(totalDonations < donationGoalMin, "Min goal reached");
-        require(IERC20(VE_ERC_20).balanceOf(msg.sender) == 0, "You should donate all your tokens in veERC20");
+        require(IERC20Upgradeable(VE_ERC_20).balanceOf(msg.sender) == 0, "You should donate all your tokens in veERC20");
 
         uint256 donationAmount = donations[msg.sender];
         donations[msg.sender] = 0;
         totalDonations = totalDonations - donationAmount;
-        IERC20(donationToken).safeTransferFrom(address(this), msg.sender, donationAmount);
+        IERC20Upgradeable(donationToken).safeTransferFrom(address(this), msg.sender, donationAmount);
     }
 
     /**
@@ -241,12 +241,42 @@ contract TokenDistributor_v4 is SuAccessControlUpgradable {
 
     receive() external payable {}
 
+    function getDistributorData() public returns (
+        uint64 startTimestamp,
+        uint64 deadlineTimestamp,
+        uint256 minimumDonationUsd,
+        uint256 maximumDonationUsd,
+        uint256 donationGoalMin,
+        uint256 donationGoalMax,
+        uint256 totalDonations,
+        address donationToken,
+        uint64 fullVestingSeconds,
+        uint64 cliffSeconds,
+        uint64 tgeUnlockRatio1e18,
+        uint64 vestingFrequencySeconds
+    ) {
+        return (
+            startTimestamp,
+            deadlineTimestamp,
+            minimumDonationUsd,
+            maximumDonationUsd,
+            donationGoalMin,
+            donationGoalMax,
+            totalDonations,
+            donationToken,
+            fullVestingSeconds,
+            cliffSeconds,
+            tgeUnlockRatio1e18,
+            vestingFrequencySeconds
+        );
+    }
+
     /**
      * @notice The owner of the contact can take away tokens sent to the contract.
      * @dev The owner can't take away SuDAO token already distributed to users, because they are stored on timelockVault
      */
-    function adminWithdraw(IERC20 token) external onlyRole(DAO_ROLE) {
-        if (token == IERC20(address(0))) {
+    function adminWithdraw(IERC20Upgradeable token) external onlyRole(DAO_ROLE) {
+        if (token == IERC20Upgradeable(address(0))) {
             payable(msg.sender).transfer(address(this).balance);
         } else {
             token.safeTransfer(address(msg.sender), token.balanceOf(address(this)));
@@ -267,4 +297,11 @@ contract TokenDistributor_v4 is SuAccessControlUpgradable {
         uint64 _tgeUnlockRatio1e18,
         uint64 _vestingFrequencySeconds
     );
+
+    /**
+     * @dev This empty reserved space is put in place to allow future versions to add new
+     * variables without shifting down storage in the inheritance chain.
+     * See https://docs.openzeppelin.com/contracts/4.x/upgradeable#storage_gaps
+     */
+    uint256[49] private __gap;
 }

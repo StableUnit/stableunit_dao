@@ -72,6 +72,7 @@ const config: HardhatUserConfig = {
         goerli: {
             url: `https://goerli.infura.io/v3/${INFURA_API_KEY}`,
             accounts: accountsTestnet,
+            allowUnlimitedContractSize: true,
             timeout: 100000,
             blockGasLimit: 7_000_000,
             gas: 7_000_000,
