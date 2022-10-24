@@ -34,23 +34,23 @@ contract TokenDistributor_v4 is SuAccessControlUpgradable {
     address public SU_DAO;
     address public BONUS_CONTRACT;
 
-    uint64 startTimestamp;                 // The date when participation is available
-    uint64 deadlineTimestamp;              // Ultimate date when participation is available
+    uint64 public startTimestamp;                 // The date when participation is available
+    uint64 public deadlineTimestamp;              // Ultimate date when participation is available
 
-    uint256 minimumDonationUsd;            // Let's think that price(donationToken) = $1
-    uint256 maximumDonationUsd;
-    uint256[] bondingCurvePolynomial1e18;                  // Reserve ratio for Bancor formula, represented in ppm, 1-1000000
+    uint256 public minimumDonationUsd;            // Let's think that price(donationToken) = $1
+    uint256 public maximumDonationUsd;
+    uint256[] public bondingCurvePolynomial1e18;                  // Reserve ratio for Bancor formula, represented in ppm, 1-1000000
 
-    uint256 donationGoalMin;
-    uint256 donationGoalMax;
-    mapping(address => uint256) donations; // Donation amounts
-    uint256 totalDonations;                // Sum of all user donations
-    address donationToken;                 // For now it's only DAI
+    uint256 public donationGoalMin;
+    uint256 public donationGoalMax;
+    mapping(address => uint256) public donations; // Donation amounts
+    uint256 public totalDonations;                // Sum of all user donations
+    address public donationToken;                 // For now it's only DAI
 
-    uint64 fullVestingSeconds;             // Default vesting period is 12 months
-    uint64 cliffSeconds;                   // With 3 months cliff.
-    uint64 tgeUnlockRatio1e18;
-    uint64 vestingFrequencySeconds;
+    uint64 public fullVestingSeconds;             // Default vesting period is 12 months
+    uint64 public cliffSeconds;                   // With 3 months cliff.
+    uint64 public tgeUnlockRatio1e18;
+    uint64 public vestingFrequencySeconds;
 
     using EnumerableSet for EnumerableSet.AddressSet;
     EnumerableSet.AddressSet private nftRequirement;
@@ -241,14 +241,13 @@ contract TokenDistributor_v4 is SuAccessControlUpgradable {
 
     receive() external payable {}
 
-    function getDistributorData() public returns (
+    function getDistributorStaticData() public returns (
         uint64 startTimestamp,
         uint64 deadlineTimestamp,
         uint256 minimumDonationUsd,
         uint256 maximumDonationUsd,
         uint256 donationGoalMin,
         uint256 donationGoalMax,
-        uint256 totalDonations,
         address donationToken,
         uint64 fullVestingSeconds,
         uint64 cliffSeconds,
@@ -262,7 +261,6 @@ contract TokenDistributor_v4 is SuAccessControlUpgradable {
             maximumDonationUsd,
             donationGoalMin,
             donationGoalMax,
-            totalDonations,
             donationToken,
             fullVestingSeconds,
             cliffSeconds,

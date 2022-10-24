@@ -6,7 +6,7 @@ const verify = async (contractName: string, contractPath?: string) => {
 
     // hardhat documentation says that we need to use "verify:verify" subtask
     // but it doesn't work with proxy
-    await run("verify", {
+    await run("verify:verify", {
       address: Contract.address,
       contract: contractPath,
     });

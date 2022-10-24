@@ -153,7 +153,7 @@ dist
 #Hardhat files
 cache
 artifacts
-submodule-artifacts
+submodule-artifacts/goerli/solcInputs
 .gitsecret/keys/random_seed
 !*.secret
 
