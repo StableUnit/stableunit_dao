@@ -18,10 +18,11 @@ const verify = async (contractName: string, contractPath?: string) => {
 };
 
 async function main() {
+  await verify("SuAccessControlSingleton");
   await verify("SuDAO");
   await verify("Bonus");
-  await verify("veERC20");
-  await verify("TokenDistributor_v4");
+  await verify("VeERC20");
+  await verify("TokenDistributorV4");
 }
 
 main().catch((error) => {
