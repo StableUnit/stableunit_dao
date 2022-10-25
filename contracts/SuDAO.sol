@@ -16,12 +16,12 @@ import "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20Upgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/extensions/ERC20VotesUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/extensions/ERC20BurnableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/utils/SafeERC20Upgradeable.sol";
-import "./access-control/SuAccessControlUpgradable.sol";
+import "./access-control/SuAccessControlAuthenticated.sol";
 
 /**
  * @title Governance token for StableUnit Decentralized Autonomous Organisation
  */
-contract SuDAO is ERC20VotesUpgradeable, ERC20BurnableUpgradeable, SuAccessControlUpgradable {
+contract SuDAO is ERC20VotesUpgradeable, ERC20BurnableUpgradeable, SuAccessControlAuthenticated {
     using SafeERC20Upgradeable for ERC20Upgradeable;
 
     uint256 public constant MAX_SUPPLY = 21_000_000 * 1e18;

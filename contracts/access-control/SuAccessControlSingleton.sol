@@ -2,6 +2,10 @@
 
 import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+import "./SuAccessControlAuthenticated.sol";
+// TODO: remove debug data
+import "hardhat/console.sol";
+
 
 pragma solidity ^0.8.0;
 
@@ -17,5 +21,28 @@ contract SuAccessControlSingleton is AccessControlUpgradeable {
     function initialize() public initializer {
         __AccessControl_init();
         _setupRole(DEFAULT_ADMIN_ROLE, msg.sender);
+        console.log(msg.sender);
     }
+
+    /**
+    * @dev Transfers ownership of the contract to a new account (`newOwner`).
+    * Can only be called by the current owner.
+    */
+//    function transferOwnership(address newOwner) external {
+//        require(newOwner != address(0), "Ownable: new owner is the zero address");
+//        require(hasRole(DAO_ROLE, msg.sender), "Ownable: caller is not the owner");
+//
+//        if (hasRole(ADMIN_ROLE, msg.sender)) {
+//            grantRole(ADMIN_ROLE, newOwner);
+//            revokeRole(ADMIN_ROLE, msg.sender);
+//        }
+//
+//        if (hasRole(COMMUNITY_ADMIN_ROLE, msg.sender)) {
+//            grantRole(COMMUNITY_ADMIN_ROLE, newOwner);
+//            revokeRole(COMMUNITY_ADMIN_ROLE, msg.sender);
+//        }
+//
+//        grantRole(DAO_ROLE, newOwner);
+//        revokeRole(DAO_ROLE, msg.sender);
+//    }
 }

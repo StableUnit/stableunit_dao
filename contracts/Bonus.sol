@@ -13,9 +13,9 @@ pragma solidity ^0.8.9;
 */
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "./interfaces/IBonus.sol";
-import "./access-control/SuAccessControlUpgradable.sol";
+import "./access-control/SuAccessControlAuthenticated.sol";
 
-contract Bonus is IBonus, SuAccessControlUpgradable {
+contract Bonus is IBonus, SuAccessControlAuthenticated {
     mapping(address => NFTInfo) public nftInfo;
     mapping(address => UserInfo) public userInfo;
     mapping(address => CommunityAdminInfo) public communityAdminInfo;

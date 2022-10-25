@@ -7,15 +7,15 @@ import {TokenDistributorV4} from "../typechain";
 
 /**
  * launch with the  command:
- * npx hardhat ogDistribution --network goerli --verbose
+ * npx hardhat setDistributor --verbose --network goerli
  */
 
 task("setDistributor", "set all parameters from the script")
     .setAction(async (taskArgs, hre) => {
         const BN_1E18 = hre.ethers.BigNumber.from(10).pow(18);
         const BN_1E6 = hre.ethers.BigNumber.from(10).pow(6);
-        const distributor = await hre.ethers.getContract("TokenDistributor_v4") as TokenDistributorV4;
-        console.log(`TokenDistributor_v4@${ (await hre.ethers.provider.getNetwork()).name } = `, distributor.address);
+        const distributor = await hre.ethers.getContract("TokenDistributorV4") as TokenDistributorV4;
+        console.log(`TokenDistributorV4@${ (await hre.ethers.provider.getNetwork()).name } = `, distributor.address);
 
         const DISTRIBUTION_INFO = {
             lengthSeconds: 2 * 60 * 60,

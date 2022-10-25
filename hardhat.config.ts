@@ -3,7 +3,6 @@ import * as dotenv from "dotenv";
 import { HardhatUserConfig, task } from "hardhat/config";
 import "@nomiclabs/hardhat-etherscan";
 import "@nomiclabs/hardhat-waffle";
-import "@nomiclabs/hardhat-truffle5";
 import "@openzeppelin/hardhat-upgrades";
 import "@typechain/hardhat";
 import "hardhat-gas-reporter";
@@ -20,7 +19,7 @@ dotenv.config({ path: envPath });
 // This is a sample Hardhat task. To learn how to create your own go to
 // https://hardhat.org/guides/create-task.html
 import "./tasks/accounts.ts";
-// import "./tasks/setDistributor.ts";
+import "./tasks/setDistributor.ts";
 
 const {
     INFURA_API_KEY,
