@@ -26,7 +26,7 @@ import "../interfaces/IveERC20.sol";
 /**
  * @title The contract that distribute suDAO tokens for community based on NFT membership
  */
-contract TokenDistributor_v4 is SuAccessControlUpgradable {
+contract TokenDistributorV4 is SuAccessControlUpgradable {
     using SafeERC20Upgradeable for IERC20Upgradeable;
     using Math for *;
 
@@ -37,8 +37,8 @@ contract TokenDistributor_v4 is SuAccessControlUpgradable {
     uint64 public startTimestamp;                 // The date when participation is available
     uint64 public deadlineTimestamp;              // Ultimate date when participation is available
 
-    uint256 public minimumDonationUsd;            // Let's think that price(donationToken) = $1
-    uint256 public maximumDonationUsd;
+    uint256 public minimumDonation;            // Let's think that price(donationToken) = $1
+    uint256 public maximumDonation;
     uint256[] public bondingCurvePolynomial1e18;                  // Reserve ratio for Bancor formula, represented in ppm, 1-1000000
 
     uint256 public donationGoalMin;
@@ -125,12 +125,12 @@ contract TokenDistributor_v4 is SuAccessControlUpgradable {
             revert NoAccessNftError(msg.sender, accessNft);
 
         require(
-            donationAmount > minimumDonationUsd,
+            donationAmount > minimumDonation,
             "Your donation should be greater than minimum donation"
         );
 
         uint256 bonusAllocation = IBonus(BONUS_CONTRACT).getAllocation(msg.sender);
-        uint256 maxAllocation = bonusAllocation == 0 ? maximumDonationUsd : bonusAllocation;
+        uint256 maxAllocation = bonusAllocation == 0 ? maximumDonation : bonusAllocation;
         require(
             donations[msg.sender] + donationAmount < maxAllocation,
             "Your donations should be less than max donation"
@@ -163,7 +163,7 @@ contract TokenDistributor_v4 is SuAccessControlUpgradable {
     function getMaximumDonationAmount(address user, address accessNft) view external returns (uint256) {
         if (IERC721(accessNft).balanceOf(msg.sender) > 0) {
             return Math.min(
-                maximumDonationUsd - donations[user],
+                maximumDonation - donations[user],
                 donationGoalMax - totalDonations
             );
         }
@@ -189,8 +189,8 @@ contract TokenDistributor_v4 is SuAccessControlUpgradable {
         uint64 _deadlineTimestamp,
         uint256 _donationGoalMin,
         uint256 _donationGoalMax,
-        uint256 _minimumDonationUsd,
-        uint256 _maximumDonationUsd,
+        uint256 _minimumDonation,
+        uint256 _maximumDonation,
         address _donationToken,
         uint64 _fullVestingSeconds,
         uint64 _cliffSeconds,
@@ -199,7 +199,7 @@ contract TokenDistributor_v4 is SuAccessControlUpgradable {
     ) external onlyRole(ADMIN_ROLE) {
         require(_startTimestamp < _deadlineTimestamp, "!_startTimestamp < _deadlineTimestamp");
         require(_donationGoalMin <= _donationGoalMax, "!donationGoalMin <= donationGoalMax");
-        require(_minimumDonationUsd <= _maximumDonationUsd, "!minimumDonationUsd <= maximumDonationUsd");
+        require(_minimumDonation <= _maximumDonation, "!minimumDonationUsd <= maximumDonationUsd");
         require(_donationToken != address(0), "donationToken is null");
         require(_cliffSeconds < _fullVestingSeconds, "!cliff seconds < vesting seconds");
         require(_tgeUnlockRatio1e18 <= 1e18, "tgeUnlockRatio should be less than 1");
@@ -208,8 +208,8 @@ contract TokenDistributor_v4 is SuAccessControlUpgradable {
         deadlineTimestamp = _deadlineTimestamp;
         donationGoalMin = _donationGoalMin;
         donationGoalMax = _donationGoalMax;
-        minimumDonationUsd = _minimumDonationUsd;
-        maximumDonationUsd = _maximumDonationUsd;
+        minimumDonation = _minimumDonation;
+        maximumDonation = _maximumDonation;
         donationToken = _donationToken;
         fullVestingSeconds = _fullVestingSeconds;
         cliffSeconds = _cliffSeconds;
@@ -221,8 +221,8 @@ contract TokenDistributor_v4 is SuAccessControlUpgradable {
             _deadlineTimestamp,
             _donationGoalMin,
             _donationGoalMax,
-            _minimumDonationUsd,
-            _maximumDonationUsd,
+            _minimumDonation,
+            _maximumDonation,
             _donationToken,
             _fullVestingSeconds,
             _cliffSeconds,
@@ -244,8 +244,8 @@ contract TokenDistributor_v4 is SuAccessControlUpgradable {
     function getDistributorStaticData() public returns (
         uint64 startTimestamp,
         uint64 deadlineTimestamp,
-        uint256 minimumDonationUsd,
-        uint256 maximumDonationUsd,
+        uint256 minimumDonation,
+        uint256 maximumDonation,
         uint256 donationGoalMin,
         uint256 donationGoalMax,
         address donationToken,
@@ -257,8 +257,8 @@ contract TokenDistributor_v4 is SuAccessControlUpgradable {
         return (
             startTimestamp,
             deadlineTimestamp,
-            minimumDonationUsd,
-            maximumDonationUsd,
+            minimumDonation,
+            maximumDonation,
             donationGoalMin,
             donationGoalMax,
             donationToken,
@@ -287,8 +287,8 @@ contract TokenDistributor_v4 is SuAccessControlUpgradable {
         uint64 _deadlineTimestamp,
         uint256 _donationGoalMin,
         uint256 _donationGoalMax,
-        uint256 _minimumDonationUsd,
-        uint256 _maximumDonationUsd,
+        uint256 _minimumDonation,
+        uint256 _maximumDonation,
         address _donationToken,
         uint64 _fullVestingSeconds,
         uint64 _cliffSeconds,

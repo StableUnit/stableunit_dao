@@ -2,7 +2,6 @@
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 import { DeployFunction } from "hardhat-deploy/types";
 import { ethers, upgrades } from "hardhat";
-import { SuDAO } from "../typechain";
 
 const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
   const { save, getExtendedArtifact } = hre.deployments;
@@ -39,7 +38,7 @@ const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
   const suDAOAddress = await deployProxy("SuDAO", [accessControlAddress, 10000]);
   const bonusAddress = await deployProxy("Bonus", [accessControlAddress]);
   const veERC20Address = await deployProxy("veERC20", [accessControlAddress, suDAOAddress]);
-  await deployProxy("TokenDistributor_v4", [accessControlAddress, suDAOAddress, veERC20Address, bonusAddress]);
+  await deployProxy("TokenDistributorV4", [accessControlAddress, suDAOAddress, veERC20Address, bonusAddress]);
 };
 export default func;
 func.tags = ["Deployer"];
