@@ -46,6 +46,7 @@ task("setDistributor", "set all parameters from the script")
             DISTRIBUTION_INFO.vestingFrequencySeconds
         );
         console.log(`tx = `, tx.hash);
+        await tx.wait();
     });
 
 export default {};

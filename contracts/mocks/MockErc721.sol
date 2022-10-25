@@ -9,7 +9,7 @@ contract MockErc721 is ERC721, ERC721Enumerable {
     using Counters for Counters.Counter;
     Counters.Counter private _tokenIdCounter;
 
-    string baseURI = "The Times 03/Jan/2009 Chancellor on brink of second bailout for banks";
+    string baseURI = "ipfs://QmeSjSinHpPnmXmspMjwiXyN6zS4E9zccariGR3jxcaWtq/";
 
     constructor(
         string memory name,
@@ -23,6 +23,14 @@ contract MockErc721 is ERC721, ERC721Enumerable {
 
     function setBaseURI(string calldata uri) public {
         baseURI = uri;
+    }
+
+    /**
+     * @dev See {IERC721Metadata-tokenURI}.
+     */
+    function tokenURI(uint256 tokenId) public view virtual returns (string memory) {
+        require(_exists(tokenId), "ERC721Metadata: URI query for nonexistent token");
+        return string(abi.encodePacked(baseURI, tokenId.toString()));
     }
 
     function mint(address to) public {
