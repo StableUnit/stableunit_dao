@@ -27,8 +27,7 @@ abstract contract SuAccessControlAuthenticated is Initializable, ISuAccessContro
     }
 
     modifier onlyRole(bytes32 role) {
-        require(ACCESS_CONTROL_SINGLETON.hasRole(role, msg.sender), "OnlyRoleError");
-        //if (!hasRole(role, _msgSender())) revert OnlyRoleError(role, msg.sender);
+        if (!hasRole(role, msg.sender)) revert OnlyRoleError(role, msg.sender);
         _;
     }
 
