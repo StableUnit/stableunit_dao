@@ -2,27 +2,22 @@
 pragma solidity ^0.8.7;
 
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
-import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Enumerable.sol";
+import "@openzeppelin/contracts-upgradeable/token/ERC721/extensions/ERC721EnumerableUpgradeable.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
 
-contract MockErc721 is ERC721, ERC721Enumerable {
+contract MockErc721 is ERC721EnumerableUpgradeable {
     using Counters for Counters.Counter;
     Counters.Counter private _tokenIdCounter;
 
-    string baseURI = "ipfs://QmeSjSinHpPnmXmspMjwiXyN6zS4E9zccariGR3jxcaWtq/";
+    string baseURI;
 
-    constructor(
-        string memory name,
-        string memory symbol
-    ) ERC721(name, symbol) {
+    function initialize(string memory name, string memory symbol) initializer public {
+        __ERC721_init(name, symbol);
+        baseURI = "ipfs://QmeSjSinHpPnmXmspMjwiXyN6zS4E9zccariGR3jxcaWtq/";
     }
 
     function _baseURI() internal view override returns (string memory) {
         return baseURI;
-    }
-
-    function setBaseURI(string calldata uri) public {
-        baseURI = uri;
     }
 
     /**
@@ -40,7 +35,7 @@ contract MockErc721 is ERC721, ERC721Enumerable {
 
     function _beforeTokenTransfer(address from, address to, uint256 tokenId)
     internal
-    override(ERC721, ERC721Enumerable)
+    override
     {
         super._beforeTokenTransfer(from, to, tokenId);
     }
@@ -48,7 +43,7 @@ contract MockErc721 is ERC721, ERC721Enumerable {
     function supportsInterface(bytes4 interfaceId)
     public
     view
-    override(ERC721, ERC721Enumerable)
+    override
     returns (bool)
     {
         return super.supportsInterface(interfaceId);
