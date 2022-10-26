@@ -446,7 +446,7 @@
           "type": "address[]"
         }
       ],
-      "stateMutability": "nonpayable",
+      "stateMutability": "view",
       "type": "function"
     },
     {
@@ -474,57 +474,57 @@
       "outputs": [
         {
           "internalType": "uint64",
-          "name": "startTimestamp",
+          "name": "",
           "type": "uint64"
         },
         {
           "internalType": "uint64",
-          "name": "deadlineTimestamp",
+          "name": "",
           "type": "uint64"
         },
         {
           "internalType": "uint256",
-          "name": "minimumDonation",
+          "name": "",
           "type": "uint256"
         },
         {
           "internalType": "uint256",
-          "name": "maximumDonation",
+          "name": "",
           "type": "uint256"
         },
         {
           "internalType": "uint256",
-          "name": "donationGoalMin",
+          "name": "",
           "type": "uint256"
         },
         {
           "internalType": "uint256",
-          "name": "donationGoalMax",
+          "name": "",
           "type": "uint256"
         },
         {
           "internalType": "address",
-          "name": "donationToken",
+          "name": "",
           "type": "address"
         },
         {
           "internalType": "uint64",
-          "name": "fullVestingSeconds",
+          "name": "",
           "type": "uint64"
         },
         {
           "internalType": "uint64",
-          "name": "cliffSeconds",
+          "name": "",
           "type": "uint64"
         },
         {
           "internalType": "uint64",
-          "name": "tgeUnlockRatio1e18",
+          "name": "",
           "type": "uint64"
         },
         {
           "internalType": "uint64",
-          "name": "vestingFrequencySeconds",
+          "name": "",
           "type": "uint64"
         }
       ],
@@ -668,6 +668,19 @@
       "name": "participate",
       "outputs": [],
       "stateMutability": "payable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256[]",
+          "name": "_bondingCurvePolynomial1e18",
+          "type": "uint256[]"
+        }
+      ],
+      "name": "setBondingCurve",
+      "outputs": [],
+      "stateMutability": "nonpayable",
       "type": "function"
     },
     {

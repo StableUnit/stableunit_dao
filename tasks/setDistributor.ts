@@ -3,6 +3,7 @@ import "@nomiclabs/hardhat-waffle";
 import {task} from "hardhat/config";
 
 import {MockErc721, TokenDistributorV4} from "../typechain";
+import {BigNumber} from "ethers";
 
 
 /**
@@ -50,6 +51,14 @@ task("setDistributor", "set all parameters from the script")
         );
         await tx.wait();
         console.log("✅ setDistributionInfo done");
+
+        tx = await distributor.setBondingCurve([
+          BigNumber.from(10).pow(18).mul(9).div(10), // 1e18*0.9
+          BigNumber.from(10).pow(18).mul(15).div(100).div(BigNumber.from(10).pow(6)), // 1e18*0.15*1e-6
+          BigNumber.from(10).pow(18).mul(15).div(100).div(BigNumber.from(10).pow(12)), // 1e18*0.15*1e-12
+        ]);
+        await tx.wait();
+        console.log("✅ setBondingCurve done");
 
         tx = await distributor.setNftAccess(mockErc721.address, true);
         await tx.wait();

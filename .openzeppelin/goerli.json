@@ -1405,7 +1405,7 @@
             "label": "ACCESS_CONTROL_SINGLETON",
             "offset": 0,
             "slot": "304",
-            "type": "t_contract(ISuAccessControl)11648",
+            "type": "t_contract(ISuAccessControl)11621",
             "contract": "SuAccessControlAuthenticated",
             "src": "contracts/access-control/SuAccessControlAuthenticated.sol:20"
           },
@@ -1459,7 +1459,7 @@
             "label": "bytes32",
             "numberOfBytes": "32"
           },
-          "t_contract(ISuAccessControl)11648": {
+          "t_contract(ISuAccessControl)11621": {
             "label": "contract ISuAccessControl",
             "numberOfBytes": "20"
           },
@@ -6376,6 +6376,292 @@
             "numberOfBytes": "32"
           },
           "t_contract(ISuAccessControl)3526": {
+            "label": "contract ISuAccessControl",
+            "numberOfBytes": "20"
+          },
+          "t_mapping(t_address,t_uint256)": {
+            "label": "mapping(address => uint256)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_bytes32,t_uint256)": {
+            "label": "mapping(bytes32 => uint256)",
+            "numberOfBytes": "32"
+          },
+          "t_struct(AddressSet)2072_storage": {
+            "label": "struct EnumerableSet.AddressSet",
+            "members": [
+              {
+                "label": "_inner",
+                "type": "t_struct(Set)1771_storage",
+                "offset": 0,
+                "slot": "0"
+              }
+            ],
+            "numberOfBytes": "64"
+          },
+          "t_struct(Set)1771_storage": {
+            "label": "struct EnumerableSet.Set",
+            "members": [
+              {
+                "label": "_values",
+                "type": "t_array(t_bytes32)dyn_storage",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "_indexes",
+                "type": "t_mapping(t_bytes32,t_uint256)",
+                "offset": 0,
+                "slot": "1"
+              }
+            ],
+            "numberOfBytes": "64"
+          },
+          "t_uint256": {
+            "label": "uint256",
+            "numberOfBytes": "32"
+          },
+          "t_uint64": {
+            "label": "uint64",
+            "numberOfBytes": "8"
+          },
+          "t_uint8": {
+            "label": "uint8",
+            "numberOfBytes": "1"
+          }
+        }
+      }
+    },
+    "7cfdd55b14bccf7c4c883ced9fc566d935421d7cbc7ed2acd1e9bdc47a0abe73": {
+      "address": "0x6D4fEB220A1AcD1A22dB4ff00AE9aB1a993357A6",
+      "txHash": "0xe6cd90e70576b5909f8a965a4eba3f19ba8008b8475abf4d8ca547213ad166dd",
+      "layout": {
+        "solcVersion": "0.8.15",
+        "storage": [
+          {
+            "label": "_initialized",
+            "offset": 0,
+            "slot": "0",
+            "type": "t_uint8",
+            "contract": "Initializable",
+            "src": "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol:62",
+            "retypedFrom": "bool"
+          },
+          {
+            "label": "_initializing",
+            "offset": 1,
+            "slot": "0",
+            "type": "t_bool",
+            "contract": "Initializable",
+            "src": "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol:67"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "1",
+            "type": "t_array(t_uint256)50_storage",
+            "contract": "ContextUpgradeable",
+            "src": "@openzeppelin/contracts-upgradeable/utils/ContextUpgradeable.sol:36"
+          },
+          {
+            "label": "ACCESS_CONTROL_SINGLETON",
+            "offset": 0,
+            "slot": "51",
+            "type": "t_contract(ISuAccessControl)3540",
+            "contract": "SuAccessControlAuthenticated",
+            "src": "contracts/access-control/SuAccessControlAuthenticated.sol:20"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "52",
+            "type": "t_array(t_uint256)49_storage",
+            "contract": "SuAccessControlAuthenticated",
+            "src": "contracts/access-control/SuAccessControlAuthenticated.sol:54"
+          },
+          {
+            "label": "VE_ERC_20",
+            "offset": 0,
+            "slot": "101",
+            "type": "t_address",
+            "contract": "TokenDistributorV4",
+            "src": "contracts/distributions/TokenDistributorV4.sol:33"
+          },
+          {
+            "label": "SU_DAO",
+            "offset": 0,
+            "slot": "102",
+            "type": "t_address",
+            "contract": "TokenDistributorV4",
+            "src": "contracts/distributions/TokenDistributorV4.sol:34"
+          },
+          {
+            "label": "BONUS_CONTRACT",
+            "offset": 0,
+            "slot": "103",
+            "type": "t_address",
+            "contract": "TokenDistributorV4",
+            "src": "contracts/distributions/TokenDistributorV4.sol:35"
+          },
+          {
+            "label": "startTimestamp",
+            "offset": 20,
+            "slot": "103",
+            "type": "t_uint64",
+            "contract": "TokenDistributorV4",
+            "src": "contracts/distributions/TokenDistributorV4.sol:37"
+          },
+          {
+            "label": "deadlineTimestamp",
+            "offset": 0,
+            "slot": "104",
+            "type": "t_uint64",
+            "contract": "TokenDistributorV4",
+            "src": "contracts/distributions/TokenDistributorV4.sol:38"
+          },
+          {
+            "label": "minimumDonation",
+            "offset": 0,
+            "slot": "105",
+            "type": "t_uint256",
+            "contract": "TokenDistributorV4",
+            "src": "contracts/distributions/TokenDistributorV4.sol:40"
+          },
+          {
+            "label": "maximumDonation",
+            "offset": 0,
+            "slot": "106",
+            "type": "t_uint256",
+            "contract": "TokenDistributorV4",
+            "src": "contracts/distributions/TokenDistributorV4.sol:41"
+          },
+          {
+            "label": "bondingCurvePolynomial1e18",
+            "offset": 0,
+            "slot": "107",
+            "type": "t_array(t_uint256)dyn_storage",
+            "contract": "TokenDistributorV4",
+            "src": "contracts/distributions/TokenDistributorV4.sol:42"
+          },
+          {
+            "label": "donationGoalMin",
+            "offset": 0,
+            "slot": "108",
+            "type": "t_uint256",
+            "contract": "TokenDistributorV4",
+            "src": "contracts/distributions/TokenDistributorV4.sol:44"
+          },
+          {
+            "label": "donationGoalMax",
+            "offset": 0,
+            "slot": "109",
+            "type": "t_uint256",
+            "contract": "TokenDistributorV4",
+            "src": "contracts/distributions/TokenDistributorV4.sol:45"
+          },
+          {
+            "label": "donations",
+            "offset": 0,
+            "slot": "110",
+            "type": "t_mapping(t_address,t_uint256)",
+            "contract": "TokenDistributorV4",
+            "src": "contracts/distributions/TokenDistributorV4.sol:46"
+          },
+          {
+            "label": "totalDonations",
+            "offset": 0,
+            "slot": "111",
+            "type": "t_uint256",
+            "contract": "TokenDistributorV4",
+            "src": "contracts/distributions/TokenDistributorV4.sol:47"
+          },
+          {
+            "label": "donationToken",
+            "offset": 0,
+            "slot": "112",
+            "type": "t_address",
+            "contract": "TokenDistributorV4",
+            "src": "contracts/distributions/TokenDistributorV4.sol:48"
+          },
+          {
+            "label": "fullVestingSeconds",
+            "offset": 20,
+            "slot": "112",
+            "type": "t_uint64",
+            "contract": "TokenDistributorV4",
+            "src": "contracts/distributions/TokenDistributorV4.sol:50"
+          },
+          {
+            "label": "cliffSeconds",
+            "offset": 0,
+            "slot": "113",
+            "type": "t_uint64",
+            "contract": "TokenDistributorV4",
+            "src": "contracts/distributions/TokenDistributorV4.sol:51"
+          },
+          {
+            "label": "tgeUnlockRatio1e18",
+            "offset": 8,
+            "slot": "113",
+            "type": "t_uint64",
+            "contract": "TokenDistributorV4",
+            "src": "contracts/distributions/TokenDistributorV4.sol:52"
+          },
+          {
+            "label": "vestingFrequencySeconds",
+            "offset": 16,
+            "slot": "113",
+            "type": "t_uint64",
+            "contract": "TokenDistributorV4",
+            "src": "contracts/distributions/TokenDistributorV4.sol:53"
+          },
+          {
+            "label": "nftRequirement",
+            "offset": 0,
+            "slot": "114",
+            "type": "t_struct(AddressSet)2072_storage",
+            "contract": "TokenDistributorV4",
+            "src": "contracts/distributions/TokenDistributorV4.sol:56"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "116",
+            "type": "t_array(t_uint256)49_storage",
+            "contract": "TokenDistributorV4",
+            "src": "contracts/distributions/TokenDistributorV4.sol:308"
+          }
+        ],
+        "types": {
+          "t_address": {
+            "label": "address",
+            "numberOfBytes": "20"
+          },
+          "t_array(t_bytes32)dyn_storage": {
+            "label": "bytes32[]",
+            "numberOfBytes": "32"
+          },
+          "t_array(t_uint256)49_storage": {
+            "label": "uint256[49]",
+            "numberOfBytes": "1568"
+          },
+          "t_array(t_uint256)50_storage": {
+            "label": "uint256[50]",
+            "numberOfBytes": "1600"
+          },
+          "t_array(t_uint256)dyn_storage": {
+            "label": "uint256[]",
+            "numberOfBytes": "32"
+          },
+          "t_bool": {
+            "label": "bool",
+            "numberOfBytes": "1"
+          },
+          "t_bytes32": {
+            "label": "bytes32",
+            "numberOfBytes": "32"
+          },
+          "t_contract(ISuAccessControl)3540": {
             "label": "contract ISuAccessControl",
             "numberOfBytes": "20"
           },

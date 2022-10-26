@@ -231,6 +231,10 @@ contract TokenDistributorV4 is SuAccessControlAuthenticated {
         );
     }
 
+    function setBondingCurve(uint256[] memory _bondingCurvePolynomial1e18) external onlyRole(ADMIN_ROLE) {
+        bondingCurvePolynomial1e18 = _bondingCurvePolynomial1e18;
+    }
+
     function setNftAccess(address accessNft, bool valid) external onlyRole(ADMIN_ROLE) {
         if (valid) {
             nftRequirement.add(accessNft);
