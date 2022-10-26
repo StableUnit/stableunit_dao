@@ -199,7 +199,6 @@ contract TokenDistributorV4 is SuAccessControlAuthenticated {
         uint256 _minimumDonation,
         uint256 _maximumDonation,
         address _donationToken,
-        uint256 _baseRewardRatio,
         uint64 _fullVestingSeconds,
         uint64 _cliffSeconds,
         uint64 _tgeUnlockRatio1e18,
@@ -219,7 +218,6 @@ contract TokenDistributorV4 is SuAccessControlAuthenticated {
         minimumDonation = _minimumDonation;
         maximumDonation = _maximumDonation;
         donationToken = _donationToken;
-        baseRewardRatio = __baseRewardRatio;
         fullVestingSeconds = _fullVestingSeconds;
         cliffSeconds = _cliffSeconds;
         tgeUnlockRatio1e18 = _tgeUnlockRatio1e18;
@@ -233,12 +231,15 @@ contract TokenDistributorV4 is SuAccessControlAuthenticated {
             _minimumDonation,
             _maximumDonation,
             _donationToken,
-            _baseRewardRatio,
             _fullVestingSeconds,
             _cliffSeconds,
             _tgeUnlockRatio1e18,
             _vestingFrequencySeconds
         );
+    }
+
+    function setBaseRewardRatio(uint256 _baseRewardRatio) external onlyRole(ADMIN_ROLE) {
+        baseRewardRatio = _baseRewardRatio;
     }
 
     function setBondingCurve(uint256[] memory _bondingCurvePolynomial1e18) external onlyRole(ADMIN_ROLE) {
@@ -305,7 +306,6 @@ contract TokenDistributorV4 is SuAccessControlAuthenticated {
         uint256 _minimumDonation,
         uint256 _maximumDonation,
         address _donationToken,
-        uint256 _baseRewardRatio,
         uint64 _fullVestingSeconds,
         uint64 _cliffSeconds,
         uint64 _tgeUnlockRatio1e18,
