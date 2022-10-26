@@ -1571,7 +1571,7 @@
             "label": "ACCESS_CONTROL_SINGLETON",
             "offset": 0,
             "slot": "51",
-            "type": "t_contract(ISuAccessControl)11648",
+            "type": "t_contract(ISuAccessControl)11621",
             "contract": "SuAccessControlAuthenticated",
             "src": "contracts/access-control/SuAccessControlAuthenticated.sol:20"
           },
@@ -1587,7 +1587,7 @@
             "label": "nftInfo",
             "offset": 0,
             "slot": "101",
-            "type": "t_mapping(t_address,t_struct(NFTInfo)11535_storage)",
+            "type": "t_mapping(t_address,t_struct(NFTInfo)11508_storage)",
             "contract": "Bonus",
             "src": "contracts/Bonus.sol:19"
           },
@@ -1595,7 +1595,7 @@
             "label": "userInfo",
             "offset": 0,
             "slot": "102",
-            "type": "t_mapping(t_address,t_struct(UserInfo)11542_storage)",
+            "type": "t_mapping(t_address,t_struct(UserInfo)11515_storage)",
             "contract": "Bonus",
             "src": "contracts/Bonus.sol:20"
           },
@@ -1603,7 +1603,7 @@
             "label": "communityAdminInfo",
             "offset": 0,
             "slot": "103",
-            "type": "t_mapping(t_address,t_struct(CommunityAdminInfo)11550_storage)",
+            "type": "t_mapping(t_address,t_struct(CommunityAdminInfo)11523_storage)",
             "contract": "Bonus",
             "src": "contracts/Bonus.sol:21"
           },
@@ -1611,7 +1611,7 @@
             "label": "adminInfo",
             "offset": 0,
             "slot": "104",
-            "type": "t_mapping(t_address,t_struct(AdminInfo)11545_storage)",
+            "type": "t_mapping(t_address,t_struct(AdminInfo)11518_storage)",
             "contract": "Bonus",
             "src": "contracts/Bonus.sol:22"
           },
@@ -1645,27 +1645,27 @@
             "label": "bool",
             "numberOfBytes": "1"
           },
-          "t_contract(ISuAccessControl)11648": {
+          "t_contract(ISuAccessControl)11621": {
             "label": "contract ISuAccessControl",
             "numberOfBytes": "20"
           },
-          "t_mapping(t_address,t_struct(AdminInfo)11545_storage)": {
+          "t_mapping(t_address,t_struct(AdminInfo)11518_storage)": {
             "label": "mapping(address => struct IBonus.AdminInfo)",
             "numberOfBytes": "32"
           },
-          "t_mapping(t_address,t_struct(CommunityAdminInfo)11550_storage)": {
+          "t_mapping(t_address,t_struct(CommunityAdminInfo)11523_storage)": {
             "label": "mapping(address => struct IBonus.CommunityAdminInfo)",
             "numberOfBytes": "32"
           },
-          "t_mapping(t_address,t_struct(NFTInfo)11535_storage)": {
+          "t_mapping(t_address,t_struct(NFTInfo)11508_storage)": {
             "label": "mapping(address => struct IBonus.NFTInfo)",
             "numberOfBytes": "32"
           },
-          "t_mapping(t_address,t_struct(UserInfo)11542_storage)": {
+          "t_mapping(t_address,t_struct(UserInfo)11515_storage)": {
             "label": "mapping(address => struct IBonus.UserInfo)",
             "numberOfBytes": "32"
           },
-          "t_struct(AdminInfo)11545_storage": {
+          "t_struct(AdminInfo)11518_storage": {
             "label": "struct IBonus.AdminInfo",
             "members": [
               {
@@ -1677,7 +1677,7 @@
             ],
             "numberOfBytes": "32"
           },
-          "t_struct(CommunityAdminInfo)11550_storage": {
+          "t_struct(CommunityAdminInfo)11523_storage": {
             "label": "struct IBonus.CommunityAdminInfo",
             "members": [
               {
@@ -1695,7 +1695,7 @@
             ],
             "numberOfBytes": "64"
           },
-          "t_struct(NFTInfo)11535_storage": {
+          "t_struct(NFTInfo)11508_storage": {
             "label": "struct IBonus.NFTInfo",
             "members": [
               {
@@ -1713,7 +1713,7 @@
             ],
             "numberOfBytes": "64"
           },
-          "t_struct(UserInfo)11542_storage": {
+          "t_struct(UserInfo)11515_storage": {
             "label": "struct IBonus.UserInfo",
             "members": [
               {
@@ -4488,6 +4488,222 @@
               }
             ],
             "numberOfBytes": "32"
+          },
+          "t_uint256": {
+            "label": "uint256",
+            "numberOfBytes": "32"
+          },
+          "t_uint8": {
+            "label": "uint8",
+            "numberOfBytes": "1"
+          }
+        }
+      }
+    },
+    "6c5914268895cb414aa31d09b0534c4211bf33eea33f73e738a9ced4938aed47": {
+      "address": "0x1522F8d2fce705ADFC6fc7aE2F1b1f8fb76dACd4",
+      "txHash": "0x173ee028b51521422aeb9944b743aaba307978eb9ebbaf8c73714a9699be0b3c",
+      "layout": {
+        "solcVersion": "0.8.15",
+        "storage": [
+          {
+            "label": "_initialized",
+            "offset": 0,
+            "slot": "0",
+            "type": "t_uint8",
+            "contract": "Initializable",
+            "src": "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol:62",
+            "retypedFrom": "bool"
+          },
+          {
+            "label": "_initializing",
+            "offset": 1,
+            "slot": "0",
+            "type": "t_bool",
+            "contract": "Initializable",
+            "src": "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol:67"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "1",
+            "type": "t_array(t_uint256)50_storage",
+            "contract": "ContextUpgradeable",
+            "src": "@openzeppelin/contracts-upgradeable/utils/ContextUpgradeable.sol:36"
+          },
+          {
+            "label": "ACCESS_CONTROL_SINGLETON",
+            "offset": 0,
+            "slot": "51",
+            "type": "t_contract(ISuAccessControl)4288",
+            "contract": "SuAccessControlAuthenticated",
+            "src": "contracts/access-control/SuAccessControlAuthenticated.sol:20"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "52",
+            "type": "t_array(t_uint256)49_storage",
+            "contract": "SuAccessControlAuthenticated",
+            "src": "contracts/access-control/SuAccessControlAuthenticated.sol:54"
+          },
+          {
+            "label": "nftInfo",
+            "offset": 0,
+            "slot": "101",
+            "type": "t_mapping(t_address,t_struct(NFTInfo)4159_storage)",
+            "contract": "Bonus",
+            "src": "contracts/Bonus.sol:19"
+          },
+          {
+            "label": "userInfo",
+            "offset": 0,
+            "slot": "102",
+            "type": "t_mapping(t_address,t_struct(UserInfo)4166_storage)",
+            "contract": "Bonus",
+            "src": "contracts/Bonus.sol:20"
+          },
+          {
+            "label": "communityAdminInfo",
+            "offset": 0,
+            "slot": "103",
+            "type": "t_mapping(t_address,t_struct(CommunityAdminInfo)4174_storage)",
+            "contract": "Bonus",
+            "src": "contracts/Bonus.sol:21"
+          },
+          {
+            "label": "adminInfo",
+            "offset": 0,
+            "slot": "104",
+            "type": "t_mapping(t_address,t_struct(AdminInfo)4169_storage)",
+            "contract": "Bonus",
+            "src": "contracts/Bonus.sol:22"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "105",
+            "type": "t_array(t_uint256)45_storage",
+            "contract": "Bonus",
+            "src": "contracts/Bonus.sol:176"
+          }
+        ],
+        "types": {
+          "t_address": {
+            "label": "address",
+            "numberOfBytes": "20"
+          },
+          "t_array(t_uint256)45_storage": {
+            "label": "uint256[45]",
+            "numberOfBytes": "1440"
+          },
+          "t_array(t_uint256)49_storage": {
+            "label": "uint256[49]",
+            "numberOfBytes": "1568"
+          },
+          "t_array(t_uint256)50_storage": {
+            "label": "uint256[50]",
+            "numberOfBytes": "1600"
+          },
+          "t_bool": {
+            "label": "bool",
+            "numberOfBytes": "1"
+          },
+          "t_contract(ISuAccessControl)4288": {
+            "label": "contract ISuAccessControl",
+            "numberOfBytes": "20"
+          },
+          "t_mapping(t_address,t_struct(AdminInfo)4169_storage)": {
+            "label": "mapping(address => struct IBonus.AdminInfo)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_address,t_struct(CommunityAdminInfo)4174_storage)": {
+            "label": "mapping(address => struct IBonus.CommunityAdminInfo)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_address,t_struct(NFTInfo)4159_storage)": {
+            "label": "mapping(address => struct IBonus.NFTInfo)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_address,t_struct(UserInfo)4166_storage)": {
+            "label": "mapping(address => struct IBonus.UserInfo)",
+            "numberOfBytes": "32"
+          },
+          "t_struct(AdminInfo)4169_storage": {
+            "label": "struct IBonus.AdminInfo",
+            "members": [
+              {
+                "label": "isAdmin",
+                "type": "t_bool",
+                "offset": 0,
+                "slot": "0"
+              }
+            ],
+            "numberOfBytes": "32"
+          },
+          "t_struct(CommunityAdminInfo)4174_storage": {
+            "label": "struct IBonus.CommunityAdminInfo",
+            "members": [
+              {
+                "label": "xpLimit",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "levelLimit",
+                "type": "t_uint16",
+                "offset": 0,
+                "slot": "1"
+              }
+            ],
+            "numberOfBytes": "64"
+          },
+          "t_struct(NFTInfo)4159_storage": {
+            "label": "struct IBonus.NFTInfo",
+            "members": [
+              {
+                "label": "allocation",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "discountRatioPresale",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "1"
+              }
+            ],
+            "numberOfBytes": "64"
+          },
+          "t_struct(UserInfo)4166_storage": {
+            "label": "struct IBonus.UserInfo",
+            "members": [
+              {
+                "label": "xp",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "allocation",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "1"
+              },
+              {
+                "label": "discountRatioPresale",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "2"
+              }
+            ],
+            "numberOfBytes": "96"
+          },
+          "t_uint16": {
+            "label": "uint16",
+            "numberOfBytes": "2"
           },
           "t_uint256": {
             "label": "uint256",

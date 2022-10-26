@@ -155,8 +155,17 @@ contract Bonus is IBonus, SuAccessControlAuthenticated {
         return userInfo[user].allocation;
     }
 
+    function getNftAllocation(address nft) public view override returns (uint256) {
+        return nftInfo[nft].allocation;
+    }
+
+
     function getDiscount(address user) public view override returns (uint256) {
         return userInfo[user].discountRatioPresale;
+    }
+
+    function getNftDiscount(address nft) public view override returns (uint256) {
+        return nftInfo[nft].discountRatioPresale;
     }
 
     /**

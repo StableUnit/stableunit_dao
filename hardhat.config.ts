@@ -20,6 +20,7 @@ dotenv.config({ path: envPath });
 // https://hardhat.org/guides/create-task.html
 import "./tasks/accounts.ts";
 import "./tasks/setDistributor.ts";
+import "./tasks/setBonus.ts";
 
 const {
     INFURA_API_KEY,
