@@ -16,6 +16,7 @@ task("setDistributor", "set all parameters from the script")
         let tx;
         const BN_1E18 = hre.ethers.BigNumber.from(10).pow(18);
         const BN_1E6 = hre.ethers.BigNumber.from(10).pow(6);
+        const BN_1E12 = hre.ethers.BigNumber.from(10).pow(12);
         const distributor = await hre.ethers.getContract("TokenDistributorV4") as TokenDistributorV4;
         const mockErc721 = await hre.ethers.getContract("MockErc721") as MockErc721;
         console.log(`TokenDistributorV4@${ (await hre.ethers.provider.getNetwork()).name } = `, distributor.address);
@@ -27,7 +28,7 @@ task("setDistributor", "set all parameters from the script")
             maxGoal: 2_000_000,
             minDonation: 1000,
             maxDonation: 100000,
-            donationToken: "0x33f3b4Ac5083b7bcA29397728A7aA56909F790cA",
+            donationToken: "0x33f3b4Ac5083b7bcA29397728A7aA56909F790cA", // tUSDT
             fullVestingSeconds: 2 * 24 * 60 * 60,
             cliffSeconds: 2 * 60 * 60,
             tgeUnlock: 0.05,
@@ -53,9 +54,9 @@ task("setDistributor", "set all parameters from the script")
         console.log("✅ setDistributionInfo done");
 
         tx = await distributor.setBondingCurve([
-          BigNumber.from(10).pow(18).mul(9).div(10), // 1e18*0.9
-          BigNumber.from(10).pow(18).mul(15).div(100).div(BigNumber.from(10).pow(6)), // 1e18*0.15*1e-6
-          BigNumber.from(10).pow(18).mul(15).div(100).div(BigNumber.from(10).pow(12)), // 1e18*0.15*1e-12
+          BN_1E18.mul(9).div(10), // 1e18*0.9
+          BN_1E18.mul(15).div(100).div(BN_1E6), // 1e18*0.15*1e-6
+          BN_1E18.mul(15).div(100).div(BN_1E12), // 1e18*0.15*1e-12
         ]);
         await tx.wait();
         console.log("✅ setBondingCurve done");
@@ -63,6 +64,10 @@ task("setDistributor", "set all parameters from the script")
         tx = await distributor.setNftAccess(mockErc721.address, true);
         await tx.wait();
         console.log("✅ setNftAccess done");
+
+        tx = await distributor.setBaseRewardRatio(BN_1E12);
+        await tx.wait();
+        console.log("✅ setBaseRewardRatio done");
     });
 
 export default {};

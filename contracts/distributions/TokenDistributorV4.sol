@@ -46,7 +46,6 @@ contract TokenDistributorV4 is SuAccessControlAuthenticated {
     mapping(address => uint256) public donations; // Donation amounts
     uint256 public totalDonations;                // Sum of all user donations
     address public donationToken;                 // For now it's only DAI
-    uint256 public baseRewardRatio;               // default reward amount user might get for 1 donation token
 
     uint64 public fullVestingSeconds;             // Default vesting period is 12 months
     uint64 public cliffSeconds;                   // With 3 months cliff.
@@ -56,6 +55,7 @@ contract TokenDistributorV4 is SuAccessControlAuthenticated {
     using EnumerableSet for EnumerableSet.AddressSet;
     EnumerableSet.AddressSet private nftRequirement;
 
+    uint256 public baseRewardRatio;               // default reward amount user might get for 1 donation token
 
     error NoActiveDistributionError();
     error DistributionTimeframeError();
@@ -317,5 +317,5 @@ contract TokenDistributorV4 is SuAccessControlAuthenticated {
      * variables without shifting down storage in the inheritance chain.
      * See https://docs.openzeppelin.com/contracts/4.x/upgradeable#storage_gaps
      */
-    uint256[49] private __gap;
+    uint256[48] private __gap;
 }
