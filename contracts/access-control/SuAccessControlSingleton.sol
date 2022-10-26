@@ -3,9 +3,6 @@
 import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "./SuAccessControlAuthenticated.sol";
-// TODO: remove debug data
-import "hardhat/console.sol";
-
 
 pragma solidity ^0.8.0;
 
@@ -21,7 +18,6 @@ contract SuAccessControlSingleton is AccessControlUpgradeable {
     function initialize() public initializer {
         __AccessControl_init();
         _setupRole(DEFAULT_ADMIN_ROLE, msg.sender);
-        console.log(msg.sender);
     }
 
     /**

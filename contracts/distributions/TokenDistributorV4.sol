@@ -23,6 +23,10 @@ import "../access-control/SuAccessControlAuthenticated.sol";
 import "../interfaces/IBonus.sol";
 import "../interfaces/IveERC20.sol";
 
+
+// TODO: remove debug data
+import "hardhat/console.sol";
+
 /**
  * @title The contract that distribute suDAO tokens for community based on NFT membership
  */
@@ -55,16 +59,16 @@ contract TokenDistributorV4 is SuAccessControlAuthenticated {
     using EnumerableSet for EnumerableSet.AddressSet;
     EnumerableSet.AddressSet private nftRequirement;
 
-    uint256 public donationTokenToUSD;               // default reward amount user might get for 1 donation token
+    uint256 public donationTokenToUSD1e18;               // default reward amount user might get for 1 donation token
 
     error NoActiveDistributionError();
     error DistributionTimeframeError();
     error AccessNftNotValidError(address accessNft);
     error NoAccessNftError(address account, address accessNft);
-    error NotEnoughRewardLeft(uint256 donationAmount);
+    error NotEnoughRewardLeft(uint256 donationAmountUsd1e18);
 
 
-    function initialize (address _accessControlSingleton, address _suDAO, address _veErc20, address _bonusContract) initializer public {
+    function initialize(address _accessControlSingleton, address _suDAO, address _veErc20, address _bonusContract) initializer public {
         __SuAuthenticated_init(_accessControlSingleton);
         SU_DAO = _suDAO;
         VE_ERC_20 = _veErc20;
@@ -88,21 +92,25 @@ contract TokenDistributorV4 is SuAccessControlAuthenticated {
         uint256 x_ = x;
         uint256 px = 0;
         for (uint256 i = 0; i < l; i++) {
-            px = px + bondingCurvePolynomial1e18[i]*x_ / (i+1);
-            x_ = x_*x;
+            px = px + bondingCurvePolynomial1e18[i] * x_ / (i + 1);
+            x_ = x_ * x;
         }
         return px;
     }
 
-    function getBondingCurveRewardAmountFromDonationUSD(uint256 donationAmount) public view returns (uint256) {
-        uint256 S1 = antiderivativeOfBondingCurvePolynomial1e18At(totalDonations);
-        uint256 S2 = antiderivativeOfBondingCurvePolynomial1e18At(totalDonations + donationAmount);
-        uint256 rewards = (S2-S1);
-        // 1 usdt == 1 suDAO => baseRewardRatio = 1e12;
+    function getBondingCurveRewardAmountFromDonationUSD(uint256 donationAmountUSD1e18) public view returns (uint256) {
+        uint256 S1 = antiderivativeOfBondingCurvePolynomial1e18At(totalDonations * donationTokenToUSD1e18 / 1e18);
+//        console.log("S1", S1);
+        uint256 S2 = antiderivativeOfBondingCurvePolynomial1e18At((totalDonations * donationTokenToUSD1e18 + donationAmountUSD1e18) / 1e18);
+//        console.log("S2", S2);
+        uint256 rewards = (S2 - S1);
+        //         1 usdt == 1 suDAO => baseRewardRatio = 1e12;
         if (rewards > IERC20Upgradeable(SU_DAO).balanceOf(address(this))) {
-            revert NotEnoughRewardLeft(donationAmount);
+            revert NotEnoughRewardLeft(donationAmountUSD1e18);
         }
+        //        require(rewards <= IERC20Upgradeable(SU_DAO).balanceOf(address(this)), "no enough rewards");
         return rewards;
+
     }
 
     function getAccessNftsForUser(address account) public view returns (address[] memory) {
@@ -144,7 +152,7 @@ contract TokenDistributorV4 is SuAccessControlAuthenticated {
         );
 
         uint256 bonusDiscountRatio = IBonus(BONUS_CONTRACT).getDiscount(msg.sender);
-        uint256 rewardAmount = getBondingCurveRewardAmountFromDonationUSD(donationAmount*donationTokenToUSD/1e18) * (1e18 + bonusDiscountRatio) / 1e18;
+        uint256 rewardAmount = getBondingCurveRewardAmountFromDonationUSD(donationAmount * donationTokenToUSD1e18) * (1e18 + bonusDiscountRatio) / 1e18;
 
         // get donation from the user
         IERC20Upgradeable(donationToken).safeTransferFrom(msg.sender, address(this), donationAmount);
@@ -239,7 +247,7 @@ contract TokenDistributorV4 is SuAccessControlAuthenticated {
     }
 
     function setBaseRewardRatio(uint256 _baseRewardRatio) external onlyRole(ADMIN_ROLE) {
-        donationTokenToUSD = _baseRewardRatio;
+        donationTokenToUSD1e18 = _baseRewardRatio;
     }
 
     function setBondingCurve(uint256[] memory _bondingCurvePolynomial1e18) external onlyRole(ADMIN_ROLE) {
