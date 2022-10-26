@@ -55,7 +55,7 @@ contract TokenDistributorV4 is SuAccessControlAuthenticated {
     using EnumerableSet for EnumerableSet.AddressSet;
     EnumerableSet.AddressSet private nftRequirement;
 
-    uint256 public baseRewardRatio;               // default reward amount user might get for 1 donation token
+    uint256 public donationTokenToUSD;               // default reward amount user might get for 1 donation token
 
     error NoActiveDistributionError();
     error DistributionTimeframeError();
@@ -97,7 +97,7 @@ contract TokenDistributorV4 is SuAccessControlAuthenticated {
     function getBondingCurveRewardAmountFromDonationUSD(uint256 donationAmount) public view returns (uint256) {
         uint256 S1 = antiderivativeOfBondingCurvePolynomial1e18At(totalDonations);
         uint256 S2 = antiderivativeOfBondingCurvePolynomial1e18At(totalDonations + donationAmount);
-        uint256 rewards = baseRewardRatio*(S2-S1) / 1e18;
+        uint256 rewards = (S2-S1);
         // 1 usdt == 1 suDAO => baseRewardRatio = 1e12;
         if (rewards > IERC20Upgradeable(SU_DAO).balanceOf(address(this))) {
             revert NotEnoughRewardLeft(donationAmount);
@@ -144,7 +144,7 @@ contract TokenDistributorV4 is SuAccessControlAuthenticated {
         );
 
         uint256 bonusDiscountRatio = IBonus(BONUS_CONTRACT).getDiscount(msg.sender);
-        uint256 rewardAmount = getBondingCurveRewardAmountFromDonationUSD(donationAmount) * (1e18 + bonusDiscountRatio) / 1e18;
+        uint256 rewardAmount = getBondingCurveRewardAmountFromDonationUSD(donationAmount*donationTokenToUSD/1e18) * (1e18 + bonusDiscountRatio) / 1e18;
 
         // get donation from the user
         IERC20Upgradeable(donationToken).safeTransferFrom(msg.sender, address(this), donationAmount);
@@ -239,7 +239,7 @@ contract TokenDistributorV4 is SuAccessControlAuthenticated {
     }
 
     function setBaseRewardRatio(uint256 _baseRewardRatio) external onlyRole(ADMIN_ROLE) {
-        baseRewardRatio = _baseRewardRatio;
+        donationTokenToUSD = _baseRewardRatio;
     }
 
     function setBondingCurve(uint256[] memory _bondingCurvePolynomial1e18) external onlyRole(ADMIN_ROLE) {

@@ -1,6 +1,6 @@
-import {ethers, upgrades} from "hardhat";
-import { expect } from "chai";
-import {SuAccessControl, SuAccessControlSingleton} from "../../typechain";
+import {ethers} from "hardhat";
+import {expect} from "chai";
+import {SuAccessControlSingleton} from "../../typechain";
 import {SignerWithAddress} from "hardhat-deploy-ethers/signers";
 import deployProxy from "../utils/deploy";
 

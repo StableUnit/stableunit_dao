@@ -37,20 +37,20 @@ task("setDistributor", "set all parameters from the script")
 
         const nowTimestamp = Math.floor(Date.now() / 1000);
 
-        tx = await distributor.setDistributionInfo(
-            nowTimestamp + 10 * 60,
-            nowTimestamp + +10 * 60 + DISTRIBUTION_INFO.lengthSeconds,
-            BN_1E6.mul(DISTRIBUTION_INFO.minGoal),
-            BN_1E6.mul(DISTRIBUTION_INFO.maxGoal),
-            BN_1E6.mul(DISTRIBUTION_INFO.minDonation),
-            BN_1E6.mul(DISTRIBUTION_INFO.maxDonation),
-            DISTRIBUTION_INFO.donationToken,
-            DISTRIBUTION_INFO.fullVestingSeconds,
-            DISTRIBUTION_INFO.cliffSeconds,
-            BN_1E18.mul(DISTRIBUTION_INFO.tgeUnlock * 1000).div(1000),
-            DISTRIBUTION_INFO.vestingFrequencySeconds
-        );
-        await tx.wait();
+        // tx = await distributor.setDistributionInfo(
+        //     nowTimestamp + 10 * 60,
+        //     nowTimestamp + +10 * 60 + DISTRIBUTION_INFO.lengthSeconds,
+        //     BN_1E6.mul(DISTRIBUTION_INFO.minGoal),
+        //     BN_1E6.mul(DISTRIBUTION_INFO.maxGoal),
+        //     BN_1E6.mul(DISTRIBUTION_INFO.minDonation),
+        //     BN_1E6.mul(DISTRIBUTION_INFO.maxDonation),
+        //     DISTRIBUTION_INFO.donationToken,
+        //     DISTRIBUTION_INFO.fullVestingSeconds,
+        //     DISTRIBUTION_INFO.cliffSeconds,
+        //     BN_1E18.mul(DISTRIBUTION_INFO.tgeUnlock * 1000).div(1000),
+        //     DISTRIBUTION_INFO.vestingFrequencySeconds
+        // );
+        // await tx.wait();
         console.log("✅ setDistributionInfo done");
 
         tx = await distributor.setBondingCurve([
@@ -61,8 +61,8 @@ task("setDistributor", "set all parameters from the script")
         await tx.wait();
         console.log("✅ setBondingCurve done");
 
-        tx = await distributor.setNftAccess(mockErc721.address, true);
-        await tx.wait();
+        // tx = await distributor.setNftAccess(mockErc721.address, true);
+        // await tx.wait();
         console.log("✅ setNftAccess done");
 
         tx = await distributor.setBaseRewardRatio(BN_1E12);

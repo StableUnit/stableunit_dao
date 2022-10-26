@@ -5,6 +5,7 @@ import deployProxy from "../test/utils/deploy";
 
 const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
   const deployer  = (await hre.ethers.getSigners())[0];
+  console.log("Deployer is running on ", (await hre.ethers.provider.getNetwork()).chainId);
 
   const mockErc721 = await deployProxy("MockErc721", ["Mock StableUnit NFT", "SuNFTPro"]);
   const accessControlSingleton = await deployProxy("SuAccessControlSingleton");
