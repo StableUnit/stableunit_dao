@@ -20,7 +20,7 @@ task("setBonus", "set all parameters from the script")
         const bonus = await hre.ethers.getContract("Bonus") as Bonus;
         const mockErc721 = await hre.ethers.getContract("MockErc721") as MockErc721;
         console.log(`bonus@${ (await hre.ethers.provider.getNetwork()).name } = `, bonus.address);
-        console.log(`mockErc721@${ (await hre.ethers.provider.getNetwork()).name } = `, bonus.address);
+        console.log(`mockErc721@${ (await hre.ethers.provider.getNetwork()).name } = `, mockErc721.address);
 
         tx = await bonus.setAdmin(deployer.address, true);
         await tx.wait();

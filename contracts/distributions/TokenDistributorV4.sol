@@ -15,7 +15,7 @@ pragma solidity ^0.8.12;
 import "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20Upgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/IERC20Upgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/utils/SafeERC20Upgradeable.sol";
-import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
+import "@openzeppelin/contracts-upgradeable/token/ERC721/IERC721Upgradeable.sol";
 import "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 import "@openzeppelin/contracts/utils/math/Math.sol";
 
@@ -98,12 +98,12 @@ contract TokenDistributorV4 is SuAccessControlAuthenticated {
         return Math.min(IERC20Upgradeable(SU_DAO).balanceOf(address(this)), S2 - S1);
     }
 
-    function getAccessNftsForUser(address account) external returns (address[] memory) {
+    function getAccessNftsForUser(address account) public view returns (address[] memory) {
         address[] memory nfts = nftRequirement.values();
         uint256 l = nfts.length;
         address[] memory answer = new address[](l);
         for (uint256 i = 0; i < l; i++) {
-            if (IERC721(nfts[i]).balanceOf(msg.sender) > 0) {
+            if (IERC721Upgradeable(nfts[i]).balanceOf(account) > 0) {
                 answer[i] = nfts[i];
             }
         }
@@ -121,7 +121,7 @@ contract TokenDistributorV4 is SuAccessControlAuthenticated {
             revert DistributionTimeframeError();
         if (!nftRequirement.contains(accessNft))
             revert AccessNftNotValidError(accessNft);
-        if (IERC721(accessNft).balanceOf(msg.sender) == 0)
+        if (IERC721Upgradeable(accessNft).balanceOf(msg.sender) == 0)
             revert NoAccessNftError(msg.sender, accessNft);
 
         require(
@@ -161,7 +161,7 @@ contract TokenDistributorV4 is SuAccessControlAuthenticated {
      * @notice Get the max donation that user can do
      */
     function getMaximumDonationAmount(address user, address accessNft) view external returns (uint256) {
-        if (IERC721(accessNft).balanceOf(msg.sender) > 0) {
+        if (IERC721Upgradeable(accessNft).balanceOf(user) > 0) {
             return Math.min(
                 maximumDonation - donations[user],
                 donationGoalMax - totalDonations

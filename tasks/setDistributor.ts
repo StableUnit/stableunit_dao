@@ -2,7 +2,7 @@ import "@nomiclabs/hardhat-web3";
 import "@nomiclabs/hardhat-waffle";
 import {task} from "hardhat/config";
 
-import {TokenDistributorV4} from "../typechain";
+import {MockErc721, TokenDistributorV4} from "../typechain";
 
 
 /**
@@ -12,10 +12,13 @@ import {TokenDistributorV4} from "../typechain";
 
 task("setDistributor", "set all parameters from the script")
     .setAction(async (taskArgs, hre) => {
+        let tx;
         const BN_1E18 = hre.ethers.BigNumber.from(10).pow(18);
         const BN_1E6 = hre.ethers.BigNumber.from(10).pow(6);
         const distributor = await hre.ethers.getContract("TokenDistributorV4") as TokenDistributorV4;
+        const mockErc721 = await hre.ethers.getContract("MockErc721") as MockErc721;
         console.log(`TokenDistributorV4@${ (await hre.ethers.provider.getNetwork()).name } = `, distributor.address);
+        console.log(`mockErc721@${ (await hre.ethers.provider.getNetwork()).name } = `, mockErc721.address);
 
         const DISTRIBUTION_INFO = {
             lengthSeconds: 2 * 60 * 60,
@@ -32,7 +35,7 @@ task("setDistributor", "set all parameters from the script")
 
         const nowTimestamp = Math.floor(Date.now() / 1000);
 
-        const tx = await distributor.setDistributionInfo(
+        tx = await distributor.setDistributionInfo(
             nowTimestamp + 10 * 60,
             nowTimestamp + +10 * 60 + DISTRIBUTION_INFO.lengthSeconds,
             BN_1E6.mul(DISTRIBUTION_INFO.minGoal),
@@ -45,8 +48,12 @@ task("setDistributor", "set all parameters from the script")
             BN_1E18.mul(DISTRIBUTION_INFO.tgeUnlock * 1000).div(1000),
             DISTRIBUTION_INFO.vestingFrequencySeconds
         );
-        console.log(`tx = `, tx.hash);
         await tx.wait();
+        console.log("✅ setDistributionInfo done");
+
+        tx = await distributor.setNftAccess(mockErc721.address, true);
+        await tx.wait();
+        console.log("✅ setNftAccess done");
     });
 
 export default {};
