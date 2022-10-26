@@ -154,6 +154,8 @@ dist
 cache
 artifacts
 submodule-artifacts/goerli/solcInputs
+submodule-artifacts/hardhat
+submodule-artifacts/localhost
 .gitsecret/keys/random_seed
 !*.secret
 

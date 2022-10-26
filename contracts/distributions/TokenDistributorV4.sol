@@ -46,6 +46,7 @@ contract TokenDistributorV4 is SuAccessControlAuthenticated {
     mapping(address => uint256) public donations; // Donation amounts
     uint256 public totalDonations;                // Sum of all user donations
     address public donationToken;                 // For now it's only DAI
+    uint256 public baseRewardRatio;               // default reward amount user might get for 1 donation token
 
     uint64 public fullVestingSeconds;             // Default vesting period is 12 months
     uint64 public cliffSeconds;                   // With 3 months cliff.
@@ -60,6 +61,7 @@ contract TokenDistributorV4 is SuAccessControlAuthenticated {
     error DistributionTimeframeError();
     error AccessNftNotValidError(address accessNft);
     error NoAccessNftError(address account, address accessNft);
+    error NotEnoughRewardLeft(uint256 donationAmount);
 
 
     function initialize (address _accessControlSingleton, address _suDAO, address _veErc20, address _bonusContract) initializer public {
@@ -75,7 +77,7 @@ contract TokenDistributorV4 is SuAccessControlAuthenticated {
         uint256 x_ = 1;
         uint256 px = 0;
         for (uint256 i = 0; i < l; i++) {
-            px = px + bondingCurvePolynomial1e18[i]*x_ / 1e18;
+            px = px + bondingCurvePolynomial1e18[i]*x_;
             x_ = x_*x;
         }
         return px;
@@ -92,10 +94,15 @@ contract TokenDistributorV4 is SuAccessControlAuthenticated {
         return px;
     }
 
-    function getBondingCurveRewardAmountFromDonation(uint256 donationAmount) public view returns (uint256) {
+    function getBondingCurveRewardAmountFromDonationUSD(uint256 donationAmount) public view returns (uint256) {
         uint256 S1 = antiderivativeOfBondingCurvePolynomial1e18At(totalDonations);
         uint256 S2 = antiderivativeOfBondingCurvePolynomial1e18At(totalDonations + donationAmount);
-        return Math.min(IERC20Upgradeable(SU_DAO).balanceOf(address(this)), S2 - S1);
+        uint256 rewards = baseRewardRatio*(S2-S1) / 1e18;
+        // 1 usdt == 1 suDAO => baseRewardRatio = 1e12;
+        if (rewards > IERC20Upgradeable(SU_DAO).balanceOf(address(this))) {
+            revert NotEnoughRewardLeft(donationAmount);
+        }
+        return rewards;
     }
 
     function getAccessNftsForUser(address account) public view returns (address[] memory) {
@@ -137,7 +144,7 @@ contract TokenDistributorV4 is SuAccessControlAuthenticated {
         );
 
         uint256 bonusDiscountRatio = IBonus(BONUS_CONTRACT).getDiscount(msg.sender);
-        uint256 rewardAmount = getBondingCurveRewardAmountFromDonation(donationAmount) * (1e18 + bonusDiscountRatio) / 1e18;
+        uint256 rewardAmount = getBondingCurveRewardAmountFromDonationUSD(donationAmount) * (1e18 + bonusDiscountRatio) / 1e18;
 
         // get donation from the user
         IERC20Upgradeable(donationToken).safeTransferFrom(msg.sender, address(this), donationAmount);
@@ -192,6 +199,7 @@ contract TokenDistributorV4 is SuAccessControlAuthenticated {
         uint256 _minimumDonation,
         uint256 _maximumDonation,
         address _donationToken,
+        uint256 _baseRewardRatio,
         uint64 _fullVestingSeconds,
         uint64 _cliffSeconds,
         uint64 _tgeUnlockRatio1e18,
@@ -211,6 +219,7 @@ contract TokenDistributorV4 is SuAccessControlAuthenticated {
         minimumDonation = _minimumDonation;
         maximumDonation = _maximumDonation;
         donationToken = _donationToken;
+        baseRewardRatio = __baseRewardRatio;
         fullVestingSeconds = _fullVestingSeconds;
         cliffSeconds = _cliffSeconds;
         tgeUnlockRatio1e18 = _tgeUnlockRatio1e18;
@@ -224,6 +233,7 @@ contract TokenDistributorV4 is SuAccessControlAuthenticated {
             _minimumDonation,
             _maximumDonation,
             _donationToken,
+            _baseRewardRatio,
             _fullVestingSeconds,
             _cliffSeconds,
             _tgeUnlockRatio1e18,
@@ -253,6 +263,7 @@ contract TokenDistributorV4 is SuAccessControlAuthenticated {
         uint256,
         uint256,
         address,
+        // uint256 ?? baseRewardRatio
         uint64,
         uint64,
         uint64,
@@ -294,6 +305,7 @@ contract TokenDistributorV4 is SuAccessControlAuthenticated {
         uint256 _minimumDonation,
         uint256 _maximumDonation,
         address _donationToken,
+        uint256 _baseRewardRatio,
         uint64 _fullVestingSeconds,
         uint64 _cliffSeconds,
         uint64 _tgeUnlockRatio1e18,
