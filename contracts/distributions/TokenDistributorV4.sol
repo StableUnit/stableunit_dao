@@ -241,18 +241,18 @@ contract TokenDistributorV4 is SuAccessControlAuthenticated {
 
     receive() external payable {}
 
-    function getDistributorStaticData() public returns (
-        uint64 startTimestamp,
-        uint64 deadlineTimestamp,
-        uint256 minimumDonation,
-        uint256 maximumDonation,
-        uint256 donationGoalMin,
-        uint256 donationGoalMax,
-        address donationToken,
-        uint64 fullVestingSeconds,
-        uint64 cliffSeconds,
-        uint64 tgeUnlockRatio1e18,
-        uint64 vestingFrequencySeconds
+    function getDistributorStaticData() view external returns (
+        uint64,
+        uint64,
+        uint256,
+        uint256,
+        uint256,
+        uint256,
+        address,
+        uint64,
+        uint64,
+        uint64,
+        uint64
     ) {
         return (
             startTimestamp,

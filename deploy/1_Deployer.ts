@@ -4,7 +4,20 @@ import {Bonus, SuDAO, TokenDistributorV4, VeERC20} from "../typechain";
 import deployProxy from "../test/utils/deploy";
 
 const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
-  const  deployer  = (await hre.ethers.getSigners())[0];
+  const deployer  = (await hre.ethers.getSigners())[0];
+
+  const deployOptions = {
+    from: deployer.address,
+    log: true,
+    waitConfirmations: 1,
+  };
+
+  await hre.deployments.deploy(
+    "MockErc721", {
+      ...deployOptions,
+      args: ["Mock StableUnit NFT", "SuNFTPro"]
+    }
+  );
 
   const accessControlSingleton = await deployProxy("SuAccessControlSingleton");
   const suDAO = await deployProxy("SuDAO", [accessControlSingleton.address, 10000]) as SuDAO;

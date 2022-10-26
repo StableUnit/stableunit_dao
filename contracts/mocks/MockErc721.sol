@@ -28,9 +28,9 @@ contract MockErc721 is ERC721, ERC721Enumerable {
     /**
      * @dev See {IERC721Metadata-tokenURI}.
      */
-    function tokenURI(uint256 tokenId) public view virtual returns (string memory) {
+    function tokenURI(uint256 tokenId) public view virtual override returns (string memory) {
         require(_exists(tokenId), "ERC721Metadata: URI query for nonexistent token");
-        return string(abi.encodePacked(baseURI, tokenId.toString()));
+        return string(abi.encodePacked(baseURI, tokenId));
     }
 
     function mint(address to) public {

@@ -23,6 +23,7 @@ async function main() {
   await verify("Bonus");
   await verify("VeERC20");
   await verify("TokenDistributorV4");
+  await verify("MockErc721");
 }
 
 main().catch((error) => {
