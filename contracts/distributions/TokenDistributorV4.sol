@@ -23,10 +23,6 @@ import "../access-control/SuAccessControlAuthenticated.sol";
 import "../interfaces/IBonus.sol";
 import "../interfaces/IveERC20.sol";
 
-
-// TODO: remove debug data
-import "hardhat/console.sol";
-
 /**
  * @title The contract that distribute suDAO tokens for community based on NFT membership
  */
@@ -100,9 +96,7 @@ contract TokenDistributorV4 is SuAccessControlAuthenticated {
 
     function getBondingCurveRewardAmountFromDonationUSD(uint256 donationAmountUSD1e18) public view returns (uint256) {
         uint256 S1 = antiderivativeOfBondingCurvePolynomial1e18At(totalDonations * donationTokenToUSD1e18 / 1e18);
-//        console.log("S1", S1);
         uint256 S2 = antiderivativeOfBondingCurvePolynomial1e18At((totalDonations * donationTokenToUSD1e18 + donationAmountUSD1e18) / 1e18);
-//        console.log("S2", S2);
         uint256 rewards = (S2 - S1);
         //         1 usdt == 1 suDAO => baseRewardRatio = 1e12;
         if (rewards > IERC20Upgradeable(SU_DAO).balanceOf(address(this))) {
@@ -110,7 +104,6 @@ contract TokenDistributorV4 is SuAccessControlAuthenticated {
         }
         //        require(rewards <= IERC20Upgradeable(SU_DAO).balanceOf(address(this)), "no enough rewards");
         return rewards;
-
     }
 
     function getAccessNftsForUser(address account) public view returns (address[] memory) {

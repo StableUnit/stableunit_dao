@@ -2,8 +2,7 @@ import "@nomiclabs/hardhat-web3";
 import "@nomiclabs/hardhat-waffle";
 import {task} from "hardhat/config";
 
-import {MockErc721, TokenDistributorV4} from "../typechain";
-import {BigNumber} from "ethers";
+import {MockErc721, SuDAO, TokenDistributorV4} from "../typechain";
 
 
 /**
@@ -14,11 +13,13 @@ import {BigNumber} from "ethers";
 task("setDistributor", "set all parameters from the script")
     .setAction(async (taskArgs, hre) => {
         let tx;
+        const deployer  = (await hre.ethers.getSigners())[0];
         const BN_1E18 = hre.ethers.BigNumber.from(10).pow(18);
         const BN_1E6 = hre.ethers.BigNumber.from(10).pow(6);
         const BN_1E12 = hre.ethers.BigNumber.from(10).pow(12);
         const distributor = await hre.ethers.getContract("TokenDistributorV4") as TokenDistributorV4;
         const mockErc721 = await hre.ethers.getContract("MockErc721") as MockErc721;
+        const suDAO = await hre.ethers.getContract("SuDAO") as SuDAO;
         console.log(`TokenDistributorV4@${ (await hre.ethers.provider.getNetwork()).name } = `, distributor.address);
         console.log(`mockErc721@${ (await hre.ethers.provider.getNetwork()).name } = `, mockErc721.address);
 
@@ -61,13 +62,22 @@ task("setDistributor", "set all parameters from the script")
         await tx.wait();
         console.log("✅ setBondingCurve done");
 
-        // tx = await distributor.setNftAccess(mockErc721.address, true);
-        // await tx.wait();
+        tx = await mockErc721.mint(deployer.address);
+        await tx.wait();
+        console.log("✅ mockErc721 mint done");
+
+        tx = await distributor.setNftAccess(mockErc721.address, true);
+        await tx.wait();
         console.log("✅ setNftAccess done");
 
         tx = await distributor.setBaseRewardRatio(BN_1E12);
         await tx.wait();
         console.log("✅ setBaseRewardRatio done");
+
+        // TODO: remove in mainnet!!!
+        tx = await suDAO.mint(distributor.address, BN_1E18.mul(1_450_000));
+        await tx.wait();
+        console.log("✅ suDAO mint done");
     });
 
 export default {};

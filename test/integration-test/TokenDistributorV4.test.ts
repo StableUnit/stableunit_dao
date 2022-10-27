@@ -1,7 +1,6 @@
 import {deployments, ethers} from "hardhat";
 import {expect} from "chai";
-import {MockErc20, MockErc721, SuAccessControlSingleton, SuDAO, TokenDistributorV4} from "../../typechain";
-import deployProxy from "../utils/deploy";
+import {MockErc20, MockErc721, SuDAO, TokenDistributorV4} from "../../typechain";
 import {BN_1E12, BN_1E18, BN_1E6} from "../utils";
 import {BigNumber} from "ethers";
 
