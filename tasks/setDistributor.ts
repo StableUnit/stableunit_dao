@@ -24,16 +24,16 @@ task("setDistributor", "set all parameters from the script")
         console.log(`mockErc721@${ (await hre.ethers.provider.getNetwork()).name } = `, mockErc721.address);
 
         const DISTRIBUTION_INFO = {
-            lengthSeconds: 2 * 60 * 60,
-            minGoal: 1_000_000,
-            maxGoal: 2_000_000,
-            minDonation: 1000,
-            maxDonation: 100000,
-            donationToken: "0x33f3b4Ac5083b7bcA29397728A7aA56909F790cA", // tUSDT
-            fullVestingSeconds: 2 * 24 * 60 * 60,
-            cliffSeconds: 2 * 60 * 60,
-            tgeUnlock: 0.05,
-            vestingFrequencySeconds: 60 * 60
+            lengthSeconds: taskArgs.lengthSeconds ?? 2 * 60 * 60,
+            minGoal: taskArgs.minGoal ?? 1_000_000,
+            maxGoal: taskArgs.maxGoal ?? 2_000_000,
+            minDonation: taskArgs.minDonation ?? 1000,
+            maxDonation: taskArgs.maxDonation ?? 100000,
+            donationToken: taskArgs.donationToken ?? "0x33f3b4Ac5083b7bcA29397728A7aA56909F790cA", // tUSDT
+            fullVestingSeconds: taskArgs.fullVestingSeconds ?? 2 * 24 * 60 * 60,
+            cliffSeconds: taskArgs.cliffSeconds ?? 2 * 60 * 60,
+            tgeUnlock: taskArgs.tgeUnlock ?? 0.05,
+            vestingFrequencySeconds: taskArgs.vestingFrequencySeconds ?? 60 * 60
         }
 
         const nowTimestamp = Math.floor(Date.now() / 1000);
@@ -52,7 +52,10 @@ task("setDistributor", "set all parameters from the script")
             DISTRIBUTION_INFO.vestingFrequencySeconds
         );
         await tx.wait();
-        console.log("✅ setDistributionInfo done");
+
+        if (!taskArgs.removeLogs) {
+          console.log("✅ setDistributionInfo done");
+        }
 
         tx = await distributor.setBondingCurve([
           BN_1E18.mul(9).div(10), // 1e18*0.9
@@ -60,24 +63,34 @@ task("setDistributor", "set all parameters from the script")
           BN_1E18.mul(15).div(100).div(BN_1E12), // 1e18*0.15*1e-12
         ]);
         await tx.wait();
-        console.log("✅ setBondingCurve done");
+        if (!taskArgs.removeLogs) {
+          console.log("✅ setBondingCurve done");
+        }
 
         tx = await mockErc721.mint(deployer.address);
         await tx.wait();
-        console.log("✅ mockErc721 mint done");
+        if (!taskArgs.removeLogs) {
+          console.log("✅ mockErc721 mint done");
+        }
 
         tx = await distributor.setNftAccess(mockErc721.address, true);
         await tx.wait();
-        console.log("✅ setNftAccess done");
+        if (!taskArgs.removeLogs) {
+          console.log("✅ setNftAccess done");
+        }
 
         tx = await distributor.setBaseRewardRatio(BN_1E12);
         await tx.wait();
-        console.log("✅ setBaseRewardRatio done");
+        if (!taskArgs.removeLogs) {
+          console.log("✅ setBaseRewardRatio done");
+        }
 
         // TODO: remove in mainnet!!!
         tx = await suDAO.mint(distributor.address, BN_1E18.mul(1_450_000));
         await tx.wait();
-        console.log("✅ suDAO mint done");
+        if (!taskArgs.removeLogs) {
+          console.log("✅ suDAO mint done");
+        }
     });
 
 export default {};
