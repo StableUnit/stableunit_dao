@@ -11,13 +11,13 @@ pragma solidity ^0.8.12;
      \______/  \______/ |_______/ |__/  |__/ \______/
 
 */
-import "@openzeppelin/contracts-upgradeable/token/ERC20/extensions/ERC20VotesUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20Upgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/IERC20Upgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/utils/SafeERC20Upgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/math/SafeCastUpgradeable.sol";
-import "../access-control/SuAccessControlModifiers.sol";
+import "../access-control/SuAccessControlAuthenticated.sol";
 import "../interfaces/IveERC20.sol";
+
 
 /*
  * @title The contact enables the storage of erc20 tokens under the linear time-vesting with the cliff time-lock.
@@ -33,9 +33,8 @@ import "../interfaces/IveERC20.sol";
  * To make balance visible in the erc20 wallets, the contact "looks like" erc20 token by implementing its interface
  * however all non-view methods such as transfer or approve aren't active and will be reverted.
 */
-contract veERC20 is ERC20VotesUpgradeable, SuAccessControlModifiers, IveERC20 {
+contract VeERC20 is ERC20Upgradeable, SuAccessControlAuthenticated, IveERC20 {
     using SafeERC20Upgradeable for ERC20Upgradeable;
-    using SafeCastUpgradeable for uint256;
 
     ERC20Upgradeable public LOCKED_TOKEN;
     uint32 public TGE_MAX_TIMESTAMP;
@@ -43,18 +42,18 @@ contract veERC20 is ERC20VotesUpgradeable, SuAccessControlModifiers, IveERC20 {
 
     struct VestingInfo {
         // we keep all data in one 256 bits slot to safe on gas usage
-        uint96 amountAlreadyWithdrawn;
-        uint32 cliffSeconds;
-        uint32 vestingSeconds;
-        uint64 tgeUnlockRatio1e18; // [0..1], uint64 is enough because log2(1e18) ~= 60
-        uint32 vestingFrequencySeconds;
+        uint256 amountAlreadyWithdrawn;
+        uint256 cliffSeconds;
+        uint256 vestingSeconds;
+        uint256 tgeUnlockRatio1e18; // [0..1], uint64 is enough because log2(1e18) ~= 60
+        uint256 vestingFrequencySeconds;
     }
     mapping(address => VestingInfo) public vestingInfo;
 
-    function initialize(ERC20Upgradeable _lockedToken) initializer public {
+    function initialize(address _accessControlSingleton, ERC20Upgradeable _lockedToken) initializer public {
+        __SuAuthenticated_init(_accessControlSingleton);
         __ERC20_init(string.concat("vested escrow ", _lockedToken.name()), string.concat("ve", _lockedToken.symbol()));
         LOCKED_TOKEN = _lockedToken;
-        _setupRole(DEFAULT_ADMIN_ROLE, msg.sender);
         TGE_MAX_TIMESTAMP = 1685577600; // Unix Timestamp	1685577600 = GMT+0 Thu Jun 01 2023 00:00:00 GMT+0000
         tgeTimestamp = TGE_MAX_TIMESTAMP;
     }
@@ -62,7 +61,7 @@ contract veERC20 is ERC20VotesUpgradeable, SuAccessControlModifiers, IveERC20 {
     /**
     * @notice owner of the contract can set up TGE date within set limits.
     */
-    function updateTgeTimestamp(uint32 newTgeTimestamp) external onlyOwner {
+    function updateTgeTimestamp(uint32 newTgeTimestamp) external onlyRole(DAO_ROLE) {
         require(uint32(block.timestamp) <= newTgeTimestamp, "veERC20: TGE date can't be in the past");
         require(newTgeTimestamp <= TGE_MAX_TIMESTAMP, "veERC20: new TGE date is beyond limit");
         tgeTimestamp = newTgeTimestamp;
@@ -98,7 +97,7 @@ contract veERC20 is ERC20VotesUpgradeable, SuAccessControlModifiers, IveERC20 {
         uint256 cliffSeconds,
         uint256 tgeUnlockRatio1e18,
         uint256 vestingFrequencySeconds
-    ) external onlyOwner override
+    ) external onlyRole(ADMIN_ROLE) override
     {
         _mergeVesting(account, vestingSeconds, cliffSeconds, tgeUnlockRatio1e18, vestingFrequencySeconds);
         addBalance(account, amount);
@@ -122,23 +121,20 @@ contract veERC20 is ERC20VotesUpgradeable, SuAccessControlModifiers, IveERC20 {
         require(cliffSeconds <= vestingSeconds, "cliffTime should be less then vestingTime");
         require(tgeUnlockRatio1e18 <= 1e18, "tgeUnlockRatio should be less than 1");
 
-        uint32 newVestingSeconds = vestingSeconds.toUint32();
-        if (vestingInfo[account].vestingSeconds < newVestingSeconds) {
-            vestingInfo[account].vestingSeconds = newVestingSeconds;
+        if (vestingInfo[account].vestingSeconds < vestingSeconds) {
+            vestingInfo[account].vestingSeconds = vestingSeconds;
         }
 
-        uint32 newCliffSeconds = cliffSeconds.toUint32();
-        if (vestingInfo[account].cliffSeconds < newCliffSeconds) {
-            vestingInfo[account].cliffSeconds = newCliffSeconds;
+        if (vestingInfo[account].cliffSeconds < cliffSeconds) {
+            vestingInfo[account].cliffSeconds = cliffSeconds;
         }
 
         if (vestingInfo[account].tgeUnlockRatio1e18 > tgeUnlockRatio1e18) {
-            vestingInfo[account].tgeUnlockRatio1e18 = tgeUnlockRatio1e18.toUint64();
+            vestingInfo[account].tgeUnlockRatio1e18 = tgeUnlockRatio1e18;
         }
 
-        uint32 newVestingFrequencySeconds = vestingFrequencySeconds.toUint32();
-        if (vestingInfo[account].vestingFrequencySeconds < newVestingFrequencySeconds) {
-            vestingInfo[account].vestingFrequencySeconds = newVestingFrequencySeconds;
+        if (vestingInfo[account].vestingFrequencySeconds < vestingFrequencySeconds) {
+            vestingInfo[account].vestingFrequencySeconds = vestingFrequencySeconds;
         }
     }
 
@@ -200,7 +196,7 @@ contract veERC20 is ERC20VotesUpgradeable, SuAccessControlModifiers, IveERC20 {
     function claim() external {
         uint256 claimAmount = availableToClaim(msg.sender);
         require(claimAmount > 0, "Can't claim 0 tokens");
-        vestingInfo[msg.sender].amountAlreadyWithdrawn = vestingInfo[msg.sender].amountAlreadyWithdrawn + claimAmount.toUint96();
+        vestingInfo[msg.sender].amountAlreadyWithdrawn = vestingInfo[msg.sender].amountAlreadyWithdrawn + claimAmount;
         LOCKED_TOKEN.safeTransfer(msg.sender, claimAmount);
     }
 
@@ -208,7 +204,7 @@ contract veERC20 is ERC20VotesUpgradeable, SuAccessControlModifiers, IveERC20 {
      * @notice User can donate tokens under vesting to DAO or other admin contract as us treasury.
      */
     function donateTokens(address toAdmin) external {
-        require(hasRole(DEFAULT_ADMIN_ROLE, toAdmin) == true, "invalid admin address");
+        require(hasRole(ADMIN_ROLE, toAdmin) == true, "invalid admin address");
         uint256 balance = balanceOf(msg.sender);
         require(balance > 0, "nothing to donate");
         vestingInfo[msg.sender].amountAlreadyWithdrawn = vestingInfo[msg.sender].amountAlreadyWithdrawn + uint64(balance);
@@ -222,7 +218,7 @@ contract veERC20 is ERC20VotesUpgradeable, SuAccessControlModifiers, IveERC20 {
     /**
     * @notice The owner of the contact can take away tokens accidentally sent to the contract.
     */
-    function rescue(ERC20Upgradeable token) external onlyOwner {
+    function rescue(ERC20Upgradeable token) external onlyRole(DAO_ROLE) {
         require(token != LOCKED_TOKEN, "No allowed to rescue this token");
         // allow to rescue ether
         if (address(token) == address(0)) {
@@ -232,4 +228,11 @@ contract veERC20 is ERC20VotesUpgradeable, SuAccessControlModifiers, IveERC20 {
         }
     }
     receive() external payable {}
+
+    /**
+     * @dev This empty reserved space is put in place to allow future versions to add new
+     * variables without shifting down storage in the inheritance chain.
+     * See https://docs.openzeppelin.com/contracts/4.x/upgradeable#storage_gaps
+     */
+    uint256[49] private __gap;
 }

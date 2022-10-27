@@ -3,7 +3,6 @@ import * as dotenv from "dotenv";
 import { HardhatUserConfig, task } from "hardhat/config";
 import "@nomiclabs/hardhat-etherscan";
 import "@nomiclabs/hardhat-waffle";
-import "@nomiclabs/hardhat-truffle5";
 import "@openzeppelin/hardhat-upgrades";
 import "@typechain/hardhat";
 import "hardhat-gas-reporter";
@@ -19,10 +18,9 @@ dotenv.config({ path: envPath });
 
 // This is a sample Hardhat task. To learn how to create your own go to
 // https://hardhat.org/guides/create-task.html
-task("accounts", "Prints the list of accounts", async (taskArgs, hre) => {
-    const accounts = await hre.ethers.getSigners();
-    accounts.forEach((account) => console.log(account.address));
-});
+import "./tasks/accounts.ts";
+import "./tasks/setDistributor.ts";
+import "./tasks/setBonus.ts";
 
 const {
     INFURA_API_KEY,
@@ -72,6 +70,7 @@ const config: HardhatUserConfig = {
         goerli: {
             url: `https://goerli.infura.io/v3/${INFURA_API_KEY}`,
             accounts: accountsTestnet,
+            allowUnlimitedContractSize: true,
             timeout: 100000,
             blockGasLimit: 7_000_000,
             gas: 7_000_000,

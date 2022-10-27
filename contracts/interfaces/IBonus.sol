@@ -95,4 +95,16 @@ interface IBonus {
      * `user` Address of user
     **/
     function getDiscount(address user) external view returns ( uint256 );
+
+    /**
+     * @notice Get nft allocation
+     * `user` Address of user
+    **/
+    function getNftAllocation(address user) external view returns ( uint256 );
+
+    /**
+     * @notice Get nft discount ratio for presale
+     * `user` Address of nft
+    **/
+    function getNftDiscount(address user) external view returns ( uint256 );
 }

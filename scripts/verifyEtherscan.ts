@@ -6,7 +6,7 @@ const verify = async (contractName: string, contractPath?: string) => {
 
     // hardhat documentation says that we need to use "verify:verify" subtask
     // but it doesn't work with proxy
-    await run("verify", {
+    await run("verify:verify", {
       address: Contract.address,
       contract: contractPath,
     });
@@ -18,10 +18,12 @@ const verify = async (contractName: string, contractPath?: string) => {
 };
 
 async function main() {
+  await verify("SuAccessControlSingleton");
   await verify("SuDAO");
   await verify("Bonus");
-  await verify("veERC20");
-  await verify("TokenDistributor_v4");
+  await verify("VeERC20");
+  await verify("TokenDistributorV4");
+  await verify("MockErc721");
 }
 
 main().catch((error) => {

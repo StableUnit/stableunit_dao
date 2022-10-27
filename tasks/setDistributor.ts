@@ -1,0 +1,83 @@
+import "@nomiclabs/hardhat-web3";
+import "@nomiclabs/hardhat-waffle";
+import {task} from "hardhat/config";
+
+import {MockErc721, SuDAO, TokenDistributorV4} from "../typechain";
+
+
+/**
+ * launch with the  command:
+ * npx hardhat setDistributor --verbose --network goerli
+ */
+
+task("setDistributor", "set all parameters from the script")
+    .setAction(async (taskArgs, hre) => {
+        let tx;
+        const deployer  = (await hre.ethers.getSigners())[0];
+        const BN_1E18 = hre.ethers.BigNumber.from(10).pow(18);
+        const BN_1E6 = hre.ethers.BigNumber.from(10).pow(6);
+        const BN_1E12 = hre.ethers.BigNumber.from(10).pow(12);
+        const distributor = await hre.ethers.getContract("TokenDistributorV4") as TokenDistributorV4;
+        const mockErc721 = await hre.ethers.getContract("MockErc721") as MockErc721;
+        const suDAO = await hre.ethers.getContract("SuDAO") as SuDAO;
+        console.log(`TokenDistributorV4@${ (await hre.ethers.provider.getNetwork()).name } = `, distributor.address);
+        console.log(`mockErc721@${ (await hre.ethers.provider.getNetwork()).name } = `, mockErc721.address);
+
+        const DISTRIBUTION_INFO = {
+            lengthSeconds: 2 * 60 * 60,
+            minGoal: 1_000_000,
+            maxGoal: 2_000_000,
+            minDonation: 1000,
+            maxDonation: 100000,
+            donationToken: "0x33f3b4Ac5083b7bcA29397728A7aA56909F790cA", // tUSDT
+            fullVestingSeconds: 2 * 24 * 60 * 60,
+            cliffSeconds: 2 * 60 * 60,
+            tgeUnlock: 0.05,
+            vestingFrequencySeconds: 60 * 60
+        }
+
+        const nowTimestamp = Math.floor(Date.now() / 1000);
+
+        tx = await distributor.setDistributionInfo(
+            nowTimestamp + 10 * 60,
+            nowTimestamp + +10 * 60 + DISTRIBUTION_INFO.lengthSeconds,
+            BN_1E6.mul(DISTRIBUTION_INFO.minGoal),
+            BN_1E6.mul(DISTRIBUTION_INFO.maxGoal),
+            BN_1E6.mul(DISTRIBUTION_INFO.minDonation),
+            BN_1E6.mul(DISTRIBUTION_INFO.maxDonation),
+            DISTRIBUTION_INFO.donationToken,
+            DISTRIBUTION_INFO.fullVestingSeconds,
+            DISTRIBUTION_INFO.cliffSeconds,
+            BN_1E18.mul(DISTRIBUTION_INFO.tgeUnlock * 1000).div(1000),
+            DISTRIBUTION_INFO.vestingFrequencySeconds
+        );
+        await tx.wait();
+        console.log("✅ setDistributionInfo done");
+
+        tx = await distributor.setBondingCurve([
+          BN_1E18.mul(9).div(10), // 1e18*0.9
+          BN_1E18.mul(15).div(100).div(BN_1E6), // 1e18*0.15*1e-6
+          BN_1E18.mul(15).div(100).div(BN_1E12), // 1e18*0.15*1e-12
+        ]);
+        await tx.wait();
+        console.log("✅ setBondingCurve done");
+
+        tx = await mockErc721.mint(deployer.address);
+        await tx.wait();
+        console.log("✅ mockErc721 mint done");
+
+        tx = await distributor.setNftAccess(mockErc721.address, true);
+        await tx.wait();
+        console.log("✅ setNftAccess done");
+
+        tx = await distributor.setBaseRewardRatio(BN_1E12);
+        await tx.wait();
+        console.log("✅ setBaseRewardRatio done");
+
+        // TODO: remove in mainnet!!!
+        tx = await suDAO.mint(distributor.address, BN_1E18.mul(1_450_000));
+        await tx.wait();
+        console.log("✅ suDAO mint done");
+    });
+
+export default {};

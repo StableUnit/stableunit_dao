@@ -30,10 +30,12 @@ const upgrade = async (contractName: string) => {
 };
 
 async function main() {
+  await upgrade("TokenDistributorV4");
+  await upgrade("SuAccessControlSingleton");
   await upgrade("SuDAO");
   await upgrade("Bonus");
-  await upgrade("veERC20");
-  await upgrade("TokenDistributor_v4");
+  await upgrade("VeERC20");
+  await upgrade("MockErc721");
 }
 
 main().catch((error) => {

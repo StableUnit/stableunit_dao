@@ -12,18 +12,17 @@ pragma solidity ^0.8.9;
 
 */
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
-
 import "./interfaces/IBonus.sol";
-import "./access-control/SuAccessControlModifiers.sol";
+import "./access-control/SuAccessControlAuthenticated.sol";
 
-contract Bonus is IBonus, SuAccessControlModifiers {
+contract Bonus is IBonus, SuAccessControlAuthenticated {
     mapping(address => NFTInfo) public nftInfo;
     mapping(address => UserInfo) public userInfo;
     mapping(address => CommunityAdminInfo) public communityAdminInfo;
     mapping(address => AdminInfo) public adminInfo;
 
-    function initialize() public initializer {
-        __SuAccessControlModifiers_init();
+    function initialize(address _accessControlSingleton) public initializer {
+        __SuAuthenticated_init(_accessControlSingleton);
     }
 
     function _getLevelByXP(uint256 xp) internal pure returns (uint16) {
@@ -117,27 +116,27 @@ contract Bonus is IBonus, SuAccessControlModifiers {
         return _getLevelByXP(userInfo[user].xp);
     }
 
-    function setAdmin(address admin, bool isAdmin) public onlyOwner override {
+    function setAdmin(address admin, bool isAdmin) public onlyRole(DAO_ROLE) override {
         adminInfo[admin].isAdmin = isAdmin;
     }
 
-    function setCommunityAdmin(address communityAdmin, uint256 xpLimit, uint16 levelLimit) public onlyAdmin override {
+    function setCommunityAdmin(address communityAdmin, uint256 xpLimit, uint16 levelLimit) public onlyRole(ADMIN_ROLE) override {
         require(adminInfo[msg.sender].isAdmin, "Need admin rights");
         communityAdminInfo[communityAdmin].xpLimit = xpLimit;
         communityAdminInfo[communityAdmin].levelLimit = levelLimit;
     }
 
-    function setNftInfo(address nft, uint256 allocation, uint256 discountRatioPresale) public onlyAdmin override {
+    function setNftInfo(address nft, uint256 allocation, uint256 discountRatioPresale) public onlyRole(ADMIN_ROLE) override {
         nftInfo[nft].allocation = allocation;
         nftInfo[nft].discountRatioPresale = discountRatioPresale;
     }
 
-    function setUserInfo(address user, uint256 allocation, uint256 discountRatioPresale) public onlyAdmin override {
+    function setUserInfo(address user, uint256 allocation, uint256 discountRatioPresale) public onlyRole(ADMIN_ROLE) override {
         userInfo[user].allocation = allocation;
         userInfo[user].discountRatioPresale = discountRatioPresale;
     }
 
-    function distribute(address user, uint256 xp) public onlyCommunityAdmin override {
+    function distribute(address user, uint256 xp) public onlyRole(COMMUNITY_ADMIN_ROLE) override {
         require(
             xp <= communityAdminInfo[msg.sender].xpLimit,
             "XP to distribute shouldn't be more than admin xpLimit"
@@ -156,8 +155,17 @@ contract Bonus is IBonus, SuAccessControlModifiers {
         return userInfo[user].allocation;
     }
 
+    function getNftAllocation(address nft) public view override returns (uint256) {
+        return nftInfo[nft].allocation;
+    }
+
+
     function getDiscount(address user) public view override returns (uint256) {
         return userInfo[user].discountRatioPresale;
+    }
+
+    function getNftDiscount(address nft) public view override returns (uint256) {
+        return nftInfo[nft].discountRatioPresale;
     }
 
     /**
