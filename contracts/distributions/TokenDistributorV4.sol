@@ -281,6 +281,32 @@ contract TokenDistributorV4 is SuAccessControlAuthenticated {
 
     receive() external payable {}
 
+    function getDistributorStaticData() view external returns (
+        uint64 startTimestamp_,
+        uint64 deadlineTimestamp_,
+        uint256 minimumDonation_,
+        uint256 maximumDonation_,
+        uint256 donationGoalMin_,
+        uint256 donationGoalMax_,
+        address donationToken_,
+        uint64 fullVestingSeconds_,
+        uint64 cliffSeconds_,
+        uint64 tgeUnlockRatio1e18_,
+        uint64 vestingFrequencySeconds_
+    ) {
+        startTimestamp_ = startTimestamp;
+        deadlineTimestamp_ = deadlineTimestamp;
+        minimumDonation_ = minimumDonation;
+        maximumDonation_ = maximumDonation;
+        donationGoalMin_ = donationGoalMin;
+        donationGoalMax_ = donationGoalMax;
+        donationToken_ = donationToken;
+        fullVestingSeconds_ = fullVestingSeconds;
+        cliffSeconds_ = cliffSeconds;
+        tgeUnlockRatio1e18_ = tgeUnlockRatio1e18;
+        vestingFrequencySeconds_ = vestingFrequencySeconds;
+    }
+
     /**
      * @notice The owner of the contact can take away tokens sent to the contract.
      * @dev The owner can't take away SuDAO token already distributed to users,

@@ -8,6 +8,22 @@ import {BN_1E12, BN_1E18, BN_1E6} from "../utils";
 import {SignerWithAddress} from "@nomiclabs/hardhat-ethers/signers";
 import {latest, waitNBlocks} from "../utils/time";
 
+type DataType = {
+    startTimestamp: number;
+    startLengthSeconds: number,
+    lengthSeconds: number,
+    minGoal: number,
+    maxGoal: number,
+    minDonation: number,
+    maxDonation: number,
+    donationToken: string,
+    fullVestingSeconds: number,
+    cliffSeconds: number,
+    tgeUnlock: number,
+    vestingFrequencySeconds: number,
+    removeLogs: boolean,
+}
+
 describe("TokenDistributorV4", () => {
     let tx: ContractTransaction | Promise<ContractTransaction>;
 
@@ -17,13 +33,28 @@ describe("TokenDistributorV4", () => {
     let suDAO: SuDAO;
     let veERC20: VeERC20;
     let accessControlSingleton: SuAccessControlSingleton;
+    let data: DataType = {
+        startTimestamp: 0,
+        startLengthSeconds: 0,
+        lengthSeconds: 2 * 60,
+        minGoal: 1_000_000,
+        maxGoal: 2_000_000,
+        minDonation: 1_000,
+        maxDonation: 500_000,
+        donationToken: "",
+        fullVestingSeconds: 2 * 24 * 60 * 60,
+        cliffSeconds: 2 * 60 * 60,
+        tgeUnlock: 0.05,
+        vestingFrequencySeconds: 60 * 60,
+        removeLogs: true,
+    };
 
     let deployerSigner: SignerWithAddress;
     let ownerSigner: SignerWithAddress;
     let userSigner: SignerWithAddress;
     let randomSigner: SignerWithAddress;
 
-    const beforeAllFunc = async () => {
+    const initialize = async () => {
         const {
             deployer, owner, userAccount, randomAccount,
         } = await getNamedAccounts();
@@ -41,27 +72,44 @@ describe("TokenDistributorV4", () => {
         veERC20 = await ethers.getContract("VeERC20") as VeERC20;
         const mockErc20Factory = await ethers.getContractFactory("MockErc20");
         mockUSDT = await mockErc20Factory.deploy("test tether", "USDT", 6) as MockErc20;
+    }
 
-        const blockTimestamp = await latest();
-        await run("setDistributor", {
-            startTimestamp: blockTimestamp,
-            startLengthSeconds: 0,
-            lengthSeconds: 2 * 60,
-            minGoal: 1_000_000,
-            maxGoal: 2_000_000,
-            minDonation: 1_000,
-            maxDonation: 500_000,
-            donationToken: mockUSDT.address,
-            fullVestingSeconds: 2 * 24 * 60 * 60,
-            cliffSeconds: 2 * 60 * 60,
-            tgeUnlock: 0.05,
-            vestingFrequencySeconds: 60 * 60,
-            removeLogs: true,
-        });
+    const beforeAllFuncNoSuDAOMint = async (distributeData: DataType) => {
+        await initialize();
+        distributeData.startTimestamp = data.startTimestamp || await latest();
+        distributeData.donationToken = mockUSDT.address;
+        await run("setDistributor", distributeData);
 
         await accessControlSingleton.grantRole(await veERC20.ADMIN_ROLE(), distributor.address);
+    }
+
+    const beforeAllFunc = async () => {
+        await beforeAllFuncNoSuDAOMint(data);
         await suDAO.mint(distributor.address, BN_1E18.mul(1_450_000));
     };
+
+    describe("initial tests", function () {
+        it("nothing is set", async () => {
+            await initialize();
+
+            // no distribution
+            tx = distributor.connect(ownerSigner).participate(BN_1E6.mul(10000), mockNft.address);
+            await expect(tx).to.be.reverted;
+        });
+        it("after setDistributor and grantRole", async () => {
+            await beforeAllFuncNoSuDAOMint({ ...data, startTimestamp: await latest() + 60});
+
+            // distribution don't started
+            await expect(distributor.connect(userSigner).participate(BN_1E6.mul(10000), mockNft.address)).to.be.reverted;
+
+            await waitNBlocks(100);
+
+            // distributor don't have suDAO to distribute
+            await mockNft.mint(userSigner.address);
+            tx = distributor.connect(userSigner).participate(BN_1E6.mul(10000), mockNft.address);
+            await expect(tx).to.be.reverted;
+        });
+    });
 
     describe("rewards are correct", function () {
         this.beforeEach(beforeAllFunc);
@@ -95,6 +143,37 @@ describe("TokenDistributorV4", () => {
             await mockUSDT.connect(signer).approve(distributor.address, BN_1E6.mul(2_000_000));
             await mockNft.mint(signer.address);
         }
+
+        it("setDistributionInfo is correct", async () => {
+            const contractData = await distributor.getDistributorStaticData();
+            expect(contractData.startTimestamp_).to.be.equal(data.startTimestamp);
+            expect(contractData.deadlineTimestamp_).to.be.equal(data.startTimestamp + data.startLengthSeconds + data.lengthSeconds);
+            expect(contractData.minimumDonation_).to.be.equal(BN_1E6.mul(data.minDonation));
+            expect(contractData.maximumDonation_).to.be.equal(BN_1E6.mul(data.maxDonation));
+            expect(contractData.donationGoalMin_).to.be.equal(BN_1E6.mul(data.minGoal));
+            expect(contractData.donationGoalMax_).to.be.equal(BN_1E6.mul(data.maxGoal));
+            expect(contractData.donationToken_).to.be.equal(data.donationToken);
+            expect(contractData.fullVestingSeconds_).to.be.equal(data.fullVestingSeconds);
+            expect(contractData.cliffSeconds_).to.be.equal(data.cliffSeconds);
+            expect(contractData.tgeUnlockRatio1e18_).to.be.equal(BN_1E18.mul(data.tgeUnlock * 1000).div(1000));
+            expect(contractData.vestingFrequencySeconds_).to.be.equal(data.vestingFrequencySeconds);
+        });
+
+        it("admin can remove accessNFT", async () => {
+            let accessNFTS = await distributor.getAccessNftsForUser(userSigner.address);
+            expect(accessNFTS[0]).to.be.equal('0x0000000000000000000000000000000000000000');
+
+            await mockNft.mint(userSigner.address);
+            accessNFTS = await distributor.getAccessNftsForUser(userSigner.address);
+            expect(accessNFTS[0]).to.be.equal(mockNft.address);
+
+            await distributor.setNftAccess(mockNft.address, false);
+            accessNFTS = await distributor.getAccessNftsForUser(userSigner.address);
+            expect(accessNFTS.length).to.be.equal(0);
+
+            tx = distributor.connect(ownerSigner).participate(BN_1E6.mul(10000), mockNft.address);
+            await expect(tx).to.be.reverted;
+        });
 
         it("user have access token", async () => {
             let accessNFTS = await distributor.getAccessNftsForUser(userSigner.address);
@@ -164,6 +243,9 @@ describe("TokenDistributorV4", () => {
 
             // wait until distribution ends
             await waitNBlocks(150);
+
+            // can't participate more
+            await expect(distributor.connect(userSigner).participate(donation2, mockNft.address)).to.be.reverted;
 
             // should donate all received tokens
             await expect(distributor.connect(userSigner).takeDonationBack()).to.be.reverted;

@@ -88,11 +88,11 @@ task("setDistributor", "set all parameters from the script")
         }
 
         // TODO: remove in mainnet!!!
-        tx = await suDAO.mint(distributor.address, BN_1E18.mul(1_450_000));
-        await tx.wait();
-        if (!taskArgs.removeLogs) {
-          console.log("✅ suDAO mint done");
-        }
+        // tx = await suDAO.mint(distributor.address, BN_1E18.mul(1_450_000));
+        // await tx.wait();
+        // if (!taskArgs.removeLogs) {
+        //   console.log("✅ suDAO mint done");
+        // }
     });
 
 export default {};
