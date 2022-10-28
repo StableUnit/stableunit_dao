@@ -36,7 +36,7 @@ describe("Bonus", () => {
       tx = bonus.setUserInfo(accounts.alice.address, BN_1E6, BN_1E18.div(10));
       await expect(tx).to.be.reverted;
 
-      tx = bonus.distribute(accounts.alice.address, 5000);
+      tx = bonus.distributeXp(accounts.alice.address, 5000);
       await expect(tx).to.be.reverted;
 
       tx = bonus.setAdmin(accounts.deployer.address, true);
@@ -52,7 +52,7 @@ describe("Bonus", () => {
       tx = bonus.setUserInfo(accounts.alice.address, BN_1E6, BN_1E18.div(10));
       await expect(tx).not.to.be.reverted;
 
-      tx = bonus.distribute(accounts.alice.address, 5000);
+      tx = bonus.distributeXp(accounts.alice.address, 5000);
       await expect(tx).to.be.reverted;
 
       tx = bonus.setCommunityAdmin(accounts.deployer.address, BN_1E6, 100);
@@ -68,7 +68,7 @@ describe("Bonus", () => {
       tx = bonus.connect(accounts.bob).setUserInfo(accounts.alice.address, BN_1E6, BN_1E18.div(10));
       await expect(tx).not.to.be.reverted;
 
-      tx = bonus.connect(accounts.bob).distribute(accounts.alice.address, 5000);
+      tx = bonus.connect(accounts.bob).distributeXp(accounts.alice.address, 5000);
       await expect(tx).to.be.reverted;
 
       tx = bonus.connect(accounts.bob).setCommunityAdmin(accounts.alice.address, BN_1E6, 100);
@@ -80,7 +80,7 @@ describe("Bonus", () => {
       await bonus.setAdmin(accounts.bob.address, true);
       await bonus.connect(accounts.bob).setCommunityAdmin(accounts.alice.address, BN_1E6, 100);
 
-      tx = bonus.connect(accounts.alice).distribute(accounts.carl.address, 5000);
+      tx = bonus.connect(accounts.alice).distributeXp(accounts.carl.address, 5000);
       await expect(tx).not.to.be.reverted;
 
       tx = bonus.connect(accounts.alice).setAdmin(accounts.carl.address, true);
@@ -106,7 +106,7 @@ describe("Bonus", () => {
       const newAllocation = await bonus.getNftAllocation(mockNft.address);
       expect(newAllocation).to.be.equal(allocation);
 
-      const newDiscount = await bonus.getNftDiscount(mockNft.address);
+      const newDiscount = await bonus.getNftBonus(mockNft.address);
       expect(newDiscount).to.be.equal(discount);
     });
   });
@@ -124,7 +124,7 @@ describe("Bonus", () => {
       const newAllocation = await bonus.getAllocation(accounts.alice.address);
       expect(newAllocation).to.be.equal(allocation);
 
-      const newDiscount = await bonus.getDiscount(accounts.alice.address);
+      const newDiscount = await bonus.getBonus(accounts.alice.address);
       expect(newDiscount).to.be.equal(discount);
     });
 
@@ -142,7 +142,7 @@ describe("Bonus", () => {
       expect(userInfo.xp).to.be.equal(0);
       expect(await bonus.getLevel(accounts.carl.address)).to.be.equal(1);
 
-      await bonus.connect(accounts.alice).distribute(accounts.carl.address, userXP);
+      await bonus.connect(accounts.alice).distributeXp(accounts.carl.address, userXP);
       let communityAdminInfo = await bonus.communityAdminInfo(accounts.alice.address);
       userInfo = await bonus.userInfo(accounts.carl.address);
 
@@ -151,15 +151,15 @@ describe("Bonus", () => {
 
       expect(userInfo.xp).to.be.equal(userXP);
       expect(userInfo.allocation).to.be.equal(0);
-      expect(userInfo.discountRatioPresale).to.be.equal(0);
+      expect(userInfo.donationBonusRatio).to.be.equal(0);
       expect(await bonus.getLevel(accounts.carl.address)).to.be.equal(lvl);
 
       // can't distribute more xp than admin has
-      tx = bonus.connect(accounts.alice).distribute(accounts.carl.address, adminXP - userXP + 1);
+      tx = bonus.connect(accounts.alice).distributeXp(accounts.carl.address, adminXP - userXP + 1);
       await expect(tx).to.be.reverted;
 
       // admin can distribute all xp
-      await bonus.connect(accounts.alice).distribute(accounts.carl.address, adminXP - userXP);
+      await bonus.connect(accounts.alice).distributeXp(accounts.carl.address, adminXP - userXP);
 
       communityAdminInfo = await bonus.communityAdminInfo(accounts.alice.address);
       userInfo = await bonus.userInfo(accounts.carl.address);
@@ -169,7 +169,7 @@ describe("Bonus", () => {
 
       expect(userInfo.xp).to.be.equal(adminXP);
       expect(userInfo.allocation).to.be.equal(0);
-      expect(userInfo.discountRatioPresale).to.be.equal(0);
+      expect(userInfo.donationBonusRatio).to.be.equal(0);
       expect(await bonus.getLevel(accounts.carl.address)).to.be.equal(lvl + 1);
     });
 
@@ -183,11 +183,11 @@ describe("Bonus", () => {
       await bonus.connect(accounts.bob).setCommunityAdmin(accounts.alice.address, adminXP, restrictedLvl);
 
       // can't distribute more lvl than admin has
-      tx = bonus.connect(accounts.alice).distribute(accounts.carl.address, userXP);
+      tx = bonus.connect(accounts.alice).distributeXp(accounts.carl.address, userXP);
       await expect(tx).to.be.reverted;
 
       // can't distribute more xp than admin has
-      tx = bonus.connect(accounts.alice).distribute(accounts.carl.address, userXP * 2);
+      tx = bonus.connect(accounts.alice).distributeXp(accounts.carl.address, userXP * 2);
       await expect(tx).to.be.reverted;
     });
 
@@ -201,7 +201,7 @@ describe("Bonus", () => {
       await bonus.setAdmin(accounts.bob.address, true);
       await bonus.connect(accounts.bob).setCommunityAdmin(accounts.alice.address, adminXP, allowedLvl);
 
-      await bonus.connect(accounts.alice).distribute(accounts.carl.address, userXP);
+      await bonus.connect(accounts.alice).distributeXp(accounts.carl.address, userXP);
       const userInfo = await bonus.userInfo(accounts.carl.address);
 
       expect(userInfo.xp).to.be.equal(userXP);
