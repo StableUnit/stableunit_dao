@@ -129,16 +129,16 @@ contract Bonus is IBonus, SuAccessControlAuthenticated {
     function setNftInfo(address nft, uint256 allocation, uint256 discountRatioPresale) public override {
         require(adminInfo[msg.sender].isAdmin, "Need admin rights");
         nftInfo[nft].allocation = allocation;
-        nftInfo[nft].discountRatioPresale = discountRatioPresale;
+        nftInfo[nft].donationBonusRatio = discountRatioPresale;
     }
 
     function setUserInfo(address user, uint256 allocation, uint256 discountRatioPresale) public override {
         require(adminInfo[msg.sender].isAdmin, "Need admin rights");
         userInfo[user].allocation = allocation;
-        userInfo[user].discountRatioPresale = discountRatioPresale;
+        userInfo[user].donationBonusRatio = discountRatioPresale;
     }
 
-    function distribute(address user, uint256 xp) public override {
+    function distributeXp(address user, uint256 xp) public override {
         require(communityAdminInfo[msg.sender].levelLimit > 0, "Need communityAdmin rights");
         require(
             xp <= communityAdminInfo[msg.sender].xpLimit,
@@ -164,12 +164,12 @@ contract Bonus is IBonus, SuAccessControlAuthenticated {
     }
 
 
-    function getDiscount(address user) public view override returns (uint256) {
-        return userInfo[user].discountRatioPresale;
+    function getBonus(address user) public view override returns (uint256) {
+        return userInfo[user].donationBonusRatio;
     }
 
-    function getNftDiscount(address nft) public view override returns (uint256) {
-        return nftInfo[nft].discountRatioPresale;
+    function getNftBonus(address nft) public view override returns (uint256) {
+        return nftInfo[nft].donationBonusRatio;
     }
 
     /**

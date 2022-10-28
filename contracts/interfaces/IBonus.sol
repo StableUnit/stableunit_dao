@@ -12,7 +12,7 @@ interface IBonus {
     **/
     struct NFTInfo {
         uint256 allocation;
-        uint256 discountRatioPresale;
+        uint256 donationBonusRatio;
     }
 
     /**
@@ -24,7 +24,7 @@ interface IBonus {
     struct UserInfo {
         uint256 xp;
         uint256 allocation;
-        uint256 discountRatioPresale;
+        uint256 donationBonusRatio;
     }
 
     /**
@@ -82,7 +82,7 @@ interface IBonus {
      * `user` Address of user
      * `xp` The amount of XP that admin want to give user (xp <= admin.xpLimit && levelAfter(user) <= admin.levelLimit)
     **/
-    function distribute(address user, uint256 xp) external;
+    function distributeXp(address user, uint256 xp) external;
 
     /**
      * @notice Get user allocation
@@ -91,20 +91,20 @@ interface IBonus {
     function getAllocation(address user) external view returns ( uint256 );
 
     /**
-     * @notice Get user discount ratio for presale
+     * @notice Get user bonus reward for donation
      * `user` Address of user
     **/
-    function getDiscount(address user) external view returns ( uint256 );
+    function getBonus(address user) external view returns ( uint256 );
 
     /**
      * @notice Get nft allocation
      * `user` Address of user
     **/
-    function getNftAllocation(address user) external view returns ( uint256 );
+    function getNftAllocation(address nft) external view returns ( uint256 );
 
     /**
-     * @notice Get nft discount ratio for presale
+     * @notice Get nft bonus reward for donation
      * `user` Address of nft
     **/
-    function getNftDiscount(address user) external view returns ( uint256 );
+    function getNftBonus(address nft) external view returns ( uint256 );
 }

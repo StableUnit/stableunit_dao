@@ -33,21 +33,24 @@ contract TokenDistributorV4 is SuAccessControlAuthenticated {
     using SafeERC20Upgradeable for IERC20Upgradeable;
     using Math for *;
 
+    // immutable values in non-upgradable contracts
     address public VE_ERC_20;
     address public SU_DAO;
-    address public BONUS_CONTRACT;
+    IBonus public BONUS_CONTRACT;
 
     uint64 public startTimestamp;                 // The date when participation is available
     uint64 public deadlineTimestamp;              // Ultimate date when participation is available
 
-    uint256 public minimumDonation;            // Let's think that price(donationToken) = $1
+    uint256 public minimumDonation;
     uint256 public maximumDonation;
-    int256[] public bondingCurvePolynomial1e18;                  // Reserve ratio for Bancor formula, represented in ppm, 1-1000000
+    int256[] public bondingCurvePolynomial1e18;   // Reserve ratio for Bancor formula, represented in ppm, 1-1000000
 
     uint256 public donationGoalMin;
     uint256 public donationGoalMax;
+
     mapping(address => uint256) public donations; // Donation amounts
     uint256 public totalDonations;                // Sum of all user donations
+
     address public donationToken;                 // For now it's only DAI
 
     uint64 public fullVestingSeconds;             // Default vesting period is 12 months
@@ -58,20 +61,31 @@ contract TokenDistributorV4 is SuAccessControlAuthenticated {
     using EnumerableSet for EnumerableSet.AddressSet;
     EnumerableSet.AddressSet private nftRequirement;
 
-    uint256 public donationTokenToUSD1e18;               // default reward amount user might get for 1 donation token
+    uint256 public donationTokenToUSD1e18;        // donationTokenAmount * donationTokenToUSD1e18 == usd value * 1e18
+    struct BonusStats {
+        uint256 bonusRewarded;
+    }
+
+    BonusStats public bonusStats;
+
 
     error NoActiveDistributionError();
     error DistributionTimeframeError();
     error AccessNftNotValidError(address accessNft);
     error NoAccessNftError(address account, address accessNft);
     error NotEnoughRewardLeft(uint256 donationAmountUsd1e18);
+    error NegativeAntiderivative(uint256 x);
+    error VestingError();
+    error DonationAmountError();
+    error DonationGoalError(uint256 minGaol, uint256 maxGoal, uint256 totalDonations);
+    error DonationTokenError();
 
 
     function initialize(address _accessControlSingleton, address _suDAO, address _veErc20, address _bonusContract) initializer public {
         __SuAuthenticated_init(_accessControlSingleton);
         SU_DAO = _suDAO;
         VE_ERC_20 = _veErc20;
-        BONUS_CONTRACT = _bonusContract;
+        BONUS_CONTRACT = IBonus(_bonusContract);
         IERC20Upgradeable(_suDAO).approve(address(_veErc20), type(uint256).max);
     }
 
@@ -87,7 +101,7 @@ contract TokenDistributorV4 is SuAccessControlAuthenticated {
         return px;
     }
 
-    function antiderivativeOfBondingCurvePolynomial1e18At(uint256 x) public view returns (int256) {
+    function antiderivativeOfBondingCurvePolynomial1e18At(uint256 x) public view returns (uint256) {
         int256 xSigned = x.toInt256();
         uint256 l = bondingCurvePolynomial1e18.length;
         int256 x_ = xSigned;
@@ -96,20 +110,22 @@ contract TokenDistributorV4 is SuAccessControlAuthenticated {
             px = px + bondingCurvePolynomial1e18[i] * x_ / (i.toInt256() + 1);
             x_ = x_ * xSigned;
         }
-        return px;
+        if (px < 0) revert NegativeAntiderivative(x);
+        return uint256(px);
     }
 
     function getBondingCurveRewardAmountFromDonationUSD(uint256 donationAmountUSD1e18) public view returns (uint256) {
-        int256 S1 = antiderivativeOfBondingCurvePolynomial1e18At(totalDonations * donationTokenToUSD1e18 / 1e18);
-        int256 S2 = antiderivativeOfBondingCurvePolynomial1e18At((totalDonations * donationTokenToUSD1e18 + donationAmountUSD1e18) / 1e18);
-        int256 rewards = (S2 - S1);
-        require(rewards > 0, "Rewards are negative");
-        uint256 result = rewards.toUint256();
-        //         1 usdt == 1 suDAO => baseRewardRatio = 1e12;
-        if (result > IERC20Upgradeable(SU_DAO).balanceOf(address(this))) {
+        uint256 S1 = antiderivativeOfBondingCurvePolynomial1e18At(totalDonations * donationTokenToUSD1e18 / 1e18);
+        uint256 S2 = antiderivativeOfBondingCurvePolynomial1e18At((totalDonations * donationTokenToUSD1e18 + donationAmountUSD1e18) / 1e18);
+        uint256 rewards = S2 - S1;
+        if (rewards > IERC20Upgradeable(SU_DAO).balanceOf(address(this))) {
             revert NotEnoughRewardLeft(donationAmountUSD1e18);
         }
-        return result;
+        return rewards;
+    }
+
+    function getAccessNfts() public view returns (address[] memory) {
+        return nftRequirement.values();
     }
 
     function getAccessNftsForUser(address account) public view returns (address[] memory) {
@@ -138,20 +154,17 @@ contract TokenDistributorV4 is SuAccessControlAuthenticated {
         if (IERC721Upgradeable(accessNft).balanceOf(msg.sender) == 0)
             revert NoAccessNftError(msg.sender, accessNft);
 
-        require(
-            donationAmount > minimumDonation,
-            "Your donation should be greater than minimum donation"
-        );
-
-        uint256 bonusAllocation = IBonus(BONUS_CONTRACT).getAllocation(msg.sender);
+        if (donationAmount < minimumDonation)
+            revert DonationAmountError();
+        uint256 bonusAllocation = Math.max(BONUS_CONTRACT.getAllocation(msg.sender), BONUS_CONTRACT.getNftAllocation(accessNft));
         uint256 maxAllocation = bonusAllocation == 0 ? maximumDonation : bonusAllocation;
-        require(
-            donations[msg.sender] + donationAmount <= maxAllocation,
-            "Your donations should be less than max donation"
-        );
+        if (donations[msg.sender] + donationAmount > maxAllocation) revert DonationAmountError();
 
-        uint256 bonusDiscountRatio = IBonus(BONUS_CONTRACT).getDiscount(msg.sender);
-        uint256 rewardAmount = getBondingCurveRewardAmountFromDonationUSD(donationAmount * donationTokenToUSD1e18) * (1e18 + bonusDiscountRatio) / 1e18;
+        uint256 rewardAmount = getBondingCurveRewardAmountFromDonationUSD(donationAmount * donationTokenToUSD1e18) ;
+
+        uint256 bonusRewardRatio = Math.max(BONUS_CONTRACT.getBonus(msg.sender), BONUS_CONTRACT.getNftBonus(accessNft));
+        bonusStats.bonusRewarded = rewardAmount * bonusRewardRatio / 1e18;
+        rewardAmount = rewardAmount * (1e18 + bonusRewardRatio) / 1e18;
 
         // get donation from the user
         IERC20Upgradeable(donationToken).safeTransferFrom(msg.sender, address(this), donationAmount);
@@ -185,14 +198,41 @@ contract TokenDistributorV4 is SuAccessControlAuthenticated {
     }
 
     function takeDonationBack() external {
-        require(block.timestamp >= deadlineTimestamp, "Participation has not yet ended");
-        require(totalDonations < donationGoalMin, "Min goal reached");
-        require(IERC20Upgradeable(VE_ERC_20).balanceOf(msg.sender) == 0, "You should donate all your tokens in veERC20");
+        if (block.timestamp < deadlineTimestamp)
+            revert DistributionTimeframeError();
+        if (totalDonations >= donationGoalMin)
+            revert DonationGoalError(donationGoalMin, donationGoalMax, totalDonations);
+        if (IERC20Upgradeable(VE_ERC_20).balanceOf(msg.sender) > 0)
+            revert DonationAmountError();
 
         uint256 donationAmount = donations[msg.sender];
         donations[msg.sender] = 0;
         totalDonations = totalDonations - donationAmount;
-        IERC20Upgradeable(donationToken).safeTransferFrom(address(this), msg.sender, donationAmount);
+        IERC20Upgradeable(donationToken).safeTransfer(msg.sender, donationAmount);
+    }
+
+    /**
+     * @notice The admin can set new or edit existing token vesting details
+     */
+    function setDistributionVesting(
+        uint64 _fullVestingSeconds,
+        uint64 _cliffSeconds,
+        uint64 _tgeUnlockRatio1e18,
+        uint64 _vestingFrequencySeconds
+    ) external onlyRole(ADMIN_ROLE) {
+        if (_cliffSeconds > _fullVestingSeconds) {
+            revert VestingError();
+        }
+        if (_tgeUnlockRatio1e18 > 1e18) {
+            revert VestingError();
+        }
+        if (_vestingFrequencySeconds == 0 || _vestingFrequencySeconds > _fullVestingSeconds) {
+            revert VestingError();
+        }
+        fullVestingSeconds = _fullVestingSeconds;
+        cliffSeconds = _cliffSeconds;
+        tgeUnlockRatio1e18 = _tgeUnlockRatio1e18;
+        vestingFrequencySeconds = _vestingFrequencySeconds;
     }
 
     /**
@@ -206,17 +246,16 @@ contract TokenDistributorV4 is SuAccessControlAuthenticated {
         uint256 _minimumDonation,
         uint256 _maximumDonation,
         address _donationToken,
-        uint64 _fullVestingSeconds,
-        uint64 _cliffSeconds,
-        uint64 _tgeUnlockRatio1e18,
-        uint64 _vestingFrequencySeconds
+        uint256 _donationTokenToUSD1e18
     ) external onlyRole(ADMIN_ROLE) {
-        require(_startTimestamp < _deadlineTimestamp, "!_startTimestamp < _deadlineTimestamp");
-        require(_donationGoalMin <= _donationGoalMax, "!donationGoalMin <= donationGoalMax");
-        require(_minimumDonation <= _maximumDonation, "!minimumDonationUsd <= maximumDonationUsd");
-        require(_donationToken != address(0), "donationToken is null");
-        require(_cliffSeconds < _fullVestingSeconds, "!cliff seconds < vesting seconds");
-        require(_tgeUnlockRatio1e18 <= 1e18, "tgeUnlockRatio should be less than 1");
+        if (_startTimestamp >= _deadlineTimestamp)
+            revert DistributionTimeframeError();
+        if (_donationGoalMin > _donationGoalMax)
+            revert DonationGoalError(_donationGoalMin, _donationGoalMax, totalDonations);
+        if (_minimumDonation > _maximumDonation)
+            revert DonationAmountError();
+        if(_donationToken == address(0))
+            revert DonationTokenError();
 
         startTimestamp = _startTimestamp;
         deadlineTimestamp = _deadlineTimestamp;
@@ -225,30 +264,7 @@ contract TokenDistributorV4 is SuAccessControlAuthenticated {
         minimumDonation = _minimumDonation;
         maximumDonation = _maximumDonation;
         donationToken = _donationToken;
-        fullVestingSeconds = _fullVestingSeconds;
-        cliffSeconds = _cliffSeconds;
-        tgeUnlockRatio1e18 = _tgeUnlockRatio1e18;
-        vestingFrequencySeconds = _vestingFrequencySeconds;
-
-        IERC20Upgradeable(_donationToken).approve(address(this), type(uint256).max);
-
-        emit SetDistribution(
-            _startTimestamp,
-            _deadlineTimestamp,
-            _donationGoalMin,
-            _donationGoalMax,
-            _minimumDonation,
-            _maximumDonation,
-            _donationToken,
-            _fullVestingSeconds,
-            _cliffSeconds,
-            _tgeUnlockRatio1e18,
-            _vestingFrequencySeconds
-        );
-    }
-
-    function setBaseRewardRatio(uint256 _baseRewardRatio) external onlyRole(ADMIN_ROLE) {
-        donationTokenToUSD1e18 = _baseRewardRatio;
+        donationTokenToUSD1e18 = _donationTokenToUSD1e18;
     }
 
     function setBondingCurve(int256[] memory _bondingCurvePolynomial1e18) external onlyRole(ADMIN_ROLE) {
@@ -265,41 +281,13 @@ contract TokenDistributorV4 is SuAccessControlAuthenticated {
 
     receive() external payable {}
 
-    function getDistributorStaticData() view external returns (
-        uint64,
-        uint64,
-        uint256,
-        uint256,
-        uint256,
-        uint256,
-        address,
-        // uint256 ?? baseRewardRatio
-        uint64,
-        uint64,
-        uint64,
-        uint64
-    ) {
-        return (
-            startTimestamp,
-            deadlineTimestamp,
-            minimumDonation,
-            maximumDonation,
-            donationGoalMin,
-            donationGoalMax,
-            donationToken,
-            fullVestingSeconds,
-            cliffSeconds,
-            tgeUnlockRatio1e18,
-            vestingFrequencySeconds
-        );
-    }
-
     /**
      * @notice The owner of the contact can take away tokens sent to the contract.
-     * @dev The owner can't take away SuDAO token already distributed to users, because they are stored on timelockVault
+     * @dev The owner can't take away SuDAO token already distributed to users,
+     *      because they are stored on different contract
      */
     function adminWithdraw(IERC20Upgradeable token) external onlyRole(DAO_ROLE) {
-        if (token == IERC20Upgradeable(address(0))) {
+        if (address(token) == address(0)) {
             payable(msg.sender).transfer(address(this).balance);
         } else {
             token.safeTransfer(address(msg.sender), token.balanceOf(address(this)));
@@ -307,19 +295,6 @@ contract TokenDistributorV4 is SuAccessControlAuthenticated {
     }
 
     event Participated(address msg_sender, uint256 donationAmount);
-    event SetDistribution(
-        uint64 _startTimestamp,
-        uint64 _deadlineTimestamp,
-        uint256 _donationGoalMin,
-        uint256 _donationGoalMax,
-        uint256 _minimumDonation,
-        uint256 _maximumDonation,
-        address _donationToken,
-        uint64 _fullVestingSeconds,
-        uint64 _cliffSeconds,
-        uint64 _tgeUnlockRatio1e18,
-        uint64 _vestingFrequencySeconds
-    );
 
     /**
      * @dev This empty reserved space is put in place to allow future versions to add new

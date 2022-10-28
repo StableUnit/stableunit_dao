@@ -20,8 +20,8 @@ task("setDistributor", "set all parameters from the script")
         const distributor = await hre.ethers.getContract("TokenDistributorV4") as TokenDistributorV4;
         const mockErc721 = await hre.ethers.getContract("MockErc721") as MockErc721;
         const suDAO = await hre.ethers.getContract("SuDAO") as SuDAO;
-        console.log(`TokenDistributorV4@${ (await hre.ethers.provider.getNetwork()).name } = `, distributor.address);
-        console.log(`mockErc721@${ (await hre.ethers.provider.getNetwork()).name } = `, mockErc721.address);
+        // console.log(`setDistributor.TokenDistributorV4@${ (await hre.ethers.provider.getNetwork()).name } = `, distributor.address);
+        // console.log(`setDistributor.mockErc721@${ (await hre.ethers.provider.getNetwork()).name } = `, mockErc721.address);
 
         const nowTimestamp = Math.floor(Date.now() / 1000);
 
@@ -48,15 +48,22 @@ task("setDistributor", "set all parameters from the script")
             BN_1E6.mul(DISTRIBUTION_INFO.minDonation),
             BN_1E6.mul(DISTRIBUTION_INFO.maxDonation),
             DISTRIBUTION_INFO.donationToken,
-            DISTRIBUTION_INFO.fullVestingSeconds,
+            BN_1E12,
+        );
+        await tx.wait();
+        if (!taskArgs.removeLogs) {
+            console.log("✅ setDistributionInfo done");
+        }
+
+        tx = await distributor.setDistributionVesting(
+        DISTRIBUTION_INFO.fullVestingSeconds,
             DISTRIBUTION_INFO.cliffSeconds,
             BN_1E18.mul(DISTRIBUTION_INFO.tgeUnlock * 1000).div(1000),
             DISTRIBUTION_INFO.vestingFrequencySeconds
         );
         await tx.wait();
-
         if (!taskArgs.removeLogs) {
-          console.log("✅ setDistributionInfo done");
+          console.log("✅ setDistributionVesting done");
         }
 
         tx = await distributor.setBondingCurve([
@@ -78,12 +85,6 @@ task("setDistributor", "set all parameters from the script")
         await tx.wait();
         if (!taskArgs.removeLogs) {
           console.log("✅ setNftAccess done");
-        }
-
-        tx = await distributor.setBaseRewardRatio(BN_1E12);
-        await tx.wait();
-        if (!taskArgs.removeLogs) {
-          console.log("✅ setBaseRewardRatio done");
         }
 
         // TODO: remove in mainnet!!!

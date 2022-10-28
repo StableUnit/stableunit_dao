@@ -230,7 +230,7 @@ contract VeERC20 is ERC20BurnableUpgradeable, SuAccessControlAuthenticated, IveE
     }
     receive() external payable {}
 
-    function transfer(address recipient, uint256 amount) public virtual override returns (bool) {
+    function transfer(address, uint256) public virtual override returns (bool) {
         revert("not possible to transfer vested token");
     }
 

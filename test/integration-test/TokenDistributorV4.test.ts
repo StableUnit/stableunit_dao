@@ -122,7 +122,7 @@ describe("TokenDistributorV4", () => {
             await expect(tx).to.be.reverted;
         });
 
-        it("user can take donations back when distribution fail", async () => {
+        it("user can take donations back when distribution fails",  async () => {
             const donation1 = BN_1E6.mul(100_000);
             const donation2 = BN_1E6.mul(50_000);
             const initialUSDTBalance = BN_1E6.mul(500_000);
@@ -135,12 +135,14 @@ describe("TokenDistributorV4", () => {
             let totalDonations = await distributor.totalDonations();
             let veSuDAOBalance = await veERC20.balanceOf(userSigner.address);
             let mockUSDTBalance = await mockUSDT.balanceOf(userSigner.address);
+
             expect(totalDonations).to.be.equal(donation1);
             expect(veSuDAOBalance).to.be.equal(expectedRewards);
             expect(mockUSDTBalance).to.be.equal(initialUSDTBalance.sub(donation1));
+            // console.log("donation1 is successful");
 
-            // time not is over
             await expect(distributor.connect(userSigner).takeDonationBack()).to.be.reverted;
+            // console.log("can't take donations back when time not is over");
 
             const maxDonation = await distributor.getMaximumDonationAmount(userSigner.address, mockNft.address);
             expect(maxDonation).to.be.gt(0);
@@ -148,22 +150,24 @@ describe("TokenDistributorV4", () => {
             // check balance after 2 donations
             const expectedReward2 = await distributor.getBondingCurveRewardAmountFromDonationUSD(BN_1E12.mul(donation2));
             await distributor.connect(userSigner).participate(donation2, mockNft.address);
-
             totalDonations = await distributor.totalDonations();
             veSuDAOBalance = await veERC20.balanceOf(userSigner.address);
             mockUSDTBalance = await mockUSDT.balanceOf(userSigner.address);
             expect(totalDonations).to.be.equal(donation1.add(donation2));
             expect(veSuDAOBalance).to.be.equal(expectedRewards.add(expectedReward2));
             expect(mockUSDTBalance).to.be.equal(initialUSDTBalance.sub(donation1).sub(donation2));
+            // console.log("donation2 is successful");
 
             // time not is over
             await expect(distributor.connect(userSigner).takeDonationBack()).to.be.reverted;
+            // console.log("can't take donations back when time not is over");
 
             // wait until distribution ends
             await waitNBlocks(150);
 
             // should donate all received tokens
             await expect(distributor.connect(userSigner).takeDonationBack()).to.be.reverted;
+            // console.log("donations back shouldn't work when didn't return tokens first");
 
             await veERC20.connect(userSigner).burnAll();
 
@@ -171,6 +175,7 @@ describe("TokenDistributorV4", () => {
             expect(veSuDAOBalance).to.be.equal(0);
 
             await expect(distributor.connect(userSigner).takeDonationBack()).not.to.be.reverted;
+            // console.log("donations back should work");
 
             veSuDAOBalance = await veERC20.balanceOf(userSigner.address);
             totalDonations = await distributor.totalDonations();
