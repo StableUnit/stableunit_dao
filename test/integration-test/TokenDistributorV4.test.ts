@@ -219,6 +219,8 @@ describe("TokenDistributorV4", () => {
             await expect(distributor.connect(userSigner).takeDonationBack()).to.be.reverted;
             await expect(distributor.connect(ownerSigner).takeDonationBack()).to.be.reverted;
             await expect(distributor.connect(randomSigner).takeDonationBack()).to.be.reverted;
+
+            // TODO: check if admin can withdraw all USDT
         });
     })
 });
