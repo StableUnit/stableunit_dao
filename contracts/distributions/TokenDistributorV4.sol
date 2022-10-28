@@ -230,6 +230,8 @@ contract TokenDistributorV4 is SuAccessControlAuthenticated {
         tgeUnlockRatio1e18 = _tgeUnlockRatio1e18;
         vestingFrequencySeconds = _vestingFrequencySeconds;
 
+        IERC20Upgradeable(_donationToken).approve(address(this), type(uint256).max);
+
         emit SetDistribution(
             _startTimestamp,
             _deadlineTimestamp,

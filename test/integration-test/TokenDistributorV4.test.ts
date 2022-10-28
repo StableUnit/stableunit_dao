@@ -1,12 +1,12 @@
 import {deployments, ethers, getNamedAccounts} from "hardhat";
-import {BigNumber, ContractTransaction} from "ethers";
+import {ContractTransaction} from "ethers";
 import {expect} from "chai";
 import { run } from "hardhat";
 
 import {MockErc20, MockErc721, SuAccessControlSingleton, SuDAO, TokenDistributorV4, VeERC20} from "../../typechain";
-import {BN_1E18, BN_1E6, createBN1e18} from "../utils";
+import {BN_1E12, BN_1E18, BN_1E6} from "../utils";
 import {SignerWithAddress} from "@nomiclabs/hardhat-ethers/signers";
-import {latest} from "../utils/time";
+import {latest, waitNBlocks} from "../utils/time";
 
 describe("TokenDistributorV4", () => {
     let tx: ContractTransaction | Promise<ContractTransaction>;
@@ -46,7 +46,7 @@ describe("TokenDistributorV4", () => {
         await run("setDistributor", {
             startTimestamp: blockTimestamp,
             startLengthSeconds: 0,
-            lengthSeconds: 2 * 60 * 60,
+            lengthSeconds: 2 * 60,
             minGoal: 1_000_000,
             maxGoal: 2_000_000,
             minDonation: 1_000,
@@ -64,7 +64,7 @@ describe("TokenDistributorV4", () => {
     };
 
     describe("rewards are correct", function () {
-        this.beforeAll(beforeAllFunc);
+        this.beforeEach(beforeAllFunc);
         it("bonding curve give right amount of rewards", async () => {
             const tx = distributor.getBondingCurveRewardAmountFromDonationUSD(BN_1E18);
             await expect(tx).not.be.reverted;
@@ -87,7 +87,7 @@ describe("TokenDistributorV4", () => {
     });
 
     describe("Main flow is correct", function () {
-        this.beforeAll(beforeAllFunc);
+        this.beforeEach(beforeAllFunc);
 
         it("user have access token", async () => {
             let accessNFTS = await distributor.getAccessNftsForUser(userSigner.address);
@@ -98,7 +98,7 @@ describe("TokenDistributorV4", () => {
             expect(accessNFTS[0]).to.be.equal(mockNft.address);
         });
 
-        it("user can participate", async () => {
+        it("user can't participate with no NFT or smallAmount", async () => {
             await mockUSDT.mint(userSigner.address, BN_1E6.mul(500_000));
             await mockUSDT.connect(userSigner).approve(distributor.address, BN_1E6.mul(1_000_000));
             // don't have NFT
@@ -110,10 +110,66 @@ describe("TokenDistributorV4", () => {
             // amount < minAmount
             tx = distributor.connect(userSigner).participate(BN_1E6.mul(10), mockNft.address);
             await expect(tx).to.be.reverted;
+        });
 
-            await distributor.connect(userSigner).participate(BN_1E6.mul(100_000), mockNft.address);
-            const veSuDAOBalance = await veERC20.balanceOf(userSigner.address);
-            expect(veSuDAOBalance).to.be.gt(0);
+        it("user can take donations back when distribution fail", async () => {
+            const donation1 = BN_1E6.mul(100_000);
+            const donation2 = BN_1E6.mul(50_000);
+            const initialUSDTBalance = BN_1E6.mul(500_000);
+
+            await mockUSDT.mint(userSigner.address, initialUSDTBalance);
+            await mockUSDT.connect(userSigner).approve(distributor.address, BN_1E6.mul(1_000_000));
+            await mockNft.mint(userSigner.address);
+
+            const expectedRewards = await distributor.getBondingCurveRewardAmountFromDonationUSD(BN_1E12.mul(donation1));
+            await distributor.connect(userSigner).participate(donation1, mockNft.address);
+
+            let totalDonations = await distributor.totalDonations();
+            let veSuDAOBalance = await veERC20.balanceOf(userSigner.address);
+            let mockUSDTBalance = await mockUSDT.balanceOf(userSigner.address);
+            expect(totalDonations).to.be.equal(donation1);
+            expect(veSuDAOBalance).to.be.equal(expectedRewards);
+            expect(mockUSDTBalance).to.be.equal(initialUSDTBalance.sub(donation1));
+
+            // time not is over
+            await expect(distributor.connect(userSigner).takeDonationBack()).to.be.reverted;
+
+            const maxDonation = await distributor.getMaximumDonationAmount(userSigner.address, mockNft.address);
+            expect(maxDonation).to.be.gt(0);
+
+            // check balance after 2 donations
+            const expectedReward2 = await distributor.getBondingCurveRewardAmountFromDonationUSD(BN_1E12.mul(donation2));
+            await distributor.connect(userSigner).participate(donation2, mockNft.address);
+
+            totalDonations = await distributor.totalDonations();
+            veSuDAOBalance = await veERC20.balanceOf(userSigner.address);
+            mockUSDTBalance = await mockUSDT.balanceOf(userSigner.address);
+            expect(totalDonations).to.be.equal(donation1.add(donation2));
+            expect(veSuDAOBalance).to.be.equal(expectedRewards.add(expectedReward2));
+            expect(mockUSDTBalance).to.be.equal(initialUSDTBalance.sub(donation1).sub(donation2));
+
+            // time not is over
+            await expect(distributor.connect(userSigner).takeDonationBack()).to.be.reverted;
+
+            // wait until distribution ends
+            await waitNBlocks(150);
+
+            // should donate all received tokens
+            await expect(distributor.connect(userSigner).takeDonationBack()).to.be.reverted;
+
+            await veERC20.connect(userSigner).burnAll();
+
+            veSuDAOBalance = await veERC20.balanceOf(userSigner.address);
+            expect(veSuDAOBalance).to.be.equal(0);
+
+            await expect(distributor.connect(userSigner).takeDonationBack()).not.to.be.reverted;
+
+            veSuDAOBalance = await veERC20.balanceOf(userSigner.address);
+            totalDonations = await distributor.totalDonations();
+            mockUSDTBalance = await mockUSDT.balanceOf(userSigner.address);
+            expect(totalDonations).to.be.equal(0);
+            expect(veSuDAOBalance).to.be.equal(0);
+            expect(mockUSDTBalance).to.be.equal(initialUSDTBalance);
         });
     })
 });

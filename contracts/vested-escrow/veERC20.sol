@@ -12,6 +12,7 @@ pragma solidity ^0.8.12;
 
 */
 import "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20Upgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/token/ERC20/extensions/ERC20BurnableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/IERC20Upgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/utils/SafeERC20Upgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/math/SafeCastUpgradeable.sol";
@@ -33,7 +34,7 @@ import "../interfaces/IveERC20.sol";
  * To make balance visible in the erc20 wallets, the contact "looks like" erc20 token by implementing its interface
  * however all non-view methods such as transfer or approve aren't active and will be reverted.
 */
-contract VeERC20 is ERC20Upgradeable, SuAccessControlAuthenticated, IveERC20 {
+contract VeERC20 is ERC20BurnableUpgradeable, SuAccessControlAuthenticated, IveERC20 {
     using SafeERC20Upgradeable for ERC20Upgradeable;
 
     ERC20Upgradeable public LOCKED_TOKEN;
@@ -228,6 +229,23 @@ contract VeERC20 is ERC20Upgradeable, SuAccessControlAuthenticated, IveERC20 {
         }
     }
     receive() external payable {}
+
+    function transfer(address recipient, uint256 amount) public virtual override returns (bool) {
+        revert("not possible to transfer vested token");
+    }
+
+    function _burn(address account, uint256 amount)
+    internal
+    override
+    {
+        super._burn(account, amount);
+    }
+
+    function burnAll() external {
+        uint256 balance = super.balanceOf(msg.sender);
+        super._burn(msg.sender, balance);
+        vestingInfo[msg.sender].amountAlreadyWithdrawn = 0;
+    }
 
     /**
      * @dev This empty reserved space is put in place to allow future versions to add new
