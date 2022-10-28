@@ -15,6 +15,7 @@ pragma solidity ^0.8.12;
 import "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20Upgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/IERC20Upgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/utils/SafeERC20Upgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/utils/math/SafeCastUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC721/IERC721Upgradeable.sol";
 import "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 import "@openzeppelin/contracts/utils/math/Math.sol";
@@ -27,6 +28,8 @@ import "../interfaces/IveERC20.sol";
  * @title The contract that distribute suDAO tokens for community based on NFT membership
  */
 contract TokenDistributorV4 is SuAccessControlAuthenticated {
+    using SafeCastUpgradeable for int256;
+    using SafeCastUpgradeable for uint256;
     using SafeERC20Upgradeable for IERC20Upgradeable;
     using Math for *;
 
@@ -39,7 +42,7 @@ contract TokenDistributorV4 is SuAccessControlAuthenticated {
 
     uint256 public minimumDonation;            // Let's think that price(donationToken) = $1
     uint256 public maximumDonation;
-    uint256[] public bondingCurvePolynomial1e18;                  // Reserve ratio for Bancor formula, represented in ppm, 1-1000000
+    int256[] public bondingCurvePolynomial1e18;                  // Reserve ratio for Bancor formula, represented in ppm, 1-1000000
 
     uint256 public donationGoalMin;
     uint256 public donationGoalMax;
@@ -72,38 +75,41 @@ contract TokenDistributorV4 is SuAccessControlAuthenticated {
         IERC20Upgradeable(_suDAO).approve(address(_veErc20), type(uint256).max);
     }
 
-    function bondingCurvePolynomial1e18At(uint256 x) public view returns (uint256) {
+    function bondingCurvePolynomial1e18At(uint256 x) public view returns (int256) {
+        int256 xSigned = x.toInt256();
         uint256 l = bondingCurvePolynomial1e18.length;
-        uint256 x_ = 1;
-        uint256 px = 0;
+        int256 x_ = 1;
+        int256 px = 0;
         for (uint256 i = 0; i < l; i++) {
-            px = px + bondingCurvePolynomial1e18[i]*x_;
-            x_ = x_*x;
+            px = px + bondingCurvePolynomial1e18[i] * x_ / (1e18 ** i).toInt256();
+            x_ = x_ * xSigned;
         }
         return px;
     }
 
-    function antiderivativeOfBondingCurvePolynomial1e18At(uint256 x) public view returns (uint256) {
+    function antiderivativeOfBondingCurvePolynomial1e18At(uint256 x) public view returns (int256) {
+        int256 xSigned = x.toInt256();
         uint256 l = bondingCurvePolynomial1e18.length;
-        uint256 x_ = x;
-        uint256 px = 0;
+        int256 x_ = xSigned;
+        int256 px = 0;
         for (uint256 i = 0; i < l; i++) {
-            px = px + bondingCurvePolynomial1e18[i] * x_ / (i + 1);
-            x_ = x_ * x;
+            px = px + bondingCurvePolynomial1e18[i] * x_ / (i.toInt256() + 1);
+            x_ = x_ * xSigned;
         }
         return px;
     }
 
     function getBondingCurveRewardAmountFromDonationUSD(uint256 donationAmountUSD1e18) public view returns (uint256) {
-        uint256 S1 = antiderivativeOfBondingCurvePolynomial1e18At(totalDonations * donationTokenToUSD1e18 / 1e18);
-        uint256 S2 = antiderivativeOfBondingCurvePolynomial1e18At((totalDonations * donationTokenToUSD1e18 + donationAmountUSD1e18) / 1e18);
-        uint256 rewards = (S2 - S1);
+        int256 S1 = antiderivativeOfBondingCurvePolynomial1e18At(totalDonations * donationTokenToUSD1e18 / 1e18);
+        int256 S2 = antiderivativeOfBondingCurvePolynomial1e18At((totalDonations * donationTokenToUSD1e18 + donationAmountUSD1e18) / 1e18);
+        int256 rewards = (S2 - S1);
+        require(rewards > 0, "Rewards are negative");
+        uint256 result = rewards.toUint256();
         //         1 usdt == 1 suDAO => baseRewardRatio = 1e12;
-        if (rewards > IERC20Upgradeable(SU_DAO).balanceOf(address(this))) {
+        if (result > IERC20Upgradeable(SU_DAO).balanceOf(address(this))) {
             revert NotEnoughRewardLeft(donationAmountUSD1e18);
         }
-        //        require(rewards <= IERC20Upgradeable(SU_DAO).balanceOf(address(this)), "no enough rewards");
-        return rewards;
+        return result;
     }
 
     function getAccessNftsForUser(address account) public view returns (address[] memory) {
@@ -243,7 +249,7 @@ contract TokenDistributorV4 is SuAccessControlAuthenticated {
         donationTokenToUSD1e18 = _baseRewardRatio;
     }
 
-    function setBondingCurve(uint256[] memory _bondingCurvePolynomial1e18) external onlyRole(ADMIN_ROLE) {
+    function setBondingCurve(int256[] memory _bondingCurvePolynomial1e18) external onlyRole(ADMIN_ROLE) {
         bondingCurvePolynomial1e18 = _bondingCurvePolynomial1e18;
     }
 

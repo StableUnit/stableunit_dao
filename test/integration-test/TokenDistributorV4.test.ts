@@ -60,23 +60,29 @@ describe("TokenDistributorV4", () => {
         });
 
         await accessControlSingleton.grantRole(await veERC20.ADMIN_ROLE(), distributor.address);
+        await suDAO.mint(distributor.address, BN_1E18.mul(1_450_000));
     };
 
     describe("rewards are correct", function () {
         this.beforeAll(beforeAllFunc);
         it("bonding curve give right amount of rewards", async () => {
-            await suDAO.mint(distributor.address, BN_1E18.mul(1_450_000));
             const tx = distributor.getBondingCurveRewardAmountFromDonationUSD(BN_1E18);
             await expect(tx).not.be.reverted;
-            let rewards = await tx;
-            // 0.5 < rewards < 1
-            await expect(BigNumber.from(rewards.toString())).to.be.gt(BN_1E18.div(2)).lte(BN_1E18);
+            const rewards = await tx;
+            // 1 < rewards < 1.1
+            await expect(rewards).to.be.gt(BN_1E18).lt(BN_1E18.mul(11).div(10));
 
-            rewards = await distributor.getBondingCurveRewardAmountFromDonationUSD(BN_1E18.mul(1000));
-            await expect(BigNumber.from(rewards.toString())).to.be.gt(BN_1E18.mul(900)).lte(BN_1E18.mul(1200));
+            const rewards2 = await distributor.getBondingCurveRewardAmountFromDonationUSD(BN_1E18.mul(1000));
+            await expect(rewards2).to.be.gt(BN_1E18.mul(1000)).lte(BN_1E18.mul(1100));
 
-            rewards = await distributor.getBondingCurveRewardAmountFromDonationUSD(BN_1E18.mul(1_000_000));
-            await expect(BigNumber.from(rewards.toString())).to.be.gt(BN_1E18.mul(900_000)).lte(BN_1E18.mul(1_200_000));
+            const rewards3 = await distributor.getBondingCurveRewardAmountFromDonationUSD(BN_1E18.mul(1_000_000));
+            await expect(rewards3).to.be.gt(BN_1E18.mul(900_000)).lte(BN_1E18.mul(1_000_000));
+
+            const rewardStart = await distributor.bondingCurvePolynomial1e18At(0);
+            expect(rewardStart).to.be.equal(BN_1E18.mul(11).div(10)); // 1.1 * 1e18
+
+            const rewardEnd = await distributor.bondingCurvePolynomial1e18At(BN_1E18.mul(1_000_000));
+            expect(rewardEnd).to.be.equal(BN_1E18.mul(8).div(10)); // 0.8 * 1e18
         });
     });
 
@@ -84,8 +90,6 @@ describe("TokenDistributorV4", () => {
         this.beforeAll(beforeAllFunc);
 
         it("user have access token", async () => {
-            await suDAO.mint(distributor.address, BN_1E18.mul(1_450_000));
-
             let accessNFTS = await distributor.getAccessNftsForUser(userSigner.address);
             expect(accessNFTS[0]).to.be.equal('0x0000000000000000000000000000000000000000');
 

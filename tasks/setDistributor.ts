@@ -60,9 +60,8 @@ task("setDistributor", "set all parameters from the script")
         }
 
         tx = await distributor.setBondingCurve([
-          BN_1E18.mul(9).div(10), // 1e18*0.9
-          BN_1E18.mul(15).div(100).div(BN_1E6), // 1e18*0.15*1e-6
-          BN_1E18.mul(15).div(100).div(BN_1E12), // 1e18*0.15*1e-12
+          BN_1E18.mul(11).div(10), // 1.1 * 1e18
+          -BN_1E12.mul(3).div(10), // -3 * 1e11
         ]);
         await tx.wait();
         if (!taskArgs.removeLogs) {
