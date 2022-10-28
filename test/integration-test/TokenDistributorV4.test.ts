@@ -89,9 +89,19 @@ describe("TokenDistributorV4", () => {
     describe("Main flow is correct", function () {
         this.beforeEach(beforeAllFunc);
 
+        const initialUSDTBalance = BN_1E6.mul(500_000);
+        const mintNftAndUSDT = async (signer: SignerWithAddress) => {
+            await mockUSDT.mint(signer.address, initialUSDTBalance);
+            await mockUSDT.connect(signer).approve(distributor.address, BN_1E6.mul(2_000_000));
+            await mockNft.mint(signer.address);
+        }
+
         it("user have access token", async () => {
             let accessNFTS = await distributor.getAccessNftsForUser(userSigner.address);
             expect(accessNFTS[0]).to.be.equal('0x0000000000000000000000000000000000000000');
+
+            const maxDonation = await distributor.getMaximumDonationAmount(userSigner.address, mockNft.address);
+            expect(maxDonation).to.be.equal(0);
 
             await mockNft.mint(userSigner.address);
             accessNFTS = await distributor.getAccessNftsForUser(userSigner.address);
@@ -117,9 +127,7 @@ describe("TokenDistributorV4", () => {
             const donation2 = BN_1E6.mul(50_000);
             const initialUSDTBalance = BN_1E6.mul(500_000);
 
-            await mockUSDT.mint(userSigner.address, initialUSDTBalance);
-            await mockUSDT.connect(userSigner).approve(distributor.address, BN_1E6.mul(1_000_000));
-            await mockNft.mint(userSigner.address);
+            await mintNftAndUSDT(userSigner);
 
             const expectedRewards = await distributor.getBondingCurveRewardAmountFromDonationUSD(BN_1E12.mul(donation1));
             await distributor.connect(userSigner).participate(donation1, mockNft.address);
@@ -170,6 +178,47 @@ describe("TokenDistributorV4", () => {
             expect(totalDonations).to.be.equal(0);
             expect(veSuDAOBalance).to.be.equal(0);
             expect(mockUSDTBalance).to.be.equal(initialUSDTBalance);
+        });
+
+        it("admin can take donations back when distribution success", async () => {
+            const donation1 = BN_1E6.mul(500_000); // for userSigner
+            const donation2 = BN_1E6.mul(300_000); // for ownerSigner
+            const donation3 = BN_1E6.mul(400_000); // for randomSigner
+
+            await mintNftAndUSDT(userSigner);
+            await mintNftAndUSDT(ownerSigner);
+            await mintNftAndUSDT(randomSigner);
+
+            const expectedRewards1 = await distributor.getBondingCurveRewardAmountFromDonationUSD(BN_1E12.mul(donation1));
+            await distributor.connect(userSigner).participate(donation1, mockNft.address);
+
+            const expectedRewards2 = await distributor.getBondingCurveRewardAmountFromDonationUSD(BN_1E12.mul(donation2));
+            await distributor.connect(ownerSigner).participate(donation2, mockNft.address);
+
+            const expectedRewards3 = await distributor.getBondingCurveRewardAmountFromDonationUSD(BN_1E12.mul(donation3));
+            await distributor.connect(randomSigner).participate(donation3, mockNft.address);
+
+            let veSuDAOBalance1 = await veERC20.balanceOf(userSigner.address);
+            let veSuDAOBalance2 = await veERC20.balanceOf(ownerSigner.address);
+            let veSuDAOBalance3 = await veERC20.balanceOf(randomSigner.address);
+            expect(veSuDAOBalance1).to.be.equal(expectedRewards1);
+            expect(veSuDAOBalance2).to.be.equal(expectedRewards2);
+            expect(veSuDAOBalance3).to.be.equal(expectedRewards3);
+
+            let mockUSDTBalance1 = await mockUSDT.balanceOf(userSigner.address);
+            let mockUSDTBalance2 = await mockUSDT.balanceOf(ownerSigner.address);
+            let mockUSDTBalance3 = await mockUSDT.balanceOf(randomSigner.address);
+            expect(mockUSDTBalance1).to.be.equal(initialUSDTBalance.sub(donation1));
+            expect(mockUSDTBalance2).to.be.equal(initialUSDTBalance.sub(donation2));
+            expect(mockUSDTBalance3).to.be.equal(initialUSDTBalance.sub(donation3));
+
+            let totalDonations = await distributor.totalDonations();
+            expect(totalDonations).to.be.equal(donation1.add(donation2).add(donation3));
+
+            // distribution reached minGoal
+            await expect(distributor.connect(userSigner).takeDonationBack()).to.be.reverted;
+            await expect(distributor.connect(ownerSigner).takeDonationBack()).to.be.reverted;
+            await expect(distributor.connect(randomSigner).takeDonationBack()).to.be.reverted;
         });
     })
 });

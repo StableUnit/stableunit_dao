@@ -146,7 +146,7 @@ contract TokenDistributorV4 is SuAccessControlAuthenticated {
         uint256 bonusAllocation = IBonus(BONUS_CONTRACT).getAllocation(msg.sender);
         uint256 maxAllocation = bonusAllocation == 0 ? maximumDonation : bonusAllocation;
         require(
-            donations[msg.sender] + donationAmount < maxAllocation,
+            donations[msg.sender] + donationAmount <= maxAllocation,
             "Your donations should be less than max donation"
         );
 
