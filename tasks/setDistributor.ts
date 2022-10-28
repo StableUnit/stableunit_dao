@@ -23,24 +23,26 @@ task("setDistributor", "set all parameters from the script")
         console.log(`TokenDistributorV4@${ (await hre.ethers.provider.getNetwork()).name } = `, distributor.address);
         console.log(`mockErc721@${ (await hre.ethers.provider.getNetwork()).name } = `, mockErc721.address);
 
-        const DISTRIBUTION_INFO = {
-            lengthSeconds: taskArgs.lengthSeconds ?? 2 * 60 * 60,
-            minGoal: taskArgs.minGoal ?? 1_000_000,
-            maxGoal: taskArgs.maxGoal ?? 2_000_000,
-            minDonation: taskArgs.minDonation ?? 1000,
-            maxDonation: taskArgs.maxDonation ?? 100000,
-            donationToken: taskArgs.donationToken ?? "0x33f3b4Ac5083b7bcA29397728A7aA56909F790cA", // tUSDT
-            fullVestingSeconds: taskArgs.fullVestingSeconds ?? 2 * 24 * 60 * 60,
-            cliffSeconds: taskArgs.cliffSeconds ?? 2 * 60 * 60,
-            tgeUnlock: taskArgs.tgeUnlock ?? 0.05,
-            vestingFrequencySeconds: taskArgs.vestingFrequencySeconds ?? 60 * 60
-        }
-
         const nowTimestamp = Math.floor(Date.now() / 1000);
 
+        const DISTRIBUTION_INFO = {
+          startTimestamp: taskArgs.startTimestamp ?? nowTimestamp,
+          startLengthSeconds: taskArgs.startLengthSeconds ?? 10 * 60,
+          lengthSeconds: taskArgs.lengthSeconds ?? 2 * 60 * 60,
+          minGoal: taskArgs.minGoal ?? 1_000_000,
+          maxGoal: taskArgs.maxGoal ?? 2_000_000,
+          minDonation: taskArgs.minDonation ?? 1000,
+          maxDonation: taskArgs.maxDonation ?? 100000,
+          donationToken: taskArgs.donationToken ?? "0x33f3b4Ac5083b7bcA29397728A7aA56909F790cA", // tUSDT
+          fullVestingSeconds: taskArgs.fullVestingSeconds ?? 2 * 24 * 60 * 60,
+          cliffSeconds: taskArgs.cliffSeconds ?? 2 * 60 * 60,
+          tgeUnlock: taskArgs.tgeUnlock ?? 0.05,
+          vestingFrequencySeconds: taskArgs.vestingFrequencySeconds ?? 60 * 60
+        }
+
         tx = await distributor.setDistributionInfo(
-            nowTimestamp + 10 * 60,
-            nowTimestamp + +10 * 60 + DISTRIBUTION_INFO.lengthSeconds,
+          DISTRIBUTION_INFO.startTimestamp + DISTRIBUTION_INFO.startLengthSeconds,
+          DISTRIBUTION_INFO.startTimestamp +  DISTRIBUTION_INFO.startLengthSeconds + DISTRIBUTION_INFO.lengthSeconds,
             BN_1E6.mul(DISTRIBUTION_INFO.minGoal),
             BN_1E6.mul(DISTRIBUTION_INFO.maxGoal),
             BN_1E6.mul(DISTRIBUTION_INFO.minDonation),
