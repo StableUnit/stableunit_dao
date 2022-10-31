@@ -3,13 +3,14 @@
 pragma solidity >=0.7.6;
 
 import "../interfaces/ISuAccessControl.sol";
-import "@openzeppelin/contracts/utils/Context.sol";
+import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+import "@openzeppelin/contracts-upgradeable/utils/ContextUpgradeable.sol";
 
 /**
  * @title SuAuthenticated
  * @dev other contracts should inherit to be authenticated
  */
-abstract contract SuAccessControlAuthenticated is ISuAccessControl, Context {
+abstract contract SuAccessControlAuthenticatedUpgradable is Initializable, ISuAccessControl, ContextUpgradeable {
     bytes32 public constant DEFAULT_ADMIN_ROLE = 0x00;
     bytes32 public constant DAO_ROLE = 0x00;
     bytes32 public constant ADMIN_ROLE = keccak256("ADMIN_ROLE");
@@ -21,7 +22,7 @@ abstract contract SuAccessControlAuthenticated is ISuAccessControl, Context {
     error OnlyRoleError(bytes32 role, address msgSender);
 
     /// @dev should be passed in constructor
-    constructor(address _accessControlSingleton) {
+    function __SuAuthenticated_init(address _accessControlSingleton) internal onlyInitializing {
         ACCESS_CONTROL_SINGLETON = ISuAccessControl(_accessControlSingleton);
     }
 
@@ -42,4 +43,13 @@ abstract contract SuAccessControlAuthenticated is ISuAccessControl, Context {
     function supportsInterface(bytes4 interfaceId) public view virtual returns (bool) {
         return ACCESS_CONTROL_SINGLETON.supportsInterface(interfaceId);
     }
+    //============================interfaces sugar============================
+
+
+    /**
+     * @dev This empty reserved space is put in place to allow future versions to add new
+     * variables without shifting down storage in the inheritance chain.
+     * See https://docs.openzeppelin.com/contracts/4.x/upgradeable#storage_gaps
+     */
+    uint256[49] private __gap;
 }

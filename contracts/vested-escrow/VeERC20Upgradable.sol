@@ -11,11 +11,11 @@ pragma solidity ^0.8.12;
      \______/  \______/ |_______/ |__/  |__/ \______/
 
 */
-import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
-import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
-import "@openzeppelin/contracts/token/ERC20/extensions/ERC20Burnable.sol";
-import "../access-control/SuAccessControlAuthenticated.sol";
+import "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20Upgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/token/ERC20/extensions/ERC20BurnableUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/token/ERC20/IERC20Upgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/token/ERC20/utils/SafeERC20Upgradeable.sol";
+import "../access-control/SuAccessControlAuthenticatedUpgradable.sol";
 import "../interfaces/IveERC20.sol";
 
 
@@ -33,11 +33,11 @@ import "../interfaces/IveERC20.sol";
  * To make balance visible in the erc20 wallets, the contact "looks like" erc20 token by implementing its interface
  * however all non-view methods such as transfer or approve aren't active and will be reverted.
 */
-contract VeERC20 is ERC20Burnable, SuAccessControlAuthenticated, IveERC20 {
-    using SafeERC20 for ERC20;
+contract VeERC20Upgradable is ERC20BurnableUpgradeable, SuAccessControlAuthenticatedUpgradable, IveERC20 {
+    using SafeERC20Upgradeable for ERC20Upgradeable;
 
-    ERC20 public LOCKED_TOKEN;
-    uint32 public immutable TGE_MAX_TIMESTAMP = 1685577600; // Unix Timestamp	1685577600 = GMT+0 Thu Jun 01 2023 00:00:00 GMT+0000;
+    ERC20Upgradeable public LOCKED_TOKEN;
+    uint32 public TGE_MAX_TIMESTAMP;
     uint32 public tgeTimestamp;
 
     struct VestingInfo {
@@ -50,11 +50,11 @@ contract VeERC20 is ERC20Burnable, SuAccessControlAuthenticated, IveERC20 {
     }
     mapping(address => VestingInfo) public vestingInfo;
 
-    constructor(address _accessControlSingleton, ERC20 _lockedToken)
-        SuAccessControlAuthenticated(_accessControlSingleton)
-        ERC20(string.concat("vested escrow ", _lockedToken.name()), string.concat("ve", _lockedToken.symbol()))
-    {
+    function initialize(address _accessControlSingleton, ERC20Upgradeable _lockedToken) initializer public {
+        __SuAuthenticated_init(_accessControlSingleton);
+        __ERC20_init(string.concat("vested escrow ", _lockedToken.name()), string.concat("ve", _lockedToken.symbol()));
         LOCKED_TOKEN = _lockedToken;
+        TGE_MAX_TIMESTAMP = 1685577600; // Unix Timestamp	1685577600 = GMT+0 Thu Jun 01 2023 00:00:00 GMT+0000
         tgeTimestamp = TGE_MAX_TIMESTAMP;
     }
 
@@ -71,7 +71,7 @@ contract VeERC20 is ERC20Burnable, SuAccessControlAuthenticated, IveERC20 {
     * @notice Total amount of token was deposited under vesting on behalf of the user.
     */
     function totalDeposited(address user) public view returns (uint256) {
-        return IERC20(this).balanceOf(user);
+        return IERC20Upgradeable(this).balanceOf(user);
     }
 
     /**
@@ -218,7 +218,7 @@ contract VeERC20 is ERC20Burnable, SuAccessControlAuthenticated, IveERC20 {
     /**
     * @notice The owner of the contact can take away tokens accidentally sent to the contract.
     */
-    function rescue(ERC20 token) external onlyRole(DAO_ROLE) {
+    function rescue(ERC20Upgradeable token) external onlyRole(DAO_ROLE) {
         require(token != LOCKED_TOKEN, "No allowed to rescue this token");
         // allow to rescue ether
         if (address(token) == address(0)) {
@@ -245,4 +245,11 @@ contract VeERC20 is ERC20Burnable, SuAccessControlAuthenticated, IveERC20 {
         super._burn(msg.sender, balance);
         vestingInfo[msg.sender].amountAlreadyWithdrawn = 0;
     }
+
+    /**
+     * @dev This empty reserved space is put in place to allow future versions to add new
+     * variables without shifting down storage in the inheritance chain.
+     * See https://docs.openzeppelin.com/contracts/4.x/upgradeable#storage_gaps
+     */
+    uint256[49] private __gap;
 }
