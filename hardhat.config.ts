@@ -49,6 +49,7 @@ const config: HardhatUserConfig = {
         alice: 6,
         bob: 7,
         carl: 8,
+        dao: 9,
     },
     solidity: "0.8.15",
     networks: {

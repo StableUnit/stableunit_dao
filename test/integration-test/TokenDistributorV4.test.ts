@@ -52,16 +52,18 @@ describe("TokenDistributorV4", () => {
     let deployerSigner: SignerWithAddress;
     let ownerSigner: SignerWithAddress;
     let userSigner: SignerWithAddress;
+    let daoSigner: SignerWithAddress;
     let randomSigner: SignerWithAddress;
 
     const initialize = async () => {
         const {
-            deployer, owner, userAccount, randomAccount,
+            deployer, owner, dao, userAccount, randomAccount,
         } = await getNamedAccounts();
 
         ownerSigner = await ethers.getSigner(owner);
         deployerSigner = await ethers.getSigner(deployer);
         userSigner = await ethers.getSigner(userAccount);
+        daoSigner = await ethers.getSigner(dao);
         randomSigner = await ethers.getSigner(randomAccount);
 
         await deployments.fixture(["Deployer"]);
@@ -160,16 +162,22 @@ describe("TokenDistributorV4", () => {
         });
 
         it("admin can remove accessNFT", async () => {
-            let accessNFTS = await distributor.getAccessNftsForUser(userSigner.address);
-            expect(accessNFTS[0]).to.be.equal('0x0000000000000000000000000000000000000000');
+            let accessNFTS = await distributor.getAccessNfts();
+            let accessNFTSUser = await distributor.getAccessNftsForUser(userSigner.address);
+            expect(accessNFTS.length).to.be.equal(1);
+            expect(accessNFTS[0]).not.to.be.equal('0x0000000000000000000000000000000000000000');
+            expect(accessNFTSUser.length).to.be.equal(1);
+            expect(accessNFTSUser[0]).to.be.equal('0x0000000000000000000000000000000000000000');
 
             await mockNft.mint(userSigner.address);
             accessNFTS = await distributor.getAccessNftsForUser(userSigner.address);
             expect(accessNFTS[0]).to.be.equal(mockNft.address);
 
             await distributor.setNftAccess(mockNft.address, false);
-            accessNFTS = await distributor.getAccessNftsForUser(userSigner.address);
+            accessNFTS = await distributor.getAccessNfts();
+            accessNFTSUser = await distributor.getAccessNftsForUser(userSigner.address);
             expect(accessNFTS.length).to.be.equal(0);
+            expect(accessNFTSUser.length).to.be.equal(0);
 
             tx = distributor.connect(ownerSigner).participate(BN_1E6.mul(10000), mockNft.address);
             await expect(tx).to.be.reverted;
@@ -257,7 +265,7 @@ describe("TokenDistributorV4", () => {
             expect(veSuDAOBalance).to.be.equal(0);
 
             await expect(distributor.connect(userSigner).takeDonationBack()).not.to.be.reverted;
-            // console.log("donations back should work");
+            // console.log("donations back should not work");
 
             veSuDAOBalance = await veERC20.balanceOf(userSigner.address);
             totalDonations = await distributor.totalDonations();
@@ -265,6 +273,9 @@ describe("TokenDistributorV4", () => {
             expect(totalDonations).to.be.equal(0);
             expect(veSuDAOBalance).to.be.equal(0);
             expect(mockUSDTBalance).to.be.equal(initialUSDTBalance);
+
+            // dao can't withdraw if distribution didn't reach minGoal
+            await expect(distributor.daoWithdraw(mockUSDT.address, daoSigner.address, totalDonations)).to.be.reverted;
         });
 
         it("admin can take donations back when distribution success", async () => {
@@ -302,12 +313,21 @@ describe("TokenDistributorV4", () => {
             let totalDonations = await distributor.totalDonations();
             expect(totalDonations).to.be.equal(donation1.add(donation2).add(donation3));
 
+            // dao can't withdraw if distribution not ended
+            await expect(distributor.daoWithdraw(mockUSDT.address, daoSigner.address, totalDonations)).to.be.reverted;
+
+            await waitNBlocks(100);
+
             // distribution reached minGoal
             await expect(distributor.connect(userSigner).takeDonationBack()).to.be.reverted;
             await expect(distributor.connect(ownerSigner).takeDonationBack()).to.be.reverted;
             await expect(distributor.connect(randomSigner).takeDonationBack()).to.be.reverted;
 
-            // TODO: check if admin can withdraw all USDT
+            // check id DAO will receive all donations after daoWithdraw()
+            const daoBalanceBefore = await mockUSDT.balanceOf(daoSigner.address);
+            await distributor.daoWithdraw(mockUSDT.address, daoSigner.address, totalDonations);
+            const daoBalanceAfter = await mockUSDT.balanceOf(daoSigner.address);
+            expect(daoBalanceAfter).to.be.equal(daoBalanceBefore.add(totalDonations));
         });
     })
 });

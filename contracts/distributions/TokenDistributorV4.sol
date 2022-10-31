@@ -308,17 +308,26 @@ contract TokenDistributorV4 is SuAccessControlAuthenticated {
     }
 
     /**
-     * @notice The owner of the contact can take away tokens sent to the contract.
-     * @dev The owner can't take away SuDAO token already distributed to users,
+     * @notice The DAO can take away donations.
+     * @dev The DAO can't take away SuDAO token already distributed to users,
      *      because they are stored on different contract
      */
-    function adminWithdraw(IERC20Upgradeable token) external onlyRole(DAO_ROLE) {
-        if (address(token) == address(0)) {
-            payable(msg.sender).transfer(address(this).balance);
-        } else {
-            token.safeTransfer(address(msg.sender), token.balanceOf(address(this)));
-        }
+    function daoWithdraw(IERC20Upgradeable token, address to, uint256 amount) external onlyRole(DAO_ROLE) {
+        if (block.timestamp < deadlineTimestamp)
+            revert DistributionTimeframeError();
+        if (totalDonations < donationGoalMin)
+            revert DonationGoalError(donationGoalMin, donationGoalMax, totalDonations);
+
+        token.safeTransfer(to, amount);
     }
+
+//    function emergencyWithdraw(IERC20Upgradeable token) external onlyRole(DAO_ROLE) {
+//        if (address(token) == address(0)) {
+//            payable(msg.sender).transfer(address(this).balance);
+//        } else {
+//            token.safeTransfer(address(msg.sender), token.balanceOf(address(this)));
+//        }
+//    }
 
     event Participated(address msg_sender, uint256 donationAmount);
 
