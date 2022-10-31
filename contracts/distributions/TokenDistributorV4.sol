@@ -41,17 +41,15 @@ contract TokenDistributorV4 is SuAccessControlAuthenticated {
     uint64 public startTimestamp;                 // The date when participation is available
     uint64 public deadlineTimestamp;              // Ultimate date when participation is available
 
+    address public donationToken;                 // For now it's only DAI
+    uint256 public donationTokenToUSD1e18;        // donationTokenAmount * donationTokenToUSD1e18 == usd value * 1e18
+    int256[] public bondingCurvePolynomial1e18;   // curve that shows how much rewards users can get when system got x donations
+
     uint256 public minimumDonation;
     uint256 public maximumDonation;
-    int256[] public bondingCurvePolynomial1e18;   // Reserve ratio for Bancor formula, represented in ppm, 1-1000000
 
     uint256 public donationGoalMin;
     uint256 public donationGoalMax;
-
-    mapping(address => uint256) public donations; // Donation amounts
-    uint256 public totalDonations;                // Sum of all user donations
-
-    address public donationToken;                 // For now it's only DAI
 
     uint64 public fullVestingSeconds;             // Default vesting period is 12 months
     uint64 public cliffSeconds;                   // With 3 months cliff.
@@ -60,14 +58,13 @@ contract TokenDistributorV4 is SuAccessControlAuthenticated {
 
     using EnumerableSet for EnumerableSet.AddressSet;
     EnumerableSet.AddressSet private nftRequirement;
-
-    uint256 public donationTokenToUSD1e18;        // donationTokenAmount * donationTokenToUSD1e18 == usd value * 1e18
+    // stats
     struct BonusStats {
         uint256 bonusRewarded;
     }
-
     BonusStats public bonusStats;
-
+    mapping(address => uint256) public donations; // Donation amounts
+    uint256 public totalDonations;                // Sum of all user donations
 
     error NoActiveDistributionError();
     error DistributionTimeframeError();
