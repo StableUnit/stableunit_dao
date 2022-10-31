@@ -186,8 +186,11 @@ contract TokenDistributorV4 is SuAccessControlAuthenticated {
      */
     function getMaximumDonationAmount(address user, address accessNft) view external returns (uint256) {
         if (IERC721Upgradeable(accessNft).balanceOf(user) > 0) {
+            uint256 bonusAllocation = Math.max(BONUS_CONTRACT.getAllocation(msg.sender), BONUS_CONTRACT.getNftAllocation(accessNft));
+            uint256 maxAllocation = bonusAllocation == 0 ? maximumDonation : bonusAllocation;
+
             return Math.min(
-                maximumDonation - donations[user],
+                maxAllocation - donations[user],
                 donationGoalMax - totalDonations
             );
         }

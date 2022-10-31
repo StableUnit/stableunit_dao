@@ -81,8 +81,6 @@ describe("TokenDistributorV4", () => {
         distributeData.startTimestamp = data.startTimestamp || await latest();
         distributeData.donationToken = mockUSDT.address;
         await run("setDistributor", distributeData);
-
-        await accessControlSingleton.grantRole(await veERC20.ADMIN_ROLE(), distributor.address);
     }
 
     const beforeAllFunc = async () => {

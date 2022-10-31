@@ -20,6 +20,7 @@ task("setDistributor", "set all parameters from the script")
         const distributor = await hre.ethers.getContract("TokenDistributorV4") as TokenDistributorV4;
         const mockErc721 = await hre.ethers.getContract("MockErc721") as MockErc721;
         const suDAO = await hre.ethers.getContract("SuDAO") as SuDAO;
+        // const accessControlSingleton = await hre.ethers.getContract("SuAccessControlSingleton") as SuAccessControlSingleton;
         // console.log(`setDistributor.TokenDistributorV4@${ (await hre.ethers.provider.getNetwork()).name } = `, distributor.address);
         // console.log(`setDistributor.mockErc721@${ (await hre.ethers.provider.getNetwork()).name } = `, mockErc721.address);
 
@@ -27,8 +28,8 @@ task("setDistributor", "set all parameters from the script")
 
         const DISTRIBUTION_INFO = {
           startTimestamp: taskArgs.startTimestamp ?? nowTimestamp,
-          startLengthSeconds: taskArgs.startLengthSeconds ?? 10 * 60,
-          lengthSeconds: taskArgs.lengthSeconds ?? 2 * 60 * 60,
+          startLengthSeconds: taskArgs.startLengthSeconds ?? 0,
+          lengthSeconds: taskArgs.lengthSeconds ?? 48 * 60 * 60,
           minGoal: taskArgs.minGoal ?? 1_000_000,
           maxGoal: taskArgs.maxGoal ?? 2_000_000,
           minDonation: taskArgs.minDonation ?? 1000,
@@ -39,6 +40,9 @@ task("setDistributor", "set all parameters from the script")
           tgeUnlock: taskArgs.tgeUnlock ?? 0.05,
           vestingFrequencySeconds: taskArgs.vestingFrequencySeconds ?? 60 * 60
         }
+
+        // tx = await accessControlSingleton.grantRole(await distributor.ADMIN_ROLE(), distributor.address);
+        // await tx.wait();
 
         tx = await distributor.setDistributionInfo(
           DISTRIBUTION_INFO.startTimestamp + DISTRIBUTION_INFO.startLengthSeconds,

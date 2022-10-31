@@ -19,6 +19,7 @@ const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
 
   // set right rights
   await accessControlSingleton.grantRole(await tokenDistributor.ADMIN_ROLE(), deployer.address);
+  await accessControlSingleton.grantRole(await tokenDistributor.ADMIN_ROLE(), tokenDistributor.address);
 };
 export default func;
 func.tags = ["Deployer"];
