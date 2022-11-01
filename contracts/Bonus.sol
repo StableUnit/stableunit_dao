@@ -126,16 +126,16 @@ contract Bonus is IBonus, SuAccessControlAuthenticated {
         communityAdminInfo[communityAdmin].levelLimit = levelLimit;
     }
 
-    function setNftInfo(address nft, uint256 allocation, uint256 discountRatioPresale) public override {
+    function setNftInfo(address nft, uint256 allocation, uint256 donationBonusRatio) public override {
         require(adminInfo[msg.sender].isAdmin, "Need admin rights");
         nftInfo[nft].allocation = allocation;
-        nftInfo[nft].donationBonusRatio = discountRatioPresale;
+        nftInfo[nft].donationBonusRatio = donationBonusRatio;
     }
 
-    function setUserInfo(address user, uint256 allocation, uint256 discountRatioPresale) public override {
+    function setUserInfo(address user, uint256 allocation, uint256 donationBonusRatio) public override {
         require(adminInfo[msg.sender].isAdmin, "Need admin rights");
         userInfo[user].allocation = allocation;
-        userInfo[user].donationBonusRatio = discountRatioPresale;
+        userInfo[user].donationBonusRatio = donationBonusRatio;
     }
 
     function distributeXp(address user, uint256 xp) public override {

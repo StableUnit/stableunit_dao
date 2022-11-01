@@ -8,7 +8,7 @@ interface IBonus {
     /**
      * @notice Info for each nft.
      * `allocation` User allocation
-     * `discountPresale` Discount during presale
+     * `donationBonusRatio` Bonus during distribution
     **/
     struct NFTInfo {
         uint256 allocation;
@@ -19,7 +19,7 @@ interface IBonus {
      * @notice Info of each user.
      * `xp` The amount of XP.
      * `allocation` User allocation
-     * `discountPresale` Discount during presale
+     * `donationBonusRatio` Bonus during distribution
     **/
     struct UserInfo {
         uint256 xp;
@@ -46,16 +46,16 @@ interface IBonus {
     }
 
     /**
-     * @notice Set allocation and discountRatioPresale for NFT
+     * @notice Set allocation and donationBonusRatio for NFT
      * `isAdmin` Address of admin
     **/
-    function setNftInfo(address nft, uint256 allocation, uint256 discountRatioPresale) external;
+    function setNftInfo(address nft, uint256 allocation, uint256 donationBonusRatio) external;
 
     /**
-     * @notice Set allocation and discountRatioPresale for user
+     * @notice Set allocation and donationBonusRatio for user
      * `isAdmin` Address of admin
     **/
-    function setUserInfo(address user, uint256 allocation, uint256 discountRatioPresale) external;
+    function setUserInfo(address user, uint256 allocation, uint256 donationBonusRatio) external;
 
     /**
      * @notice Get user level according to constant distribution. Max value: 65535
