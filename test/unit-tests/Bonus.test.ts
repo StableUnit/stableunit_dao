@@ -13,54 +13,74 @@ describe("Bonus", () => {
   let tx: ContractTransaction | Promise<ContractTransaction>;
 
   const beforeAllFunc = (needMock: boolean) => async () => {
-    const accessControlSingleton = await deployProxy("SuAccessControlSingleton", [], undefined, false) as SuAccessControlSingleton;
-    bonus = await deployProxy("Bonus", [accessControlSingleton.address], undefined, false) as Bonus;
-    if (needMock) {
-      mockNft = await deployProxy("MockErc721", ["Mock StableUnit NFT", "SuNFTPro"], undefined, false) as MockErc721;
-    }
+    const [deployer, dao, alice, bob, carl] = await ethers.getSigners();
+    accounts = { deployer, dao, alice, bob, carl };
 
-    const [deployer, owner, alice, bob, carl] = await ethers.getSigners();
-    accounts = { deployer, owner, alice, bob, carl };
+    const accessControlSingleton = await deployProxy(undefined, "SuAccessControlSingleton", [dao.address], undefined, false) as SuAccessControlSingleton;
+    bonus = await deployProxy(undefined, "Bonus", [accessControlSingleton.address], undefined, false) as Bonus;
+    if (needMock) {
+      mockNft = await deployProxy(undefined, "MockErc721", ["Mock StableUnit NFT", "SuNFTPro"], undefined, false) as MockErc721;
+    }
   };
 
   describe("Correct rights and setNftInfo", function () {
     this.beforeEach(beforeAllFunc(true));
 
-    it("deployer can only call setAdmin", async () => {
-      tx = bonus.setCommunityAdmin(accounts.deployer.address, BN_1E6, 100);
+    it("deployer can't call anything", async () => {
+      tx = bonus.connect(accounts.deployer).setCommunityAdmin(accounts.dao.address, BN_1E6, 100);
       await expect(tx).to.be.reverted;
 
-      tx = bonus.setNftInfo(mockNft.address, BN_1E6, BN_1E18.div(10));
+      tx = bonus.connect(accounts.deployer).setNftInfo(mockNft.address, BN_1E6, BN_1E18.div(10));
       await expect(tx).to.be.reverted;
 
-      tx = bonus.setUserInfo(accounts.alice.address, BN_1E6, BN_1E18.div(10));
+      tx = bonus.connect(accounts.deployer).setUserInfo(accounts.alice.address, BN_1E6, BN_1E18.div(10));
       await expect(tx).to.be.reverted;
 
-      tx = bonus.distributeXp(accounts.alice.address, 5000);
+      tx = bonus.connect(accounts.deployer).distributeXp(accounts.alice.address, 5000);
       await expect(tx).to.be.reverted;
 
-      tx = bonus.setAdmin(accounts.deployer.address, true);
+      tx = bonus.connect(accounts.deployer).setAdmin(accounts.dao.address, true);
+      await expect(tx).to.be.reverted;
+    });
+
+    it("DAO can only call setAdmin", async () => {
+      tx = bonus.connect(accounts.dao).setCommunityAdmin(accounts.dao.address, BN_1E6, 100);
+      await expect(tx).to.be.reverted;
+
+      tx = bonus.connect(accounts.dao).setNftInfo(mockNft.address, BN_1E6, BN_1E18.div(10));
+      await expect(tx).to.be.reverted;
+
+      tx = bonus.connect(accounts.dao).setUserInfo(accounts.alice.address, BN_1E6, BN_1E18.div(10));
+      await expect(tx).to.be.reverted;
+
+      tx = bonus.connect(accounts.dao).distributeXp(accounts.alice.address, 5000);
+      await expect(tx).to.be.reverted;
+
+      tx = bonus.connect(accounts.dao).setAdmin(accounts.dao.address, true);
+      await expect(tx).not.to.be.reverted;
+
+      tx = bonus.connect(accounts.dao).setAdmin(accounts.alice.address, true);
       await expect(tx).not.to.be.reverted;
     });
 
-    it("admin (=deployer) can't call distribute ", async () => {
-      await bonus.setAdmin(accounts.deployer.address, true);
+    it("admin (=DAO) can't call distribute ", async () => {
+      await bonus.connect(accounts.dao).setAdmin(accounts.dao.address, true);
 
-      tx = bonus.setNftInfo(mockNft.address, BN_1E6, BN_1E18.div(10));
+      tx = bonus.connect(accounts.dao).setNftInfo(mockNft.address, BN_1E6, BN_1E18.div(10));
       await expect(tx).not.to.be.reverted;
 
-      tx = bonus.setUserInfo(accounts.alice.address, BN_1E6, BN_1E18.div(10));
+      tx = bonus.connect(accounts.dao).setUserInfo(accounts.alice.address, BN_1E6, BN_1E18.div(10));
       await expect(tx).not.to.be.reverted;
 
-      tx = bonus.distributeXp(accounts.alice.address, 5000);
+      tx = bonus.connect(accounts.dao).distributeXp(accounts.alice.address, 5000);
       await expect(tx).to.be.reverted;
 
-      tx = bonus.setCommunityAdmin(accounts.deployer.address, BN_1E6, 100);
+      tx = bonus.connect(accounts.dao).setCommunityAdmin(accounts.dao.address, BN_1E6, 100);
       await expect(tx).not.to.be.reverted;
     });
 
-    it("admin (NOT deployer) can't call distribute ", async () => {
-      await bonus.setAdmin(accounts.bob.address, true);
+    it("admin (NOT DAO) can't call distribute ", async () => {
+      await bonus.connect(accounts.dao).setAdmin(accounts.bob.address, true);
 
       tx = bonus.connect(accounts.bob).setNftInfo(mockNft.address, BN_1E6, BN_1E18.div(10));
       await expect(tx).not.to.be.reverted;
@@ -77,7 +97,7 @@ describe("Bonus", () => {
 
     it("communityAdmin can call only distribute", async () => {
       // bob is admin, alice is communityAdmin, carl is user
-      await bonus.setAdmin(accounts.bob.address, true);
+      await bonus.connect(accounts.dao).setAdmin(accounts.bob.address, true);
       await bonus.connect(accounts.bob).setCommunityAdmin(accounts.alice.address, BN_1E6, 100);
 
       tx = bonus.connect(accounts.alice).distributeXp(accounts.carl.address, 5000);
@@ -100,7 +120,7 @@ describe("Bonus", () => {
       const allocation = BN_1E6;
       const discount = BN_1E18.div(10);
 
-      await bonus.setAdmin(accounts.bob.address, true);
+      await bonus.connect(accounts.dao).setAdmin(accounts.bob.address, true);
       await bonus.connect(accounts.bob).setNftInfo(mockNft.address, allocation, discount);
 
       const newAllocation = await bonus.getNftAllocation(mockNft.address);
@@ -118,7 +138,7 @@ describe("Bonus", () => {
       const allocation = BN_1E6;
       const discount = BN_1E18.div(10);
 
-      await bonus.setAdmin(accounts.bob.address, true);
+      await bonus.connect(accounts.dao).setAdmin(accounts.bob.address, true);
       await bonus.connect(accounts.bob).setUserInfo(accounts.alice.address, allocation, discount);
 
       const newAllocation = await bonus.getAllocation(accounts.alice.address);
@@ -135,7 +155,7 @@ describe("Bonus", () => {
       const allowedLvl = 22;
       const adminXP = 100000;
 
-      await bonus.setAdmin(accounts.bob.address, true);
+      await bonus.connect(accounts.dao).setAdmin(accounts.bob.address, true);
       await bonus.connect(accounts.bob).setCommunityAdmin(accounts.alice.address, adminXP, allowedLvl);
 
       let userInfo = await bonus.userInfo(accounts.carl.address);
@@ -179,7 +199,7 @@ describe("Bonus", () => {
       const restrictedLvl = 10;
       const adminXP = 100000;
 
-      await bonus.setAdmin(accounts.bob.address, true);
+      await bonus.connect(accounts.dao).setAdmin(accounts.bob.address, true);
       await bonus.connect(accounts.bob).setCommunityAdmin(accounts.alice.address, adminXP, restrictedLvl);
 
       // can't distribute more lvl than admin has
@@ -198,7 +218,7 @@ describe("Bonus", () => {
       const allowedLvl = 100;
       const adminXP = 2*1e9;
 
-      await bonus.setAdmin(accounts.bob.address, true);
+      await bonus.connect(accounts.dao).setAdmin(accounts.bob.address, true);
       await bonus.connect(accounts.bob).setCommunityAdmin(accounts.alice.address, adminXP, allowedLvl);
 
       await bonus.connect(accounts.alice).distributeXp(accounts.carl.address, userXP);

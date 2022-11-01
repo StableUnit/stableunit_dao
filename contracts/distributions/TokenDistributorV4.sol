@@ -212,7 +212,7 @@ contract TokenDistributorV4 is SuAccessControlAuthenticated {
     }
 
     /**
-     * @notice The admin can set new or edit existing token vesting details
+     * @notice The DAO can set new or edit existing token vesting details
      */
     function setDistributionVesting(
         uint64 _fullVestingSeconds,
