@@ -212,14 +212,14 @@ contract TokenDistributorV4 is SuAccessControlAuthenticated {
     }
 
     /**
-     * @notice The admin can set new or edit existing token vesting details
+     * @notice The DAO can set new or edit existing token vesting details
      */
     function setDistributionVesting(
         uint64 _fullVestingSeconds,
         uint64 _cliffSeconds,
         uint64 _tgeUnlockRatio1e18,
         uint64 _vestingFrequencySeconds
-    ) external onlyRole(ADMIN_ROLE) {
+    ) external onlyRole(DAO_ROLE) {
         if (_cliffSeconds > _fullVestingSeconds) {
             revert VestingError();
         }
@@ -247,7 +247,7 @@ contract TokenDistributorV4 is SuAccessControlAuthenticated {
         uint256 _maximumDonation,
         address _donationToken,
         uint256 _donationTokenToUSD1e18
-    ) external onlyRole(ADMIN_ROLE) {
+    ) external onlyRole(DAO_ROLE) {
         if (_startTimestamp >= _deadlineTimestamp)
             revert DistributionTimeframeError();
         if (_donationGoalMin > _donationGoalMax)
@@ -267,11 +267,11 @@ contract TokenDistributorV4 is SuAccessControlAuthenticated {
         donationTokenToUSD1e18 = _donationTokenToUSD1e18;
     }
 
-    function setBondingCurve(int256[] memory _bondingCurvePolynomial1e18) external onlyRole(ADMIN_ROLE) {
+    function setBondingCurve(int256[] memory _bondingCurvePolynomial1e18) external onlyRole(DAO_ROLE) {
         bondingCurvePolynomial1e18 = _bondingCurvePolynomial1e18;
     }
 
-    function setNftAccess(address accessNft, bool valid) external onlyRole(ADMIN_ROLE) {
+    function setNftAccess(address accessNft, bool valid) external onlyRole(DAO_ROLE) {
         if (valid) {
             nftRequirement.add(accessNft);
         } else {

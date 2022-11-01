@@ -50,20 +50,21 @@ describe("TokenDistributorV4", () => {
     };
 
     let deployerSigner: SignerWithAddress;
-    let ownerSigner: SignerWithAddress;
+    let aliceSigner: SignerWithAddress;
     let userSigner: SignerWithAddress;
     let daoSigner: SignerWithAddress;
     let randomSigner: SignerWithAddress;
 
     const initialize = async () => {
         const {
-            deployer, owner, dao, userAccount, randomAccount,
+            deployer, dao, userAccount, randomAccount, alice
         } = await getNamedAccounts();
 
-        ownerSigner = await ethers.getSigner(owner);
+        // TODO: check that deployer don't have any rights
         deployerSigner = await ethers.getSigner(deployer);
-        userSigner = await ethers.getSigner(userAccount);
         daoSigner = await ethers.getSigner(dao);
+        userSigner = await ethers.getSigner(userAccount);
+        aliceSigner = await ethers.getSigner(alice);
         randomSigner = await ethers.getSigner(randomAccount);
 
         await deployments.fixture(["Deployer"]);
@@ -85,7 +86,7 @@ describe("TokenDistributorV4", () => {
 
     const beforeAllFunc = async () => {
         await beforeAllFuncNoSuDAOMint(data);
-        await suDAO.mint(distributor.address, BN_1E18.mul(1_450_000));
+        await suDAO.connect(daoSigner).mint(distributor.address, BN_1E18.mul(1_450_000));
     };
 
     describe("initial tests", function () {
@@ -93,7 +94,7 @@ describe("TokenDistributorV4", () => {
             await initialize();
 
             // no distribution
-            tx = distributor.connect(ownerSigner).participate(BN_1E6.mul(10000), mockNft.address);
+            tx = distributor.connect(aliceSigner).participate(BN_1E6.mul(10000), mockNft.address);
             await expect(tx).to.be.reverted;
         });
         it("after setDistributor and grantRole", async () => {
@@ -159,7 +160,7 @@ describe("TokenDistributorV4", () => {
             expect(contractData.vestingFrequencySeconds_).to.be.equal(data.vestingFrequencySeconds);
         });
 
-        it("admin can remove accessNFT", async () => {
+        it("DAO can remove accessNFT", async () => {
             let accessNFTS = await distributor.getAccessNfts();
             let accessNFTSUser = await distributor.getAccessNftsForUser(userSigner.address);
             expect(accessNFTS.length).to.be.equal(1);
@@ -171,13 +172,13 @@ describe("TokenDistributorV4", () => {
             accessNFTS = await distributor.getAccessNftsForUser(userSigner.address);
             expect(accessNFTS[0]).to.be.equal(mockNft.address);
 
-            await distributor.setNftAccess(mockNft.address, false);
+            await distributor.connect(daoSigner).setNftAccess(mockNft.address, false);
             accessNFTS = await distributor.getAccessNfts();
             accessNFTSUser = await distributor.getAccessNftsForUser(userSigner.address);
             expect(accessNFTS.length).to.be.equal(0);
             expect(accessNFTSUser.length).to.be.equal(0);
 
-            tx = distributor.connect(ownerSigner).participate(BN_1E6.mul(10000), mockNft.address);
+            tx = distributor.connect(userSigner).participate(BN_1E6.mul(10000), mockNft.address);
             await expect(tx).to.be.reverted;
         });
 
@@ -273,36 +274,36 @@ describe("TokenDistributorV4", () => {
             expect(mockUSDTBalance).to.be.equal(initialUSDTBalance);
 
             // dao can't withdraw if distribution didn't reach minGoal
-            await expect(distributor.daoWithdraw(mockUSDT.address, daoSigner.address, totalDonations)).to.be.reverted;
+            await expect(distributor.connect(daoSigner).daoWithdraw(mockUSDT.address, daoSigner.address, totalDonations)).to.be.reverted;
         });
 
         it("admin can take donations back when distribution success", async () => {
             const donation1 = BN_1E6.mul(500_000); // for userSigner
-            const donation2 = BN_1E6.mul(300_000); // for ownerSigner
+            const donation2 = BN_1E6.mul(300_000); // for aliceSigner
             const donation3 = BN_1E6.mul(400_000); // for randomSigner
 
             await mintNftAndUSDT(userSigner);
-            await mintNftAndUSDT(ownerSigner);
+            await mintNftAndUSDT(aliceSigner);
             await mintNftAndUSDT(randomSigner);
 
             const expectedRewards1 = await distributor.getBondingCurveRewardAmountFromDonationUSD(BN_1E12.mul(donation1));
             await distributor.connect(userSigner).participate(donation1, mockNft.address);
 
             const expectedRewards2 = await distributor.getBondingCurveRewardAmountFromDonationUSD(BN_1E12.mul(donation2));
-            await distributor.connect(ownerSigner).participate(donation2, mockNft.address);
+            await distributor.connect(aliceSigner).participate(donation2, mockNft.address);
 
             const expectedRewards3 = await distributor.getBondingCurveRewardAmountFromDonationUSD(BN_1E12.mul(donation3));
             await distributor.connect(randomSigner).participate(donation3, mockNft.address);
 
             let veSuDAOBalance1 = await veERC20.balanceOf(userSigner.address);
-            let veSuDAOBalance2 = await veERC20.balanceOf(ownerSigner.address);
+            let veSuDAOBalance2 = await veERC20.balanceOf(aliceSigner.address);
             let veSuDAOBalance3 = await veERC20.balanceOf(randomSigner.address);
             expect(veSuDAOBalance1).to.be.equal(expectedRewards1);
             expect(veSuDAOBalance2).to.be.equal(expectedRewards2);
             expect(veSuDAOBalance3).to.be.equal(expectedRewards3);
 
             let mockUSDTBalance1 = await mockUSDT.balanceOf(userSigner.address);
-            let mockUSDTBalance2 = await mockUSDT.balanceOf(ownerSigner.address);
+            let mockUSDTBalance2 = await mockUSDT.balanceOf(aliceSigner.address);
             let mockUSDTBalance3 = await mockUSDT.balanceOf(randomSigner.address);
             expect(mockUSDTBalance1).to.be.equal(initialUSDTBalance.sub(donation1));
             expect(mockUSDTBalance2).to.be.equal(initialUSDTBalance.sub(donation2));
@@ -318,12 +319,12 @@ describe("TokenDistributorV4", () => {
 
             // distribution reached minGoal
             await expect(distributor.connect(userSigner).takeDonationBack()).to.be.reverted;
-            await expect(distributor.connect(ownerSigner).takeDonationBack()).to.be.reverted;
+            await expect(distributor.connect(aliceSigner).takeDonationBack()).to.be.reverted;
             await expect(distributor.connect(randomSigner).takeDonationBack()).to.be.reverted;
 
             // check id DAO will receive all donations after daoWithdraw()
             const daoBalanceBefore = await mockUSDT.balanceOf(daoSigner.address);
-            await distributor.daoWithdraw(mockUSDT.address, daoSigner.address, totalDonations);
+            await distributor.connect(daoSigner).daoWithdraw(mockUSDT.address, daoSigner.address, totalDonations);
             const daoBalanceAfter = await mockUSDT.balanceOf(daoSigner.address);
             expect(daoBalanceAfter).to.be.equal(daoBalanceBefore.add(totalDonations));
         });

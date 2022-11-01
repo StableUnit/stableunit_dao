@@ -204,12 +204,12 @@ contract VeERC20 is ERC20BurnableUpgradeable, SuAccessControlAuthenticated, IveE
     /**
      * @notice User can donate tokens under vesting to DAO or other admin contract as us treasury.
      */
-    function donateTokens(address toAdmin) external {
-        require(hasRole(ADMIN_ROLE, toAdmin) == true, "invalid admin address");
+    function donateTokens(address toDAO) external {
+        require(hasRole(DAO_ROLE, toDAO) == true, "invalid DAO address");
         uint256 balance = balanceOf(msg.sender);
         require(balance > 0, "nothing to donate");
         vestingInfo[msg.sender].amountAlreadyWithdrawn = vestingInfo[msg.sender].amountAlreadyWithdrawn + uint64(balance);
-        LOCKED_TOKEN.safeTransfer(toAdmin, balance);
+        LOCKED_TOKEN.safeTransfer(toDAO, balance);
     }
 
     function balanceOf(address account) public view virtual override returns (uint256) {
@@ -217,7 +217,7 @@ contract VeERC20 is ERC20BurnableUpgradeable, SuAccessControlAuthenticated, IveE
     }
 
     /**
-    * @notice The owner of the contact can take away tokens accidentally sent to the contract.
+    * @notice The DAO can take away tokens accidentally sent to the contract.
     */
     function rescue(ERC20Upgradeable token) external onlyRole(DAO_ROLE) {
         require(token != LOCKED_TOKEN, "No allowed to rescue this token");
