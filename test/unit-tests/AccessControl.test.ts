@@ -12,19 +12,19 @@ describe("SuAccessControlSingleton", function () {
     const beforeAllFunc = async () => {
         const [
             deployer,
-            owner,
+            dao,
             alice,
             bob,
             carl,
         ] = await ethers.getSigners();
         accounts = {
             deployer,
-            owner,
+            dao,
             alice,
             bob,
             carl,
         };
-        accessControlSingleton = await deployProxy("SuAccessControlSingleton", []) as SuAccessControlSingleton;
+        accessControlSingleton = await deployProxy("SuAccessControlSingleton", [dao.address]) as SuAccessControlSingleton;
         defaultAdminRole = await accessControlSingleton.DEFAULT_ADMIN_ROLE();
     };
 
@@ -36,15 +36,20 @@ describe("SuAccessControlSingleton", function () {
         })
 
         it("deployer has DEFAULT_ADMIN_ROLE", async () => {
-            const tx = await accessControlSingleton.hasRole(defaultAdminRole, accounts.deployer.address);
-            expect(tx).to.be.true;
+            expect(await accessControlSingleton.hasRole(defaultAdminRole, accounts.deployer.address)).to.be.false;
+            expect(await accessControlSingleton.hasRole(defaultAdminRole, accounts.dao.address)).to.be.true;
         })
 
         it("can grant role", async () => {
-            const tx = accessControlSingleton.grantRole(defaultAdminRole, accounts.bob.address);
+            // deployer can't grant role
+            let tx = accessControlSingleton.grantRole(defaultAdminRole, accounts.bob.address);
+            await expect(tx).to.be.reverted;
+
+            tx = accessControlSingleton.connect(accounts.dao).grantRole(defaultAdminRole, accounts.bob.address);
             await expect(tx).not.to.be.reverted;
-            const tx2 = await accessControlSingleton.hasRole(defaultAdminRole, accounts.bob.address);
-            expect(tx2).to.be.true;
+
+            const bobIsAdmin = await accessControlSingleton.hasRole(defaultAdminRole, accounts.bob.address);
+            expect(bobIsAdmin).to.be.true;
         })
     })
 })
