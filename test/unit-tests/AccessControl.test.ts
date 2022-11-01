@@ -10,20 +10,8 @@ describe("SuAccessControlSingleton", function () {
     let defaultAdminRole: string;
 
     const beforeAllFunc = async () => {
-        const [
-            deployer,
-            dao,
-            alice,
-            bob,
-            carl,
-        ] = await ethers.getSigners();
-        accounts = {
-            deployer,
-            dao,
-            alice,
-            bob,
-            carl,
-        };
+        const [deployer, dao, admin ] = await ethers.getSigners();
+        accounts = { deployer, dao, admin };
         accessControlSingleton = await deployProxy(undefined, "SuAccessControlSingleton", [dao.address]) as SuAccessControlSingleton;
         defaultAdminRole = await accessControlSingleton.DEFAULT_ADMIN_ROLE();
     };
@@ -42,15 +30,14 @@ describe("SuAccessControlSingleton", function () {
 
         it("can grant role", async () => {
             // deployer can't grant role
-            let tx = accessControlSingleton.grantRole(defaultAdminRole, accounts.bob.address);
+            let tx = accessControlSingleton.grantRole(defaultAdminRole, accounts.admin.address);
             await expect(tx).to.be.reverted;
 
-            console.log(accounts.dao.address);
-            tx = accessControlSingleton.connect(accounts.dao).grantRole(defaultAdminRole, accounts.bob.address);
+            tx = accessControlSingleton.connect(accounts.dao).grantRole(defaultAdminRole, accounts.admin.address);
             await expect(tx).not.to.be.reverted;
 
-            const bobIsAdmin = await accessControlSingleton.hasRole(defaultAdminRole, accounts.bob.address);
-            expect(bobIsAdmin).to.be.true;
+            const isAdmin = await accessControlSingleton.hasRole(defaultAdminRole, accounts.admin.address);
+            expect(isAdmin).to.be.true;
         })
     })
 })

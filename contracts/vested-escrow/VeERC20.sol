@@ -62,7 +62,7 @@ contract VeERC20 is ERC20BurnableUpgradeable, SuAccessControlAuthenticated, IveE
     /**
     * @notice owner of the contract can set up TGE date within set limits.
     */
-    function updateTgeTimestamp(uint32 newTgeTimestamp) external onlyRole(DAO_ROLE) {
+    function updateTgeTimestamp(uint32 newTgeTimestamp) external onlyRole(ADMIN_ROLE) {
         require(uint32(block.timestamp) <= newTgeTimestamp, "veERC20: TGE date can't be in the past");
         require(newTgeTimestamp <= TGE_MAX_TIMESTAMP, "veERC20: new TGE date is beyond limit");
         tgeTimestamp = newTgeTimestamp;

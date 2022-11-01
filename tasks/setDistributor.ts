@@ -13,7 +13,7 @@ import {MockErc721, SuDAO, TokenDistributorV4} from "../typechain";
 task("setDistributor", "set all parameters from the script")
     .setAction(async (taskArgs, hre) => {
         let tx;
-        const [deployer, dao]  = await hre.ethers.getSigners();
+        const [deployer, dao, admin]  = await hre.ethers.getSigners();
         const BN_1E18 = hre.ethers.BigNumber.from(10).pow(18);
         const BN_1E6 = hre.ethers.BigNumber.from(10).pow(6);
         const BN_1E12 = hre.ethers.BigNumber.from(10).pow(12);
@@ -44,7 +44,7 @@ task("setDistributor", "set all parameters from the script")
         // tx = await accessControlSingleton.grantRole(await distributor.ADMIN_ROLE(), distributor.address);
         // await tx.wait();
 
-        tx = await distributor.connect(dao).setDistributionInfo(
+        tx = await distributor.connect(admin).setDistributionInfo(
           DISTRIBUTION_INFO.startTimestamp + DISTRIBUTION_INFO.startLengthSeconds,
           DISTRIBUTION_INFO.startTimestamp +  DISTRIBUTION_INFO.startLengthSeconds + DISTRIBUTION_INFO.lengthSeconds,
             BN_1E6.mul(DISTRIBUTION_INFO.minGoal),
@@ -59,7 +59,7 @@ task("setDistributor", "set all parameters from the script")
             console.log("✅ setDistributionInfo done");
         }
 
-        tx = await distributor.connect(dao).setDistributionVesting(
+        tx = await distributor.connect(admin).setDistributionVesting(
             DISTRIBUTION_INFO.fullVestingSeconds,
             DISTRIBUTION_INFO.cliffSeconds,
             BN_1E18.mul(DISTRIBUTION_INFO.tgeUnlock * 1000).div(1000),
@@ -70,7 +70,7 @@ task("setDistributor", "set all parameters from the script")
           console.log("✅ setDistributionVesting done");
         }
 
-        tx = await distributor.connect(dao).setBondingCurve([
+        tx = await distributor.connect(admin).setBondingCurve([
           BN_1E18.mul(11).div(10), // 1.1 * 1e18
           -BN_1E12.mul(3).div(10), // -3 * 1e11
         ]);
@@ -85,7 +85,7 @@ task("setDistributor", "set all parameters from the script")
         //   console.log("✅ mockErc721 mint done");
         // }
 
-        tx = await distributor.connect(dao).setNftAccess(mockErc721.address, true);
+        tx = await distributor.connect(admin).setNftAccess(mockErc721.address, true);
         await tx.wait();
         if (!taskArgs.removeLogs) {
           console.log("✅ setNftAccess done");

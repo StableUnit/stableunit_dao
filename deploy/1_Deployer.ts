@@ -4,7 +4,7 @@ import { Bonus, SuDAO, TokenDistributorV4, VeERC20 } from "../typechain";
 import deployProxy from "../test/utils/deploy";
 
 const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
-  const [deployer, dao]  = await hre.ethers.getSigners();
+  const [deployer, dao, admin]  = await hre.ethers.getSigners();
   const {chainId} = await hre.ethers.provider.getNetwork()
   console.log("Deployer is running on ", chainId);
 
@@ -25,6 +25,7 @@ const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
 
   // distributor should be able to call lockUnderVesting
   await accessControlSingleton.connect(dao).grantRole(await tokenDistributor.ADMIN_ROLE(), tokenDistributor.address);
+  await accessControlSingleton.connect(dao).grantRole(await tokenDistributor.ADMIN_ROLE(), admin.address);
 };
 export default func;
 func.tags = ["Deployer"];

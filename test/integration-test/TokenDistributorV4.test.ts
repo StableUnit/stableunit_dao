@@ -50,18 +50,20 @@ describe("TokenDistributorV4", () => {
     };
 
     let deployerSigner: SignerWithAddress;
-    let aliceSigner: SignerWithAddress;
-    let userSigner: SignerWithAddress;
     let daoSigner: SignerWithAddress;
+    let adminSigner: SignerWithAddress;
     let randomSigner: SignerWithAddress;
+    let userSigner: SignerWithAddress;
+    let aliceSigner: SignerWithAddress;
 
     const initialize = async () => {
         const {
-            deployer, dao, userAccount, randomAccount, alice
+            deployer, dao, admin, randomAccount, userAccount, alice
         } = await getNamedAccounts();
 
         deployerSigner = await ethers.getSigner(deployer);
         daoSigner = await ethers.getSigner(dao);
+        adminSigner = await ethers.getSigner(admin);
         userSigner = await ethers.getSigner(userAccount);
         aliceSigner = await ethers.getSigner(alice);
         randomSigner = await ethers.getSigner(randomAccount);
@@ -192,7 +194,7 @@ describe("TokenDistributorV4", () => {
             expect(contractData.vestingFrequencySeconds_).to.be.equal(data.vestingFrequencySeconds);
         });
 
-        it("DAO can remove accessNFT", async () => {
+        it("Admin can remove accessNFT", async () => {
             let accessNFTS = await distributor.getAccessNfts();
             let accessNFTSUser = await distributor.getAccessNftsForUser(userSigner.address);
             expect(accessNFTS.length).to.be.equal(1);
@@ -204,7 +206,7 @@ describe("TokenDistributorV4", () => {
             accessNFTS = await distributor.getAccessNftsForUser(userSigner.address);
             expect(accessNFTS[0]).to.be.equal(mockNft.address);
 
-            await distributor.connect(daoSigner).setNftAccess(mockNft.address, false);
+            await distributor.connect(adminSigner).setNftAccess(mockNft.address, false);
             accessNFTS = await distributor.getAccessNfts();
             accessNFTSUser = await distributor.getAccessNftsForUser(userSigner.address);
             expect(accessNFTS.length).to.be.equal(0);
