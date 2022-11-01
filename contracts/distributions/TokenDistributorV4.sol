@@ -279,6 +279,13 @@ contract TokenDistributorV4 is SuAccessControlAuthenticated {
         }
     }
 
+    /**
+     * Be sure you call it before donation campaign takes place
+     */
+    function setCurrentTreasuryValue(uint256 amountTreasuryUSD) external onlyRole(DAO_ROLE) {
+        totalDonations = amountTreasuryUSD / donationTokenToUSD1e18 + totalDonations;
+    }
+
     receive() external payable {}
 
     function getDistributorStaticData() view external returns (
