@@ -26,6 +26,23 @@ describe("Bonus", () => {
   describe("Correct rights and setNftInfo", function () {
     this.beforeEach(beforeAllFunc(true));
 
+    it("deployer can't call anything", async () => {
+      tx = bonus.connect(accounts.deployer).setCommunityAdmin(accounts.dao.address, BN_1E6, 100);
+      await expect(tx).to.be.reverted;
+
+      tx = bonus.connect(accounts.deployer).setNftInfo(mockNft.address, BN_1E6, BN_1E18.div(10));
+      await expect(tx).to.be.reverted;
+
+      tx = bonus.connect(accounts.deployer).setUserInfo(accounts.alice.address, BN_1E6, BN_1E18.div(10));
+      await expect(tx).to.be.reverted;
+
+      tx = bonus.connect(accounts.deployer).distributeXp(accounts.alice.address, 5000);
+      await expect(tx).to.be.reverted;
+
+      tx = bonus.connect(accounts.deployer).setAdmin(accounts.dao.address, true);
+      await expect(tx).to.be.reverted;
+    });
+
     it("DAO can only call setAdmin", async () => {
       tx = bonus.connect(accounts.dao).setCommunityAdmin(accounts.dao.address, BN_1E6, 100);
       await expect(tx).to.be.reverted;

@@ -60,7 +60,6 @@ describe("TokenDistributorV4", () => {
             deployer, dao, userAccount, randomAccount, alice
         } = await getNamedAccounts();
 
-        // TODO: check that deployer don't have any rights
         deployerSigner = await ethers.getSigner(deployer);
         daoSigner = await ethers.getSigner(dao);
         userSigner = await ethers.getSigner(userAccount);
@@ -109,6 +108,39 @@ describe("TokenDistributorV4", () => {
             await mockNft.mint(userSigner.address);
             tx = distributor.connect(userSigner).participate(BN_1E6.mul(10000), mockNft.address);
             await expect(tx).to.be.reverted;
+        });
+        it("deployer can't call anything", async () => {
+            await beforeAllFunc();
+
+            await expect(distributor.connect(deployerSigner).setDistributionVesting(
+              data.fullVestingSeconds,
+              data.cliffSeconds,
+              BN_1E18.mul(data.tgeUnlock * 1000).div(1000),
+              data.vestingFrequencySeconds
+            )).to.be.reverted;
+
+            await expect(distributor.connect(deployerSigner).setDistributionInfo(
+              data.startTimestamp + data.startLengthSeconds,
+              data.startTimestamp +  data.startLengthSeconds + data.lengthSeconds,
+              BN_1E6.mul(data.minGoal),
+              BN_1E6.mul(data.maxGoal),
+              BN_1E6.mul(data.minDonation),
+              BN_1E6.mul(data.maxDonation),
+              data.donationToken,
+              BN_1E12,
+            )).to.be.reverted;
+
+            await expect(
+              distributor.connect(deployerSigner).setNftAccess(mockNft.address, false)
+            ).to.be.reverted;
+            await expect(
+              distributor.connect(deployerSigner).setNftAccess(mockNft.address, true)
+            ).to.be.reverted;
+
+            await expect(distributor.connect(deployerSigner).setBondingCurve([
+                BN_1E18.mul(11).div(10), // 1.1 * 1e18
+                BN_1E12.mul(10).div(10), // 10 * 1e11
+            ])).to.be.reverted;
         });
     });
 
@@ -277,7 +309,7 @@ describe("TokenDistributorV4", () => {
             await expect(distributor.connect(daoSigner).daoWithdraw(mockUSDT.address, daoSigner.address, totalDonations)).to.be.reverted;
         });
 
-        it("admin can take donations back when distribution success", async () => {
+        it("DAO can take donations back when distribution success", async () => {
             const donation1 = BN_1E6.mul(500_000); // for userSigner
             const donation2 = BN_1E6.mul(300_000); // for aliceSigner
             const donation3 = BN_1E6.mul(400_000); // for randomSigner

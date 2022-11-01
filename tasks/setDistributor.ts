@@ -60,7 +60,7 @@ task("setDistributor", "set all parameters from the script")
         }
 
         tx = await distributor.connect(dao).setDistributionVesting(
-        DISTRIBUTION_INFO.fullVestingSeconds,
+            DISTRIBUTION_INFO.fullVestingSeconds,
             DISTRIBUTION_INFO.cliffSeconds,
             BN_1E18.mul(DISTRIBUTION_INFO.tgeUnlock * 1000).div(1000),
             DISTRIBUTION_INFO.vestingFrequencySeconds
