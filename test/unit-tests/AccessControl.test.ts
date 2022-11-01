@@ -24,7 +24,7 @@ describe("SuAccessControlSingleton", function () {
             bob,
             carl,
         };
-        accessControlSingleton = await deployProxy("SuAccessControlSingleton", [dao.address]) as SuAccessControlSingleton;
+        accessControlSingleton = await deployProxy(undefined, "SuAccessControlSingleton", [dao.address]) as SuAccessControlSingleton;
         defaultAdminRole = await accessControlSingleton.DEFAULT_ADMIN_ROLE();
     };
 
@@ -45,6 +45,7 @@ describe("SuAccessControlSingleton", function () {
             let tx = accessControlSingleton.grantRole(defaultAdminRole, accounts.bob.address);
             await expect(tx).to.be.reverted;
 
+            console.log(accounts.dao.address);
             tx = accessControlSingleton.connect(accounts.dao).grantRole(defaultAdminRole, accounts.bob.address);
             await expect(tx).not.to.be.reverted;
 

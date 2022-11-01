@@ -5,14 +5,20 @@ import deployProxy from "../test/utils/deploy";
 
 const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
   const [deployer, dao]  = await hre.ethers.getSigners();
-  console.log("Deployer is running on ", (await hre.ethers.provider.getNetwork()).chainId);
+  const {chainId} = await hre.ethers.provider.getNetwork()
+  console.log("Deployer is running on ", chainId);
 
-  const mockErc721 = await deployProxy("MockErc721", ["Mock StableUnit NFT", "SuNFTPro"]);
-  const accessControlSingleton = await deployProxy("SuAccessControlSingleton", [dao.address]);
-  const suDAO = await deployProxy("SuDAO", [accessControlSingleton.address]) as SuDAO;
-  const bonus = await deployProxy("Bonus", [accessControlSingleton.address]) as Bonus;
-  const veERC20 = await deployProxy("VeERC20", [accessControlSingleton.address, suDAO.address]) as VeERC20;
+  // in localhost we don't need to call changeProxyAdmin (error "TransparentUpgradeableProxy: admin cannot fallback to proxy target")
+  // but in goerli or mainnet we should call it
+  const proxyAdminAddress = chainId === 31337 ? undefined : dao.address;
+
+  const mockErc721 = await deployProxy(proxyAdminAddress, "MockErc721", ["Mock StableUnit NFT", "SuNFTPro"]);
+  const accessControlSingleton = await deployProxy(proxyAdminAddress, "SuAccessControlSingleton", [dao.address]);
+  const suDAO = await deployProxy(proxyAdminAddress, "SuDAO", [accessControlSingleton.address]) as SuDAO;
+  const bonus = await deployProxy(proxyAdminAddress, "Bonus", [accessControlSingleton.address]) as Bonus;
+  const veERC20 = await deployProxy(proxyAdminAddress, "VeERC20", [accessControlSingleton.address, suDAO.address]) as VeERC20;
   const tokenDistributor = await deployProxy(
+    proxyAdminAddress,
     "TokenDistributorV4",
     [accessControlSingleton.address, suDAO.address, veERC20.address, bonus.address]
   ) as TokenDistributorV4;
