@@ -32,7 +32,8 @@ const {
     // PRIVATE_KEY_TESTNET_ADMIN,
 } = process.env;
 
-const accountsTestnet = [PRIVATE_KEY_TESTNET_DEPLOYER, PRIVATE_KEY_TESTNET_OWNER] as string[];// , PRIVATE_KEY_TESTNET_ADMIN];
+const accountsTestnetEnv = [PRIVATE_KEY_TESTNET_DEPLOYER, PRIVATE_KEY_TESTNET_OWNER] as string[];// , PRIVATE_KEY_TESTNET_ADMIN];
+const accountsTestnet = accountsTestnetEnv.filter((v) => v);
 
 // You need to export an object to set up your config
 // Go to https://hardhat.org/config/ to learn more
