@@ -15,6 +15,7 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/extensions/ERC20Burnable.sol";
+import "@openzeppelin/contracts/token/ERC20/extensions/ERC20Votes.sol";
 import "../access-control/SuAccessControlAuthenticated.sol";
 import "../interfaces/IveERC20.sol";
 
@@ -33,7 +34,7 @@ import "../interfaces/IveERC20.sol";
  * To make balance visible in the erc20 wallets, the contact "looks like" erc20 token by implementing its interface
  * however all non-view methods such as transfer or approve aren't active and will be reverted.
 */
-contract VeERC20 is ERC20Burnable, SuAccessControlAuthenticated, IveERC20 {
+contract VeERC20 is ERC20Votes, SuAccessControlAuthenticated, IveERC20 {
     using SafeERC20 for ERC20;
 
     ERC20 public LOCKED_TOKEN;
@@ -53,6 +54,7 @@ contract VeERC20 is ERC20Burnable, SuAccessControlAuthenticated, IveERC20 {
     constructor(address _accessControlSingleton, ERC20 _lockedToken)
         SuAccessControlAuthenticated(_accessControlSingleton)
         ERC20(string.concat("vested escrow ", _lockedToken.name()), string.concat("ve", _lockedToken.symbol()))
+        ERC20Permit(string.concat("vested escrow ", _lockedToken.name()))
     {
         LOCKED_TOKEN = _lockedToken;
         tgeTimestamp = TGE_MAX_TIMESTAMP;
@@ -231,13 +233,6 @@ contract VeERC20 is ERC20Burnable, SuAccessControlAuthenticated, IveERC20 {
 
     function transfer(address, uint256) public virtual override returns (bool) {
         revert("not possible to transfer vested token");
-    }
-
-    function _burn(address account, uint256 amount)
-    internal
-    override
-    {
-        super._burn(account, amount);
     }
 
     function burnAll() external {

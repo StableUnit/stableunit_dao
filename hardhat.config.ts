@@ -51,12 +51,20 @@ const config: HardhatUserConfig = {
         carl: 8,
         dao: 9,
     },
-    solidity: "0.8.15",
+    solidity: {
+        version: "0.8.15",
+        settings: {
+            optimizer: {
+                enabled: true,
+                runs: 1,
+            },
+        },
+    },
     networks: {
         hardhat: {
             gas: 12000000,
             blockGasLimit: 0x1fffffffffffff,
-            allowUnlimitedContractSize: true,
+            // allowUnlimitedContractSize: true,
             forking: {
                 url: `https://eth-mainnet.alchemyapi.io/v2/${ALCHEMY_API_KEY}`,
                 blockNumber: 14518074,
@@ -71,7 +79,7 @@ const config: HardhatUserConfig = {
         goerli: {
             url: `https://goerli.infura.io/v3/${INFURA_API_KEY}`,
             accounts: accountsTestnet,
-            allowUnlimitedContractSize: true,
+            // allowUnlimitedContractSize: true,
             timeout: 100000,
             blockGasLimit: 7_000_000,
             gas: 7_000_000,
