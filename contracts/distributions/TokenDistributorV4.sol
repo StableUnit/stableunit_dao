@@ -160,7 +160,7 @@ contract TokenDistributorV4 is SuAccessControlAuthenticated {
         uint256 rewardAmount = getBondingCurveRewardAmountFromDonationUSD(donationAmount * donationTokenToUSD1e18) ;
 
         uint256 bonusRewardRatio = Math.max(BONUS_CONTRACT.getBonus(msg.sender), BONUS_CONTRACT.getNftBonus(accessNft));
-        bonusStats.bonusRewarded = rewardAmount * bonusRewardRatio / 1e18;
+        bonusStats.bonusRewarded = bonusStats.bonusRewarded + rewardAmount * bonusRewardRatio / 1e18;
         rewardAmount = rewardAmount * (1e18 + bonusRewardRatio) / 1e18;
 
         // get donation from the user
