@@ -107,4 +107,6 @@ interface IBonus {
      * `user` Address of nft
     **/
     function getNftBonus(address nft) external view returns ( uint256 );
+
+    function isTokenTransferable(address nft, address from, address to, uint256 tokenId) external view returns (bool);
 }

@@ -173,6 +173,13 @@ contract Bonus is IBonus, SuAccessControlAuthenticated {
     }
 
     /**
+     * Returns true/false whether this NFT with tokenId tokens can be transfer
+     */
+    function isTokenTransferable(address nft, address from, address to, uint256 tokenId) external view returns (bool) {
+        return false;
+    }
+
+    /**
      * @dev This empty reserved space is put in place to allow future versions to add new
      * variables without shifting down storage in the inheritance chain.
      * See https://docs.openzeppelin.com/contracts/4.x/upgradeable#storage_gaps

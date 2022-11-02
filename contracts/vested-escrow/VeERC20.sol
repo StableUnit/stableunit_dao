@@ -19,7 +19,6 @@ import "@openzeppelin/contracts-upgradeable/utils/math/SafeCastUpgradeable.sol";
 import "../access-control/SuAccessControlAuthenticated.sol";
 import "../interfaces/IveERC20.sol";
 
-
 /*
  * @title The contact enables the storage of erc20 tokens under the linear time-vesting with the cliff time-lock.
  * @notice During cliff period all tokens are locked so the user can't claim it.
