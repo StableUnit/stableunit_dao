@@ -6,7 +6,7 @@ import "@openzeppelin/contracts-upgradeable/token/ERC721/extensions/ERC721Enumer
 import "@openzeppelin/contracts/utils/Counters.sol";
 import "../interfaces/IBonus.sol";
 
-contract MockErc721 is ERC721EnumerableUpgradeable {
+contract MockCNft is ERC721EnumerableUpgradeable {
     using Counters for Counters.Counter;
     Counters.Counter private _tokenIdCounter;
 
