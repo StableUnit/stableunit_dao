@@ -32,7 +32,8 @@ const {
     // PRIVATE_KEY_TESTNET_ADMIN,
 } = process.env;
 
-const accountsTestnet = [PRIVATE_KEY_TESTNET_DEPLOYER, PRIVATE_KEY_TESTNET_OWNER] as string[];// , PRIVATE_KEY_TESTNET_ADMIN];
+const accountsTestnetEnv = [PRIVATE_KEY_TESTNET_DEPLOYER, PRIVATE_KEY_TESTNET_OWNER] as string[];// , PRIVATE_KEY_TESTNET_ADMIN];
+const accountsTestnet = accountsTestnetEnv.filter((v) => v);
 
 // You need to export an object to set up your config
 // Go to https://hardhat.org/config/ to learn more
@@ -41,7 +42,7 @@ const config: HardhatUserConfig = {
     // learn more https://github.com/wighawag/hardhat-deploy#1-namedaccounts-ability-to-name-addresses
     namedAccounts: {
         deployer: 0,
-        owner: 1, // DAO address
+        dao: 1, // DAO address
         admin: 2, // core team
         randomAccount: 3,
         userAccount: 4,

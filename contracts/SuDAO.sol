@@ -26,21 +26,20 @@ contract SuDAO is ERC20VotesUpgradeable, ERC20BurnableUpgradeable, SuAccessContr
 
     uint256 public constant MAX_SUPPLY = 21_000_000 * 1e18;
 
-    function initialize(address _accessControlSingleton, uint256 _initMint) initializer public {
+    function initialize(address _accessControlSingleton) initializer public {
         __SuAuthenticated_init(_accessControlSingleton);
         __ERC20_init("StableUnit DAO", "SuDAO");
-        _mint(msg.sender, _initMint);
     }
 
-    function mint(address account, uint256 amount) external onlyRole(DEFAULT_ADMIN_ROLE) {
+    function mint(address account, uint256 amount) external onlyRole(DAO_ROLE) {
         require(totalSupply() + amount <= MAX_SUPPLY, "max supply is exceeded");
         _mint(account, amount);
     }
 
     /**
-     * @notice The owner of the contact can take away tokens accidentally sent to the contract.
+     * @notice The DAO can take away tokens accidentally sent to the contract.
      */
-    function rescueTokens(ERC20Upgradeable token) external onlyRole(DEFAULT_ADMIN_ROLE) {
+    function rescueTokens(ERC20Upgradeable token) external onlyRole(DAO_ROLE) {
         // allow to rescue ether
         if (address(token) == address(0)) {
             payable(msg.sender).transfer(address(this).balance);

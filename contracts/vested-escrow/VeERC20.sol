@@ -12,12 +12,12 @@ pragma solidity ^0.8.12;
 
 */
 import "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20Upgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/token/ERC20/extensions/ERC20BurnableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/IERC20Upgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/utils/SafeERC20Upgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/math/SafeCastUpgradeable.sol";
 import "../access-control/SuAccessControlAuthenticated.sol";
 import "../interfaces/IveERC20.sol";
-
 
 /*
  * @title The contact enables the storage of erc20 tokens under the linear time-vesting with the cliff time-lock.
@@ -33,7 +33,7 @@ import "../interfaces/IveERC20.sol";
  * To make balance visible in the erc20 wallets, the contact "looks like" erc20 token by implementing its interface
  * however all non-view methods such as transfer or approve aren't active and will be reverted.
 */
-contract VeERC20 is ERC20Upgradeable, SuAccessControlAuthenticated, IveERC20 {
+contract VeERC20 is ERC20BurnableUpgradeable, SuAccessControlAuthenticated, IveERC20 {
     using SafeERC20Upgradeable for ERC20Upgradeable;
 
     ERC20Upgradeable public LOCKED_TOKEN;
@@ -61,7 +61,7 @@ contract VeERC20 is ERC20Upgradeable, SuAccessControlAuthenticated, IveERC20 {
     /**
     * @notice owner of the contract can set up TGE date within set limits.
     */
-    function updateTgeTimestamp(uint32 newTgeTimestamp) external onlyRole(DAO_ROLE) {
+    function updateTgeTimestamp(uint32 newTgeTimestamp) external onlyRole(ADMIN_ROLE) {
         require(uint32(block.timestamp) <= newTgeTimestamp, "veERC20: TGE date can't be in the past");
         require(newTgeTimestamp <= TGE_MAX_TIMESTAMP, "veERC20: new TGE date is beyond limit");
         tgeTimestamp = newTgeTimestamp;
@@ -203,12 +203,12 @@ contract VeERC20 is ERC20Upgradeable, SuAccessControlAuthenticated, IveERC20 {
     /**
      * @notice User can donate tokens under vesting to DAO or other admin contract as us treasury.
      */
-    function donateTokens(address toAdmin) external {
-        require(hasRole(ADMIN_ROLE, toAdmin) == true, "invalid admin address");
+    function donateTokens(address toDAO) external {
+        require(hasRole(DAO_ROLE, toDAO) == true, "invalid DAO address");
         uint256 balance = balanceOf(msg.sender);
         require(balance > 0, "nothing to donate");
         vestingInfo[msg.sender].amountAlreadyWithdrawn = vestingInfo[msg.sender].amountAlreadyWithdrawn + uint64(balance);
-        LOCKED_TOKEN.safeTransfer(toAdmin, balance);
+        LOCKED_TOKEN.safeTransfer(toDAO, balance);
     }
 
     function balanceOf(address account) public view virtual override returns (uint256) {
@@ -216,7 +216,7 @@ contract VeERC20 is ERC20Upgradeable, SuAccessControlAuthenticated, IveERC20 {
     }
 
     /**
-    * @notice The owner of the contact can take away tokens accidentally sent to the contract.
+    * @notice The DAO can take away tokens accidentally sent to the contract.
     */
     function rescue(ERC20Upgradeable token) external onlyRole(DAO_ROLE) {
         require(token != LOCKED_TOKEN, "No allowed to rescue this token");
@@ -228,6 +228,23 @@ contract VeERC20 is ERC20Upgradeable, SuAccessControlAuthenticated, IveERC20 {
         }
     }
     receive() external payable {}
+
+    function transfer(address, uint256) public virtual override returns (bool) {
+        revert("not possible to transfer vested token");
+    }
+
+    function _burn(address account, uint256 amount)
+    internal
+    override
+    {
+        super._burn(account, amount);
+    }
+
+    function burnAll() external {
+        uint256 balance = super.balanceOf(msg.sender);
+        super._burn(msg.sender, balance);
+        vestingInfo[msg.sender].amountAlreadyWithdrawn = 0;
+    }
 
     /**
      * @dev This empty reserved space is put in place to allow future versions to add new

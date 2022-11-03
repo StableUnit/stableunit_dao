@@ -120,34 +120,38 @@ contract Bonus is IBonus, SuAccessControlAuthenticated {
         adminInfo[admin].isAdmin = isAdmin;
     }
 
-    function setCommunityAdmin(address communityAdmin, uint256 xpLimit, uint16 levelLimit) public onlyRole(ADMIN_ROLE) override {
+    function setCommunityAdmin(address communityAdmin, uint256 xpLimit, uint16 levelLimit) public override {
         require(adminInfo[msg.sender].isAdmin, "Need admin rights");
         communityAdminInfo[communityAdmin].xpLimit = xpLimit;
         communityAdminInfo[communityAdmin].levelLimit = levelLimit;
     }
 
-    function setNftInfo(address nft, uint256 allocation, uint256 discountRatioPresale) public onlyRole(ADMIN_ROLE) override {
+    function setNftInfo(address nft, uint256 allocation, uint256 donationBonusRatio) public override {
+        require(adminInfo[msg.sender].isAdmin, "Need admin rights");
         nftInfo[nft].allocation = allocation;
-        nftInfo[nft].discountRatioPresale = discountRatioPresale;
+        nftInfo[nft].donationBonusRatio = donationBonusRatio;
     }
 
-    function setUserInfo(address user, uint256 allocation, uint256 discountRatioPresale) public onlyRole(ADMIN_ROLE) override {
+    function setUserInfo(address user, uint256 allocation, uint256 donationBonusRatio) public override {
+        require(adminInfo[msg.sender].isAdmin, "Need admin rights");
         userInfo[user].allocation = allocation;
-        userInfo[user].discountRatioPresale = discountRatioPresale;
+        userInfo[user].donationBonusRatio = donationBonusRatio;
     }
 
-    function distribute(address user, uint256 xp) public onlyRole(COMMUNITY_ADMIN_ROLE) override {
+    function distributeXp(address user, uint256 xp) public override {
+        require(communityAdminInfo[msg.sender].levelLimit > 0, "Need communityAdmin rights");
         require(
             xp <= communityAdminInfo[msg.sender].xpLimit,
             "XP to distribute shouldn't be more than admin xpLimit"
         );
+
         communityAdminInfo[msg.sender].xpLimit = communityAdminInfo[msg.sender].xpLimit - xp;
         userInfo[user].xp = userInfo[user].xp + xp;
 
         uint16 newUserLevel = _getLevelByXP(userInfo[user].xp);
         require(
             newUserLevel <= communityAdminInfo[msg.sender].levelLimit,
-            "User level should be les than admin levelLimit"
+            "User level should be less than admin levelLimit"
         );
     }
 
@@ -160,12 +164,19 @@ contract Bonus is IBonus, SuAccessControlAuthenticated {
     }
 
 
-    function getDiscount(address user) public view override returns (uint256) {
-        return userInfo[user].discountRatioPresale;
+    function getBonus(address user) public view override returns (uint256) {
+        return userInfo[user].donationBonusRatio;
     }
 
-    function getNftDiscount(address nft) public view override returns (uint256) {
-        return nftInfo[nft].discountRatioPresale;
+    function getNftBonus(address nft) public view override returns (uint256) {
+        return nftInfo[nft].donationBonusRatio;
+    }
+
+    /**
+     * Returns true/false whether this NFT with tokenId tokens can be transfer
+     */
+    function isTokenTransferable(address nft, address from, address to, uint256 tokenId) external view returns (bool) {
+        return false;
     }
 
     /**

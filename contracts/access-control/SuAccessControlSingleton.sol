@@ -15,9 +15,9 @@ contract SuAccessControlSingleton is AccessControlUpgradeable {
     /**
      * @dev Initialize the contract with initial owner to be deployer
      */
-    function initialize() public initializer {
+    function initialize(address dao) public initializer {
         __AccessControl_init();
-        _setupRole(DEFAULT_ADMIN_ROLE, msg.sender);
+        _setupRole(DEFAULT_ADMIN_ROLE, dao);
     }
 
     /**

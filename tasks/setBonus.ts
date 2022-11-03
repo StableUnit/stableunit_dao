@@ -32,8 +32,8 @@ task("setBonus", "set all parameters from the script")
         await tx.wait();
         console.log("✅ setCommunityAdmin done");
 
-        // for mockErc721 we set allocation = 10 000 tUSDT, discount = 10%
-        tx = await bonus.setNftInfo(mockErc721.address, BigNumber.from(1000).mul(1e6), BigNumber.from(10).pow(17));
+        // for mockErc721 we set allocation = 500 000 tUSDT, discount = 10%
+        tx = await bonus.setNftInfo(mockErc721.address, BigNumber.from(500_000).mul(1e6), BigNumber.from(10).pow(17));
         await tx.wait();
         console.log("✅ setNftInfo done");
 
