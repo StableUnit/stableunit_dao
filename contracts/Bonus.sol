@@ -12,17 +12,17 @@ pragma solidity ^0.8.9;
 
 */
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
-
 import "./interfaces/IBonus.sol";
-import "./access-control/SuAuthenticated.sol";
+import "./access-control/SuAccessControlAuthenticated.sol";
 
-contract Bonus is IBonus, SuAuthenticated {
+contract Bonus is IBonus, SuAccessControlAuthenticated {
+    mapping(address => NFTInfo) public nftInfo;
     mapping(address => UserInfo) public userInfo;
     mapping(address => CommunityAdminInfo) public communityAdminInfo;
     mapping(address => AdminInfo) public adminInfo;
 
-    function initialize(address _authControl) public initializer {
-        __SuAuthenticated_init(_authControl);
+    function initialize(address _accessControlSingleton) public initializer {
+        __SuAuthenticated_init(_accessControlSingleton);
     }
 
     function _getLevelByXP(uint256 xp) internal pure returns (uint16) {
@@ -116,29 +116,67 @@ contract Bonus is IBonus, SuAuthenticated {
         return _getLevelByXP(userInfo[user].xp);
     }
 
-    function setAdmin(address admin, bool isAdmin) public onlyOwner override {
+    function setAdmin(address admin, bool isAdmin) public onlyRole(DAO_ROLE) override {
         adminInfo[admin].isAdmin = isAdmin;
     }
 
-    function setCommunityAdmin(address communityAdmin, uint256 xpLimit, uint16 levelLimit) public onlyAdmin override {
+    function setCommunityAdmin(address communityAdmin, uint256 xpLimit, uint16 levelLimit) public override {
         require(adminInfo[msg.sender].isAdmin, "Need admin rights");
         communityAdminInfo[communityAdmin].xpLimit = xpLimit;
         communityAdminInfo[communityAdmin].levelLimit = levelLimit;
     }
 
-    function distribute(address user, uint256 xp) public onlyCommunityAdmin override {
+    function setNftInfo(address nft, uint256 allocation, uint256 donationBonusRatio) public override {
+        require(adminInfo[msg.sender].isAdmin, "Need admin rights");
+        nftInfo[nft].allocation = allocation;
+        nftInfo[nft].donationBonusRatio = donationBonusRatio;
+    }
+
+    function setUserInfo(address user, uint256 allocation, uint256 donationBonusRatio) public override {
+        require(adminInfo[msg.sender].isAdmin, "Need admin rights");
+        userInfo[user].allocation = allocation;
+        userInfo[user].donationBonusRatio = donationBonusRatio;
+    }
+
+    function distributeXp(address user, uint256 xp) public override {
+        require(communityAdminInfo[msg.sender].levelLimit > 0, "Need communityAdmin rights");
         require(
             xp <= communityAdminInfo[msg.sender].xpLimit,
             "XP to distribute shouldn't be more than admin xpLimit"
         );
+
         communityAdminInfo[msg.sender].xpLimit = communityAdminInfo[msg.sender].xpLimit - xp;
         userInfo[user].xp = userInfo[user].xp + xp;
 
         uint16 newUserLevel = _getLevelByXP(userInfo[user].xp);
         require(
             newUserLevel <= communityAdminInfo[msg.sender].levelLimit,
-            "User level should be les than admin levelLimit"
+            "User level should be less than admin levelLimit"
         );
+    }
+
+    function getAllocation(address user) public view override returns (uint256) {
+        return userInfo[user].allocation;
+    }
+
+    function getNftAllocation(address nft) public view override returns (uint256) {
+        return nftInfo[nft].allocation;
+    }
+
+
+    function getBonus(address user) public view override returns (uint256) {
+        return userInfo[user].donationBonusRatio;
+    }
+
+    function getNftBonus(address nft) public view override returns (uint256) {
+        return nftInfo[nft].donationBonusRatio;
+    }
+
+    /**
+     * Returns true/false whether this NFT with tokenId tokens can be transfer
+     */
+    function isTokenTransferable(address nft, address from, address to, uint256 tokenId) external view returns (bool) {
+        return false;
     }
 
     /**

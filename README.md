@@ -74,10 +74,10 @@ Oversimplified plan
 
 ## Compile
 ```
-npm install
+npm install  --legacy-peer-deps
 npm audit fix
-truffle compile
-npm run generate-types
+npx hardhat typechain
+npx hardhat compile
 ```
 
 ## Test
