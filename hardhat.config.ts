@@ -51,7 +51,15 @@ const config: HardhatUserConfig = {
         bob: 7,
         carl: 8,
     },
-    solidity: "0.8.15",
+    solidity: {
+        version: "0.8.15",
+        settings: {
+            optimizer: {
+                enabled: true,
+                runs: 1,
+            },
+        },
+    },
     networks: {
         hardhat: {
             gas: 12000000,

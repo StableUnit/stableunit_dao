@@ -2,11 +2,12 @@
 pragma solidity ^0.8.7;
 
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
-import "@openzeppelin/contracts-upgradeable/token/ERC721/extensions/ERC721EnumerableUpgradeable.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
 import "../interfaces/IBonus.sol";
+import "../3rd-party/layer-zero-labs/token/onft/extension/UniversalONFT721.sol";
+import "../3rd-party/buildship-dev/interfaces/IERC721CommunityBeforeTransferExtension.sol";
 
-contract MockCNft is ERC721EnumerableUpgradeable {
+contract MockCNft is UniversalONFT721 {
     using Counters for Counters.Counter;
     Counters.Counter private _tokenIdCounter;
 
@@ -15,8 +16,9 @@ contract MockCNft is ERC721EnumerableUpgradeable {
 
     error TransferError();
 
-    function initialize(string memory name, string memory symbol, IBonus _bonus) initializer public {
-        __ERC721_init(name, symbol);
+    constructor(string memory _name, string memory _symbol, IBonus _bonus, address _layerZeroEndpoint)
+    UniversalONFT721(_name, _symbol, _layerZeroEndpoint, 0, 100500)
+    public {
         baseURI = "ipfs://QmeSjSinHpPnmXmspMjwiXyN6zS4E9zccariGR3jxcaWtq/";
         bonus = _bonus;
     }
@@ -46,14 +48,5 @@ contract MockCNft is ERC721EnumerableUpgradeable {
             revert TransferError();
         }
         super._beforeTokenTransfer(from, to, tokenId);
-    }
-
-    function supportsInterface(bytes4 interfaceId)
-    public
-    view
-    override
-    returns (bool)
-    {
-        return super.supportsInterface(interfaceId);
     }
 }

@@ -173,9 +173,10 @@ contract Bonus is IBonus, SuAccessControlAuthenticated {
     }
 
     /**
-     * Returns true/false whether this NFT with tokenId tokens can be transfer
+     * @dev See {IBonus-isTokenTransferable}.
      */
     function isTokenTransferable(address nft, address from, address to, uint256 tokenId) external view returns (bool) {
+        uint256 level =
         return false;
     }
 
