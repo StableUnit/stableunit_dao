@@ -17,7 +17,8 @@ const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
   const accessControlSingleton = await deployProxy(proxyAdminAddress, "SuAccessControlSingleton", [dao.address]);
   const suDAO = await deployProxy(proxyAdminAddress, "SuDAO", [accessControlSingleton.address]) as SuDAO;
   const bonus = await deployProxy(proxyAdminAddress, "Bonus", [accessControlSingleton.address]) as Bonus;
-  const veERC20 = await deployProxy(proxyAdminAddress, "VeERC20", [accessControlSingleton.address, suDAO.address]) as VeERC20;
+  // Unix Timestamp	1685577600 = GMT+0 Thu Jun 01 2023 00:00:00 GMT+0000
+  const veERC20 = await deployProxy(proxyAdminAddress, "VeERC20", [accessControlSingleton.address, suDAO.address, 1685577600]) as VeERC20;
   const tokenDistributor = await deployProxy(
     proxyAdminAddress,
     "TokenDistributorV4",
