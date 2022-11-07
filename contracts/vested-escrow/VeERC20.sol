@@ -13,7 +13,6 @@ pragma solidity ^0.8.12;
 */
 import "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20Upgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/extensions/ERC20BurnableUpgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/token/ERC20/IERC20Upgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/utils/SafeERC20Upgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/math/SafeCastUpgradeable.sol";
 import "../access-control/SuAccessControlAuthenticated.sol";
@@ -50,11 +49,11 @@ contract VeERC20 is ERC20BurnableUpgradeable, SuAccessControlAuthenticated, IveE
     }
     mapping(address => VestingInfo) public vestingInfo;
 
-    function initialize(address _accessControlSingleton, ERC20Upgradeable _lockedToken) initializer public {
+    function initialize(address _accessControlSingleton, ERC20Upgradeable _lockedToken, uint32 maxTgeTimestamp) initializer public {
         __SuAuthenticated_init(_accessControlSingleton);
         __ERC20_init(string.concat("vested escrow ", _lockedToken.name()), string.concat("ve", _lockedToken.symbol()));
         LOCKED_TOKEN = _lockedToken;
-        TGE_MAX_TIMESTAMP = 1685577600; // Unix Timestamp	1685577600 = GMT+0 Thu Jun 01 2023 00:00:00 GMT+0000
+        TGE_MAX_TIMESTAMP = maxTgeTimestamp;
         tgeTimestamp = TGE_MAX_TIMESTAMP;
     }
 
@@ -71,7 +70,7 @@ contract VeERC20 is ERC20BurnableUpgradeable, SuAccessControlAuthenticated, IveE
     * @notice Total amount of token was deposited under vesting on behalf of the user.
     */
     function totalDeposited(address user) public view returns (uint256) {
-        return IERC20Upgradeable(this).balanceOf(user);
+        return super.balanceOf(user) + vestingInfo[user].amountAlreadyWithdrawn;
     }
 
     /**
@@ -160,7 +159,7 @@ contract VeERC20 is ERC20BurnableUpgradeable, SuAccessControlAuthenticated, IveE
         if (t < tgeTimestamp) return 0;
 
         // if it's past TGE, there's at lest tgeUnlockRatio is vested
-         uint256 vested = super.balanceOf(user) * info.tgeUnlockRatio1e18/1e18;
+         uint256 vested = totalDeposited(user) * info.tgeUnlockRatio1e18/1e18;
 
         // if the time is before the cliff
         if (t < (tgeTimestamp + info.cliffSeconds)) {
@@ -171,10 +170,10 @@ contract VeERC20 is ERC20BurnableUpgradeable, SuAccessControlAuthenticated, IveE
             // if it's beyond vesting time
             if ((tgeTimestamp + info.vestingSeconds) < t) {
                 // everything is vested
-                vested = super.balanceOf(user);
+                vested = totalDeposited(user);
             } else {
                 // otherwise the amount is proportional to the amount after the cliff before end of vesting
-                uint256 x = super.balanceOf(user);
+                uint256 x = totalDeposited(user);
                 // how much second passed after cliff
                 uint256 y = (t - (tgeTimestamp + info.cliffSeconds));
                 // how much seconds from cliff to end of vesting
@@ -197,6 +196,7 @@ contract VeERC20 is ERC20BurnableUpgradeable, SuAccessControlAuthenticated, IveE
         uint256 claimAmount = availableToClaim(msg.sender);
         require(claimAmount > 0, "Can't claim 0 tokens");
         vestingInfo[msg.sender].amountAlreadyWithdrawn = vestingInfo[msg.sender].amountAlreadyWithdrawn + claimAmount;
+        _burn(msg.sender, claimAmount);
         LOCKED_TOKEN.safeTransfer(msg.sender, claimAmount);
     }
 
@@ -205,14 +205,11 @@ contract VeERC20 is ERC20BurnableUpgradeable, SuAccessControlAuthenticated, IveE
      */
     function donateTokens(address toDAO) external {
         require(hasRole(DAO_ROLE, toDAO) == true, "invalid DAO address");
-        uint256 balance = balanceOf(msg.sender);
+        uint256 balance = super.balanceOf(msg.sender);
         require(balance > 0, "nothing to donate");
         vestingInfo[msg.sender].amountAlreadyWithdrawn = vestingInfo[msg.sender].amountAlreadyWithdrawn + uint64(balance);
+        _burn(msg.sender, balance);
         LOCKED_TOKEN.safeTransfer(toDAO, balance);
-    }
-
-    function balanceOf(address account) public view virtual override returns (uint256) {
-        return super.balanceOf(account) - vestingInfo[account].amountAlreadyWithdrawn;
     }
 
     /**
