@@ -1,8 +1,8 @@
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 import { DeployFunction } from "hardhat-deploy/types";
+import { upgrades } from "hardhat";
 import { Bonus, SuDAO, TokenDistributorV4, VeERC20 } from "../typechain";
 import deployProxy from "../test/utils/deploy";
-import {upgrades} from "hardhat";
 
 const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
   const DAO_MULTISIG_ADDRESS = "0xdf92E30b3E8Ad232577087E036c1fDc6138bB2e9";
@@ -36,11 +36,6 @@ const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
 
   if (proxyAdminAddress) {
     await upgrades.admin.transferProxyAdminOwnership(proxyAdminAddress);
-  }
-
-  if (dao) {
-    // distributor should be able to call lockUnderVesting
-    await accessControlSingleton.connect(dao).grantRole(await tokenDistributor.ADMIN_ROLE(), tokenDistributor.address);
   }
 };
 export default func;
