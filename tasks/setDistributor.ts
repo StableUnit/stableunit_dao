@@ -2,7 +2,7 @@ import "@nomiclabs/hardhat-web3";
 import "@nomiclabs/hardhat-waffle";
 import {task} from "hardhat/config";
 
-import {MockErc721, SuDAO, TokenDistributorV4} from "../typechain";
+import {MockErc721, SuAccessControlSingleton, SuDAO, TokenDistributorV4} from "../typechain";
 
 
 /**
@@ -13,7 +13,7 @@ import {MockErc721, SuDAO, TokenDistributorV4} from "../typechain";
 task("setDistributor", "set all parameters from the script")
     .setAction(async (taskArgs, hre) => {
         let tx;
-        const [deployer, dao, admin]  = await hre.ethers.getSigners();
+        const [deployer, admin]  = await hre.ethers.getSigners();
         const BN_1E18 = hre.ethers.BigNumber.from(10).pow(18);
         const BN_1E6 = hre.ethers.BigNumber.from(10).pow(6);
         const BN_1E12 = hre.ethers.BigNumber.from(10).pow(12);
@@ -41,8 +41,11 @@ task("setDistributor", "set all parameters from the script")
           vestingFrequencySeconds: taskArgs.vestingFrequencySeconds ?? 60 * 60
         }
 
-        // tx = await accessControlSingleton.grantRole(await distributor.ADMIN_ROLE(), distributor.address);
+        // tx = await accessControlSingleton.connect(dao).grantRole(await distributor.ADMIN_ROLE(), distributor.address);
         // await tx.wait();
+        // if (!taskArgs.removeLogs) {
+        //   console.log("✅ grantRole done");
+        // }
 
         tx = await distributor.connect(admin).setDistributionInfo(
           DISTRIBUTION_INFO.startTimestamp + DISTRIBUTION_INFO.startLengthSeconds,
@@ -78,12 +81,6 @@ task("setDistributor", "set all parameters from the script")
         if (!taskArgs.removeLogs) {
           console.log("✅ setBondingCurve done");
         }
-
-        // tx = await mockErc721.mint(deployer.address);
-        // await tx.wait();
-        // if (!taskArgs.removeLogs) {
-        //   console.log("✅ mockErc721 mint done");
-        // }
 
         tx = await distributor.connect(admin).setNftAccess(mockErc721.address, true);
         await tx.wait();

@@ -1,7 +1,7 @@
 import { ethers, upgrades, deployments } from "hardhat";
 import { DeployProxyOptions } from "@openzeppelin/hardhat-upgrades/dist/utils";
 
-export const deployProxy = async (daoAddress: string | undefined, contractName: string, args?: any[], options?: DeployProxyOptions, needLogs = true) => {
+export const deployProxy = async (contractName: string, args?: any[], options?: DeployProxyOptions, needLogs = true) => {
     const contractFactory = await ethers.getContractFactory(contractName);
 
     const proxyContract = await upgrades.deployProxy(contractFactory, args, options);
@@ -9,15 +9,6 @@ export const deployProxy = async (daoAddress: string | undefined, contractName: 
 
     if (needLogs) {
         console.log(`Contract ${contractName} is deployed with proxy address ${proxyContract.address}`);
-    }
-
-    if (daoAddress) {
-        await upgrades.admin.changeProxyAdmin(proxyContract.address, daoAddress);
-        // await upgrades.admin.transferProxyAdminOwnership(daoAddress);
-        // await proxyContract.transferOwnership(daoAddress);
-        if (needLogs) {
-            console.log(`${contractName}: transferOwnership to ${daoAddress} is done`);
-        }
     }
 
     // save proxy address to the artifacts

@@ -157,6 +157,7 @@ submodule-artifacts/goerli/solcInputs
 submodule-artifacts/hardhat
 submodule-artifacts/localhost
 submodule-artifacts/local
+.openzeppelin/goerli.json
 .gitsecret/keys/random_seed
 !*.secret
 

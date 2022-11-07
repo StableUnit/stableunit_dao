@@ -12,12 +12,15 @@ pragma solidity ^0.8.0;
  */
 // TODO: refactor by https://en.wikipedia.org/wiki/Principle_of_least_privilege
 contract SuAccessControlSingleton is AccessControlUpgradeable {
+    bytes32 public constant ADMIN_ROLE = keccak256("ADMIN_ROLE");
+
     /**
      * @dev Initialize the contract with initial owner to be deployer
      */
-    function initialize(address dao) public initializer {
+    function initialize(address dao, address admin) public initializer {
         __AccessControl_init();
         _setupRole(DEFAULT_ADMIN_ROLE, dao);
+        _setupRole(ADMIN_ROLE, admin);
     }
 
     /**

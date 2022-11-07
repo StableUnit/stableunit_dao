@@ -21,8 +21,9 @@ contract Bonus is IBonus, SuAccessControlAuthenticated {
     mapping(address => CommunityAdminInfo) public communityAdminInfo;
     mapping(address => AdminInfo) public adminInfo;
 
-    function initialize(address _accessControlSingleton) public initializer {
+    function initialize(address _accessControlSingleton, address defaultAdmin) public initializer {
         __SuAuthenticated_init(_accessControlSingleton);
+        adminInfo[defaultAdmin].isAdmin = true;
     }
 
     function _getLevelByXP(uint256 xp) internal pure returns (uint16) {

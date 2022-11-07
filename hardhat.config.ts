@@ -28,13 +28,13 @@ const {
     ETHERSCAN_API_KEY,
     // TODO: fix this, as it would be production where you have deployer key only
     PRIVATE_KEY_TESTNET_DEPLOYER,
-    PRIVATE_KEY_TESTNET_OWNER,
     PRIVATE_KEY_TESTNET_ADMIN,
 } = process.env;
 
-const accountsTestnetEnv = [PRIVATE_KEY_TESTNET_DEPLOYER, PRIVATE_KEY_TESTNET_OWNER, PRIVATE_KEY_TESTNET_ADMIN] as string[];
+const accountsTestnetEnv = [PRIVATE_KEY_TESTNET_DEPLOYER, PRIVATE_KEY_TESTNET_ADMIN] as string[];
 const accountsTestnet = accountsTestnetEnv.filter((v) => v);
 
+// TODO: change accessControl initialization + swap admin and dao
 // You need to export an object to set up your config
 // Go to https://hardhat.org/config/ to learn more
 const config: HardhatUserConfig = {
@@ -42,8 +42,8 @@ const config: HardhatUserConfig = {
     // learn more https://github.com/wighawag/hardhat-deploy#1-namedaccounts-ability-to-name-addresses
     namedAccounts: {
         deployer: 0,
-        dao: 1, // DAO address
-        admin: 2, // core team
+        admin: 1, // core team
+        dao: 2, // DAO address
         randomAccount: 3,
         userAccount: 4,
         liquidatorAccount: 5,
