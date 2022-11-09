@@ -8,12 +8,14 @@ describe("SuAccessControlSingleton", function () {
     let accounts: Record<string, SignerWithAddress>;
     let accessControlSingleton: SuAccessControlSingleton;
     let defaultAdminRole: string;
+    let adminRole: string;
 
     const beforeAllFunc = async () => {
-        const [deployer, dao, admin ] = await ethers.getSigners();
+        const [deployer, admin, dao ] = await ethers.getSigners();
         accounts = { deployer, dao, admin };
-        accessControlSingleton = await deployProxy(undefined, "SuAccessControlSingleton", [dao.address]) as SuAccessControlSingleton;
+        accessControlSingleton = await deployProxy("SuAccessControlSingleton", [dao.address, admin.address]) as SuAccessControlSingleton;
         defaultAdminRole = await accessControlSingleton.DEFAULT_ADMIN_ROLE();
+        adminRole = await accessControlSingleton.ADMIN_ROLE();
     };
 
 
@@ -26,9 +28,13 @@ describe("SuAccessControlSingleton", function () {
         it("deployer has DEFAULT_ADMIN_ROLE", async () => {
             expect(await accessControlSingleton.hasRole(defaultAdminRole, accounts.deployer.address)).to.be.false;
             expect(await accessControlSingleton.hasRole(defaultAdminRole, accounts.dao.address)).to.be.true;
+            expect(await accessControlSingleton.hasRole(adminRole, accounts.admin.address)).to.be.true;
         })
 
         it("can grant role", async () => {
+            let isAdmin = await accessControlSingleton.hasRole(defaultAdminRole, accounts.admin.address);
+            expect(isAdmin).to.be.false;
+
             // deployer can't grant role
             let tx = accessControlSingleton.grantRole(defaultAdminRole, accounts.admin.address);
             await expect(tx).to.be.reverted;
@@ -36,7 +42,7 @@ describe("SuAccessControlSingleton", function () {
             tx = accessControlSingleton.connect(accounts.dao).grantRole(defaultAdminRole, accounts.admin.address);
             await expect(tx).not.to.be.reverted;
 
-            const isAdmin = await accessControlSingleton.hasRole(defaultAdminRole, accounts.admin.address);
+            isAdmin = await accessControlSingleton.hasRole(defaultAdminRole, accounts.admin.address);
             expect(isAdmin).to.be.true;
         })
     })

@@ -5,7 +5,7 @@ import {SignerWithAddress} from "hardhat-deploy-ethers/signers";
 
 import {MockErc20, SuAccessControlSingleton, SuDAO, VeERC20} from "../../typechain";
 import {increaseTime, latest} from "../utils/time";
-import {BN_1E18} from "../utils";
+import {ADDRESS_ZERO, BN_1E18} from "../utils";
 import deployProxy from "../utils/deploy";
 
 describe("VeERC20", () => {
@@ -36,14 +36,12 @@ describe("VeERC20", () => {
     }
 
     beforeEach(async function () {
-        [deployer, dao, admin, user1, user2] = await ethers.getSigners();
+        [deployer, admin, dao, user1, user2] = await ethers.getSigners();
 
-        const accessControlSingleton = await deployProxy(undefined, "SuAccessControlSingleton", [admin.address], undefined, false) as SuAccessControlSingleton;
-        suDAO = await deployProxy(undefined, "SuDAO", [accessControlSingleton.address], undefined, false) as SuDAO;
-        await accessControlSingleton.connect(admin).grantRole(await suDAO.ADMIN_ROLE(), admin.address);
-
+        const accessControlSingleton = await deployProxy( "SuAccessControlSingleton", [admin.address, admin.address], undefined, false) as SuAccessControlSingleton;
+        suDAO = await deployProxy("SuDAO", [accessControlSingleton.address], undefined, false) as SuDAO;
+        veERC20 = await deployProxy("VeERC20", [accessControlSingleton.address, suDAO.address, await latest()]) as VeERC20;
         await suDAO.connect(admin).mint(admin.address, amountToLock);
-        veERC20 = await deployProxy(undefined, "VeERC20", [accessControlSingleton.address, suDAO.address, await latest()]) as VeERC20;
     });
 
     describe("lockUnderVesting", async () => {
@@ -120,10 +118,10 @@ describe("VeERC20", () => {
             await veERC20.connect(user2).claim();
             const balanceAfter = await suDAO.balanceOf(user2.address);
 
-            // should be as amountToLock.div(3) +- 3%
+            // should be as amountToLock.div(3) +- 7%
             const claimed = balanceAfter.sub(balanceBefore);
-            expect(claimed).to.be.gt(amountToLock.div(3).mul(97).div(100));
-            expect(claimed).to.be.lt(amountToLock.div(3).mul(103).div(100));
+            expect(claimed).to.be.gt(amountToLock.div(3).mul(93).div(100));
+            expect(claimed).to.be.lt(amountToLock.div(3).mul(107).div(100));
         })
 
         it("totalClaimed", async () => {

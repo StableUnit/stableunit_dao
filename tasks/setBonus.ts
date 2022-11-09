@@ -14,7 +14,7 @@ import {BigNumber} from "ethers";
 task("setBonus", "set all parameters from the script")
     .setAction(async (taskArgs, hre) => {
         let tx;
-        const [deployer, dao, admin]  = await hre.ethers.getSigners();
+        const [deployer, admin]  = await hre.ethers.getSigners();
 
         const bonus = await hre.ethers.getContract("Bonus") as Bonus;
         const mockErc721 = await hre.ethers.getContract("MockErc721") as MockErc721;
@@ -23,9 +23,9 @@ task("setBonus", "set all parameters from the script")
         console.log(`bonus@${ (await hre.ethers.provider.getNetwork()).name } = `, bonus.address);
         console.log(`mockErc721@${ (await hre.ethers.provider.getNetwork()).name } = `, mockErc721.address);
 
-        tx = await bonus.connect(dao).setAdmin(admin.address, true);
-        await tx.wait();
-        console.log("✅ setAdmin done");
+        // tx = await bonus.connect(dao).setAdmin(admin.address, true);
+        // await tx.wait();
+        // console.log("✅ setAdmin done");
         //
         // tx = await bonus.setCommunityAdmin(deployer.address, 1e6, 100);
         // await tx.wait();
