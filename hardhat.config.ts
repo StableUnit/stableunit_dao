@@ -27,7 +27,6 @@ const {
     INFURA_API_KEY,
     ALCHEMY_API_KEY,
     ETHERSCAN_API_KEY,
-    // TODO: fix this, as it would be production where you have deployer key only
     PRIVATE_KEY_TESTNET_DEPLOYER,
     PRIVATE_KEY_TESTNET_ADMIN,
 } = process.env;
@@ -35,7 +34,6 @@ const {
 const accountsTestnetEnv = [PRIVATE_KEY_TESTNET_DEPLOYER, PRIVATE_KEY_TESTNET_ADMIN] as string[];
 const accountsTestnet = accountsTestnetEnv.filter((v) => v);
 
-// TODO: change accessControl initialization + swap admin and dao
 // You need to export an object to set up your config
 // Go to https://hardhat.org/config/ to learn more
 const config: HardhatUserConfig = {
