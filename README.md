@@ -257,3 +257,11 @@ npx hardhat transfer-owner --network mumbai --address 0x000000006cD799E2cC7A3Fe6
    1. ADMIN_ROLE is `0xa49807205ce4d355092ef5a8a18f56e8913cf4a201fbe287825b095693c21775`
    2. tokenDistributor.address you can find in `submodule-artifacts/goerli/TokenDistributorV4.json`
 
+### Upgrade instructions
+1. Choose what you need in `scripts/propose-upgrade.ts` in `main` function. 
+2. Run `npm run upgrade-proposal:goerli`
+   1. If you have `deployment at 0x... address is not registered` error, you have incorrect .openzeppelin/goerli.json. So you need to run forceImport (10 line in propose-upgrade.ts)
+3. Go to the url in the log (it's url of created proposal that can see that ProxyAdmin owner is gnosis-safe multisig)
+4. In the proposal - addresses, that are in the gnosis-safe multisig, can approve this proposal
+5. After that you can execute it.
+6. If proposal is executed you can verify contract via `npm run verify:goerli`
