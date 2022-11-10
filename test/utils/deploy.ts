@@ -10,7 +10,7 @@ export const deployProxy = async (contractName: string, args?: any[], options?: 
     await proxyContract.deployed();
 
     if (needLogs) {
-        console.log(`Contract ${contractName} is deployed with proxy address ${proxyContract.address}`);
+        console.log(`${proxyContract.address} deployed proxy ${contractName}`);
     }
 
     // save proxy address to the artifacts
@@ -27,7 +27,7 @@ export const deploy = async (contractName: string, args?: any[], options?: Deplo
     const contractFactory = await ethers.getContractFactory(contractName);
     const contract = await contractFactory.deploy(...(args??[]));
 
-    console.log(`Contract ${contractName} is deployed without proxy at address ${contract.address}`);
+    console.log(`${contract.address} deployed ${contractName}`);
 
     // save proxy address to the artifacts
     const artifact = await deployments.getExtendedArtifact(contractName);

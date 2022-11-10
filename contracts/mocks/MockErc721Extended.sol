@@ -36,7 +36,7 @@ contract MockErc721Extended is ERC721Enumerable {
 
     function mint(address to) public returns (uint256) {
         _mint(to, _tokenIdCounter.current());
-        veCNftExtension.lock(to, _tokenIdCounter.current());
+        veCNftExtension.lock(_tokenIdCounter.current());
         _tokenIdCounter.increment();
         return _tokenIdCounter.current() - 1;
     }
