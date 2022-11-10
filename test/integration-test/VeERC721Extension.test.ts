@@ -88,9 +88,43 @@ describe("VeERC721Extension", () => {
             await mockErc721Extended.mint(accounts.alice.address);
             expect(await veERC721Extension.getVotes(accounts.alice.address)).to.be.equal(2);
         })
-        // votings
-        // check votes == balance
-        // delegate vote and check new voteBalances
-        // unclock and check vote balances
+
+        it ("unlock tokens lose voting power", async () => {
+            await mockErc721Extended.mint(accounts.alice.address);
+            await mockErc721Extended.mint(accounts.alice.address);
+            expect(await veERC721Extension.getVotes(accounts.alice.address)).to.be.equal(2);
+            await veERC721Extension.connect(accounts.admin).adminUnlock(0);
+            expect(await veERC721Extension.getVotes(accounts.alice.address)).to.be.equal(1);
+            await veERC721Extension.connect(accounts.admin).adminUnlock(1);
+            expect(await veERC721Extension.getVotes(accounts.alice.address)).to.be.equal(0);
+        })
+
+        it ("transfer of unlocked tokens don't affect voting power", async () => {
+            await mockErc721Extended.mint(accounts.alice.address);
+            await mockErc721Extended.mint(accounts.bob.address);
+            await mockErc721Extended.mint(accounts.carl.address);
+            expect(await veERC721Extension.getVotes(accounts.bob.address)).to.be.equal(1);
+            expect(await veERC721Extension.getVotes(accounts.carl.address)).to.be.equal(1);
+
+            await veERC721Extension.connect(accounts.admin).adminUnlock(0);
+            await mockErc721Extended.connect(accounts.alice).transferFrom(accounts.alice.address, accounts.bob.address, 0);
+            expect(await veERC721Extension.getVotes(accounts.bob.address)).to.be.equal(1);
+
+            await mockErc721Extended.connect(accounts.bob).transferFrom(accounts.bob.address, accounts.carl.address, 0);
+            expect(await veERC721Extension.getVotes(accounts.bob.address)).to.be.equal(1);
+            expect(await veERC721Extension.getVotes(accounts.carl.address)).to.be.equal(1);
+        })
+
+        it("delegate vote and check vote balances", async () => {
+            await mockErc721Extended.mint(accounts.alice.address);
+            await mockErc721Extended.mint(accounts.bob.address);
+            await mockErc721Extended.mint(accounts.carl.address);
+            veERC721Extension.connect(accounts.alice).delegate(accounts.carl.address);
+            veERC721Extension.connect(accounts.bob).delegate(accounts.carl.address);
+
+            expect(await veERC721Extension.getVotes(accounts.alice.address)).to.be.equal(0);
+            expect(await veERC721Extension.getVotes(accounts.bob.address)).to.be.equal(0);
+            expect(await veERC721Extension.getVotes(accounts.carl.address)).to.be.equal(3);
+        })
     })
 });
