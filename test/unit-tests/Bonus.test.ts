@@ -4,7 +4,7 @@ import deployProxy from "../utils/deploy";
 import {ethers} from "hardhat";
 import {ContractTransaction} from "ethers";
 import {expect} from "chai";
-import {BN_1E18, BN_1E6} from "../utils";
+import {ADDRESS_ZERO, BN_1E18, BN_1E6} from "../utils";
 
 describe("Bonus", () => {
   let accounts: Record<string, SignerWithAddress>;
@@ -16,10 +16,10 @@ describe("Bonus", () => {
     const [deployer, dao, alice, bob, carl] = await ethers.getSigners();
     accounts = { deployer, dao, alice, bob, carl };
 
-    const accessControlSingleton = await deployProxy(undefined, "SuAccessControlSingleton", [dao.address], undefined, false) as SuAccessControlSingleton;
-    bonus = await deployProxy(undefined, "Bonus", [accessControlSingleton.address], undefined, false) as Bonus;
+    const accessControlSingleton = await deployProxy("SuAccessControlSingleton", [dao.address, ADDRESS_ZERO], undefined, false) as SuAccessControlSingleton;
+    bonus = await deployProxy("Bonus", [accessControlSingleton.address, ADDRESS_ZERO], undefined, false) as Bonus;
     if (needMock) {
-      mockNft = await deployProxy(undefined, "MockErc721", ["Mock StableUnit NFT", "SuNFTPro"], undefined, false) as MockErc721;
+      mockNft = await deployProxy("MockErc721", ["Mock StableUnit NFT", "SuNFTPro"], undefined, false) as MockErc721;
     }
   };
 

@@ -49,11 +49,11 @@ contract VeERC20 is ERC20BurnableUpgradeable, SuAccessControlAuthenticated, IveE
     }
     mapping(address => VestingInfo) public vestingInfo;
 
-    function initialize(address _accessControlSingleton, ERC20Upgradeable _lockedToken) initializer public {
+    function initialize(address _accessControlSingleton, ERC20Upgradeable _lockedToken, uint32 maxTgeTimestamp) initializer public {
         __SuAuthenticated_init(_accessControlSingleton);
         __ERC20_init(string.concat("vested escrow ", _lockedToken.name()), string.concat("ve", _lockedToken.symbol()));
         LOCKED_TOKEN = _lockedToken;
-        TGE_MAX_TIMESTAMP = 1685577600; // Unix Timestamp	1685577600 = GMT+0 Thu Jun 01 2023 00:00:00 GMT+0000
+        TGE_MAX_TIMESTAMP = maxTgeTimestamp;
         tgeTimestamp = TGE_MAX_TIMESTAMP;
     }
 

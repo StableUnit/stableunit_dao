@@ -17,6 +17,7 @@
     "deploy:goerli": "hardhat deploy --tags Deployer --reset --network goerli",
     "verify:goerli": "hardhat run ./scripts/verifyEtherscan.ts --network goerli",
     "upgrade:goerli": "hardhat run ./scripts/upgrade.ts --network goerli",
+    "upgrade-proposal:goerli": "hardhat run ./scripts/propose-upgrade.ts --network goerli",
     "grant-og-legacy": "npx hardhat ogDistribution --address 0xfffffffff615bee8d0c7d329ebe0d444ab46ee5a --filename ./misc/ogNftAirdrop.txt --verbose"
   },
   "author": "",
@@ -28,6 +29,7 @@
     "@nomiclabs/hardhat-web3": "^2.0.0",
     "@openzeppelin/contracts": "^4.7.3",
     "@openzeppelin/contracts-upgradeable": "^4.5.2",
+    "@openzeppelin/hardhat-defender": "^1.8.1",
     "@openzeppelin/hardhat-upgrades": "^1.19.1",
     "@typechain/ethers-v5": "^7.0.1",
     "@typechain/hardhat": "^2.3.0",

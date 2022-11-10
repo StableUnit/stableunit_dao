@@ -76,6 +76,9 @@ describe("TokenDistributorV4", () => {
         veERC20 = await ethers.getContract("VeERC20") as VeERC20;
         const mockErc20Factory = await ethers.getContractFactory("MockErc20");
         mockUSDT = await mockErc20Factory.deploy("test tether", "USDT", 6) as MockErc20;
+
+        // distributor should be able to call lockUnderVesting
+        await accessControlSingleton.connect(daoSigner).grantRole(await distributor.ADMIN_ROLE(), distributor.address);
     }
 
     const beforeAllFuncNoSuDAOMint = async (distributeData: DataType) => {

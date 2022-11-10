@@ -4,6 +4,7 @@ import { HardhatUserConfig, task } from "hardhat/config";
 import "@nomiclabs/hardhat-etherscan";
 import "@nomiclabs/hardhat-waffle";
 import "@openzeppelin/hardhat-upgrades";
+import "@openzeppelin/hardhat-defender";
 import "@typechain/hardhat";
 import "hardhat-gas-reporter";
 import "solidity-coverage";
@@ -26,7 +27,6 @@ const {
     INFURA_API_KEY,
     ALCHEMY_API_KEY,
     ETHERSCAN_API_KEY,
-    // TODO: fix this, as it would be production where you have deployer key only
     PRIVATE_KEY_TESTNET_DEPLOYER,
     PRIVATE_KEY_TESTNET_ADMIN,
 } = process.env;
@@ -41,8 +41,8 @@ const config: HardhatUserConfig = {
     // learn more https://github.com/wighawag/hardhat-deploy#1-namedaccounts-ability-to-name-addresses
     namedAccounts: {
         deployer: 0,
-        dao: 1, // DAO address
-        admin: 2, // core team
+        admin: 1, // core team
+        dao: 2, // DAO address
         randomAccount: 3,
         userAccount: 4,
         liquidatorAccount: 5,
@@ -122,6 +122,10 @@ const config: HardhatUserConfig = {
         deployments: "submodule-artifacts",
         imports: "imports",
     },
+    defender: {
+        apiKey: process.env.DEFENDER_TEAM_API_KEY ?? "",
+        apiSecret: process.env.DEFENDER_TEAM_API_SECRET_KEY ?? "",
+    }
 };
 
 export default config;
