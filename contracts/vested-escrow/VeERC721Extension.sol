@@ -15,14 +15,17 @@ import "@openzeppelin/contracts/token/ERC20/extensions/ERC20Votes.sol";
  * after 1 year".
  */
 
-contract VeERC721Extension is Votes {
+contract VeERC721Extension is ERC721Votes {
     ERC721 immutable TOKEN;
     IBonus immutable BONUS;
-    mapping (uint256 => bool) isUnlocked;
-    mapping (address => bool) whitelistedTransferableAddresses;
+    mapping(uint256 => bool) isUnlocked;
+    mapping(address => bool) whitelistedTransferableAddresses;
 
-    constructor(address _nftToken, address _bonus) public {
-        TOKEN = _nftToken;
+    constructor(ERC721 _nftToken, IBonus _bonus)
+    ERC721(string.concat("vested escrow ", _nftToken.name()), string.concat("ve", _nftToken.symbol()))
+    EIP712(string.concat("vested escrow ", _nftToken.name()), "1")
+    public {
+        TOKEN = ERC721(_nftToken);
         BONUS = IBonus(_bonus);
     }
 
@@ -36,12 +39,14 @@ contract VeERC721Extension is Votes {
     function unlock(uint256 tokenId) external {
         if (BONUS.isTokenTransferable(address(this), tokenId)) {
             isUnlocked[tokenId] = true;
-            _burn(TOKEN.ownerOf(tokenId), 1);
+            // burn virtual votable balance
+            _burn(tokenId);
         }
     }
 
     function lock(uint256 tokenId) external {
-        _mint(TOKEN.ownerOf(tokenId), 1);
+        // mint virtual votable balance
+        _mint(TOKEN.ownerOf(tokenId), tokenId);
     }
 }
 
