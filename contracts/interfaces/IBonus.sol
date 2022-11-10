@@ -111,5 +111,5 @@ interface IBonus {
     /**
      * @notice Returns true/false whether this NFT with tokenId can do transfer
      */
-    function isTokenTransferable(address nft, address from, address to, uint256 tokenId) external view returns (bool);
+    function isTokenTransferable(address nft, uint256 tokenId) external view returns (bool);
 }

@@ -6,21 +6,22 @@ import "@openzeppelin/contracts/utils/Counters.sol";
 import "../interfaces/IBonus.sol";
 import "../3rd-party/layer-zero-labs/token/onft/extension/UniversalONFT721.sol";
 import "../3rd-party/buildship-dev/interfaces/IERC721CommunityBeforeTransferExtension.sol";
+import "../vested-escrow/VeERC721Extension.sol";
 
 contract MockCNft is UniversalONFT721 {
     using Counters for Counters.Counter;
     Counters.Counter private _tokenIdCounter;
 
     string baseURI;
-    IBonus bonus;
+    VeERC721Extension veCNftExtension;
 
     error TransferError();
 
-    constructor(string memory _name, string memory _symbol, IBonus _bonus, address _layerZeroEndpoint)
+    constructor(string memory _name, string memory _symbol, address _veCNftExtension, address _layerZeroEndpoint)
     UniversalONFT721(_name, _symbol, _layerZeroEndpoint, 0, 100500)
     public {
         baseURI = "ipfs://QmeSjSinHpPnmXmspMjwiXyN6zS4E9zccariGR3jxcaWtq/";
-        bonus = _bonus;
+        veCNftExtension = VeERC721Extension(_veCNftExtension);
     }
 
     function _baseURI() internal view override returns (string memory) {
@@ -44,9 +45,8 @@ contract MockCNft is UniversalONFT721 {
     internal
     override
     {
-        if (!bonus.isTokenTransferable(address(this), from, to, tokenId)) {
+        if (!veCNftExtension.isTransferPossible(from, to, tokenId)) {
             revert TransferError();
         }
-        super._beforeTokenTransfer(from, to, tokenId);
     }
 }

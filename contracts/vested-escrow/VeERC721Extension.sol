@@ -1,10 +1,12 @@
 // SPDX-License-Identifier: MIT
-// In base of OpenZeppelin Contract: token/ERC20/utils/TokenTimelock.sol
 
 pragma solidity ^0.8.9;
 
-import "../interfaces/IVestingNft.sol";
-import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
+import "../interfaces/IBonus.sol";
+import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
+import "@openzeppelin/contracts/token/ERC721/extensions/draft-ERC721Votes.sol";
+import "@openzeppelin/contracts/token/ERC20/extensions/ERC20Votes.sol";
+
 
 /**
  * @dev vested escrow NFT contract, allow a beneficiary to extract NFT after a given lock schdule.
@@ -12,6 +14,37 @@ import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
  * Useful for simple vesting schedules like "whitelisted addresses get their NFT
  * after 1 year".
  */
+
+contract VeERC721Extension is Votes {
+    ERC721 immutable TOKEN;
+    IBonus immutable BONUS;
+    mapping (uint256 => bool) isUnlocked;
+    mapping (address => bool) whitelistedTransferableAddresses;
+
+    constructor(address _nftToken, address _bonus) public {
+        TOKEN = _nftToken;
+        BONUS = IBonus(_bonus);
+    }
+
+    function isTransferPossible(address from, address to, uint256 tokenId) external view returns (bool) {
+        if (isUnlocked[tokenId] || whitelistedTransferableAddresses[from] || whitelistedTransferableAddresses[to]) {
+            return true;
+        }
+        return false;
+    }
+
+    function unlock(uint256 tokenId) external {
+        if (BONUS.isTokenTransferable(address(this), tokenId)) {
+            isUnlocked[tokenId] = true;
+            _burn(TOKEN.ownerOf(tokenId), 1);
+        }
+    }
+
+    function lock(uint256 tokenId) external {
+        _mint(TOKEN.ownerOf(tokenId), 1);
+    }
+}
+
  // TODO: make contract look like ERC721 token but without ability to tranfer tokens etc
  // TODO: delegate on behalf
 //contract VeNFT is IVestingNft, IERC721 {
@@ -93,4 +126,4 @@ import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 //    ///===================erc721-like interfacee=======================
 //}
 
-contract veNFT {}
+

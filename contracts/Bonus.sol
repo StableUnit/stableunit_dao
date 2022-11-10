@@ -18,8 +18,10 @@ import "./access-control/SuAccessControlAuthenticated.sol";
 contract Bonus is IBonus, SuAccessControlAuthenticated {
     mapping(address => NFTInfo) public nftInfo;
     mapping(address => UserInfo) public userInfo;
-    mapping(address => CommunityAdminInfo) public communityAdminInfo;
+
     mapping(address => AdminInfo) public adminInfo;
+    mapping(address => CommunityAdminInfo) public communityAdminInfo;
+
 
     function initialize(address _accessControlSingleton) public initializer {
         __SuAuthenticated_init(_accessControlSingleton);
@@ -175,8 +177,7 @@ contract Bonus is IBonus, SuAccessControlAuthenticated {
     /**
      * @dev See {IBonus-isTokenTransferable}.
      */
-    function isTokenTransferable(address nft, address from, address to, uint256 tokenId) external view returns (bool) {
-        uint256 level =
+    function isTokenTransferable(address nft, uint256 tokenId) external view returns (bool) {
         return false;
     }
 
