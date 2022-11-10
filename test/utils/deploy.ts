@@ -5,7 +5,7 @@ import {getContractAddress} from "ethers/lib/utils";
 export const deployProxy = async (contractName: string, args?: any[], options?: DeployProxyOptions, needLogs = true) => {
     const contractFactory = await ethers.getContractFactory(contractName);
 
-    console.log("deployProxy(", contractName," ,", ...(args??[]), " )");
+    // console.log("deployProxy(", contractName," ,", ...(args??[]), " )");
     const proxyContract = await upgrades.deployProxy(contractFactory, args, options);
     await proxyContract.deployed();
 
@@ -21,6 +21,22 @@ export const deployProxy = async (contractName: string, args?: any[], options?: 
     });
 
     return proxyContract;
+};
+
+export const deploy = async (contractName: string, args?: any[], options?: DeployProxyOptions) => {
+    const contractFactory = await ethers.getContractFactory(contractName);
+    const contract = await contractFactory.deploy(...(args??[]));
+
+    console.log(`Contract ${contractName} is deployed without proxy at address ${contract.address}`);
+
+    // save proxy address to the artifacts
+    const artifact = await deployments.getExtendedArtifact(contractName);
+    await deployments.save(contractName, {
+        address: contract.address,
+        ...artifact,
+    });
+
+    return contract;
 };
 
 export async function getDeploymentAddress(deployer: string, nonceOffset = 0) {
@@ -54,20 +70,5 @@ export const getDeploymentProxyAddressPredictor = async (deployer: string) => {
     };
 };
 
-// export const deploy = async (contractName: string, args?: any[], options?: DeployProxyOptions) => {
-//     const contractFactory = await ethers.getContractFactory(contractName);
-//     const contract = await contractFactory.deploy(args? ...args : undefined , options);
-//
-//     console.log(`Contract ${contractName} is deployed with address ${contract.address}`);
-//
-//     // save proxy address to the artifacts
-//     const artifact = await deployments.getExtendedArtifact(contractName);
-//     await deployments.save(contractName, {
-//         address: contract.address,
-//         ...artifact,
-//     });
-//
-//     return contract;
-// };
 
 export default deployProxy;

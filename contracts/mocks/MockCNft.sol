@@ -21,7 +21,7 @@ contract MockCNft is UniversalONFT721 {
     UniversalONFT721(_name, _symbol, _layerZeroEndpoint, 0, 100500)
     public {
         baseURI = "ipfs://QmeSjSinHpPnmXmspMjwiXyN6zS4E9zccariGR3jxcaWtq/";
-        veCNftExtension = VeERC721Extension(_veCNftExtension);
+//        veCNftExtension = VeERC721Extension(_veCNftExtension);
     }
 
     function _baseURI() internal view override returns (string memory) {

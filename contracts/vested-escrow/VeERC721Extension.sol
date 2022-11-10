@@ -22,9 +22,9 @@ contract VeERC721Extension is ERC721Votes {
 
     error TransferError();
 
-    constructor(ERC721 _nftToken, IBonus _bonus)
-    ERC721(string.concat("vested escrow ", _nftToken.name()), string.concat("ve", _nftToken.symbol()))
-    EIP712(string.concat("vested escrow ", _nftToken.name()), "1")
+    constructor(address _nftToken, address _bonus)
+    ERC721(string.concat("vested escrow ", ERC721(_nftToken).name()), string.concat("ve", ERC721(_nftToken).symbol()))
+    EIP712(string.concat("vested escrow ", ERC721(_nftToken).name()), "1")
     public {
         TOKEN = ERC721(_nftToken);
         BONUS = IBonus(_bonus);

@@ -2,7 +2,7 @@ import { HardhatRuntimeEnvironment } from "hardhat/types";
 import { DeployFunction } from "hardhat-deploy/types";
 import { upgrades } from "hardhat";
 import {Bonus, MockCNft, SuDAO, TokenDistributorV4, VeERC20, VeERC721Extension} from "../typechain";
-import deployProxy, {getDeploymentAddress, getDeploymentProxyAddressPredictor} from "../test/utils/deploy";
+import deployProxy, {deploy, getDeploymentAddress, getDeploymentProxyAddressPredictor} from "../test/utils/deploy";
 
 const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
   const DAO_MULTISIG_ADDRESS = "0xdf92E30b3E8Ad232577087E036c1fDc6138bB2e9";
@@ -35,10 +35,10 @@ const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
         [accessControlSingleton.address, suDAO.address, veERC20.address, bonus.address]
     ) as TokenDistributorV4;
 
-    const mockCNftAddress = await getDeploymentAddress(deployer.address,2);
-    console.log("mockCNftAddress = ", mockCNftAddress);
-    const veErc721Extension = await deployProxy("VeERC721Extension", [mockCNftAddress, bonus.address]) as VeERC721Extension;
-    const mockCNft = await deployProxy("MockCNft", ["mock cNFT", "t_cNFT", veErc721Extension.address, 0]) as MockCNft;
+    const veErc721ExtensionAddress = await getDeploymentAddress(deployer.address,1);
+
+    const mockCNft = await deploy("MockCNft", ["mock cNFT", "t_cNFT", veErc721ExtensionAddress, veErc721ExtensionAddress]) as MockCNft;
+    const veErc721Extension = await deploy("VeERC721Extension", [mockCNft.address, bonus.address]) as VeERC721Extension;
 
     if (proxyAdminAddress) {
         await upgrades.admin.transferProxyAdminOwnership(proxyAdminAddress);
