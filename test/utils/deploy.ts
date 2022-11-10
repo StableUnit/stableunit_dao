@@ -1,9 +1,11 @@
 import { ethers, upgrades, deployments } from "hardhat";
 import { DeployProxyOptions } from "@openzeppelin/hardhat-upgrades/dist/utils";
+import {getContractAddress} from "ethers/lib/utils";
 
 export const deployProxy = async (contractName: string, args?: any[], options?: DeployProxyOptions, needLogs = true) => {
     const contractFactory = await ethers.getContractFactory(contractName);
 
+    console.log("deployProxy(", contractName," ,", ...(args??[]), " )");
     const proxyContract = await upgrades.deployProxy(contractFactory, args, options);
     await proxyContract.deployed();
 
@@ -19,6 +21,37 @@ export const deployProxy = async (contractName: string, args?: any[], options?: 
     });
 
     return proxyContract;
+};
+
+export async function getDeploymentAddress(deployer: string, nonceOffset = 0) {
+    let transactionCount = await ethers.provider.getTransactionCount(deployer);
+    return getContractAddress({
+        from: deployer,
+        nonce: transactionCount + nonceOffset,
+    });
+}
+
+export const getDeploymentProxyAddressPredictor = async (deployer: string) => {
+    let transactionCount = await ethers.provider.getTransactionCount(deployer);
+
+    // at the first execution of upgrades.deployProxy() we deploy 3 contracts:
+    // - implementation
+    // - proxyAdmin
+    // - proxy
+    // so, we need to increment counter by +2 for getting proxy address(we start from implementation address)
+
+    // afterwards, every execution of upgrades.deployProxy() we deploy 2 contracts:
+    // - implementation
+    // - proxy
+    // we need to increment counter by +2 again every time when we want to get a proxy address
+
+    return () => {
+        transactionCount += 2;
+        return getContractAddress({
+            from: deployer,
+            nonce: transactionCount,
+        });
+    };
 };
 
 // export const deploy = async (contractName: string, args?: any[], options?: DeployProxyOptions) => {
