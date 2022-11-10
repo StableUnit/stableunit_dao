@@ -42,7 +42,7 @@ const config: HardhatUserConfig = {
     namedAccounts: {
         deployer: 0,
         admin: 1, // core team
-        dao: 2, // DAO address
+        testOwner: 2, // DAO address
         randomAccount: 3,
         userAccount: 4,
         liquidatorAccount: 5,
