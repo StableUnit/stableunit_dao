@@ -1,27 +1,25 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.7;
 
-import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
+import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Enumerable.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
 import "../interfaces/IBonus.sol";
-import "../3rd-party/layer-zero-labs/token/onft/extension/UniversalONFT721.sol";
-import "../3rd-party/buildship-dev/interfaces/IERC721CommunityBeforeTransferExtension.sol";
 import "../vested-escrow/VeERC721Extension.sol";
 
-contract MockCNft is UniversalONFT721 {
+contract MockErc721Extended is ERC721Enumerable {
     using Counters for Counters.Counter;
     Counters.Counter private _tokenIdCounter;
 
     string baseURI;
-    VeERC721Extension veCNftExtension;
+    VeERC721Extension public veCNftExtension;
 
-    error TransferError();
+    error TransferError(address from, address to, uint256 tokenId);
 
-    constructor(string memory _name, string memory _symbol, address _veCNftExtension, address _layerZeroEndpoint)
-    UniversalONFT721(_name, _symbol, _layerZeroEndpoint, 0, 100500)
+    constructor(string memory _name, string memory _symbol, address _veCNftExtension)
+    ERC721(_name, _symbol)
     public {
         baseURI = "ipfs://QmeSjSinHpPnmXmspMjwiXyN6zS4E9zccariGR3jxcaWtq/";
-//        veCNftExtension = VeERC721Extension(_veCNftExtension);
+        veCNftExtension = VeERC721Extension(_veCNftExtension);
     }
 
     function _baseURI() internal view override returns (string memory) {
@@ -36,9 +34,11 @@ contract MockCNft is UniversalONFT721 {
         return string(abi.encodePacked(baseURI, tokenId));
     }
 
-    function mint(address to) public {
-        _safeMint(to, _tokenIdCounter.current());
+    function mint(address to) public returns (uint256) {
+        _mint(to, _tokenIdCounter.current());
+        veCNftExtension.lock(to, _tokenIdCounter.current());
         _tokenIdCounter.increment();
+        return _tokenIdCounter.current() - 1;
     }
 
     function _beforeTokenTransfer(address from, address to, uint256 tokenId)
@@ -46,7 +46,7 @@ contract MockCNft is UniversalONFT721 {
     override
     {
         if (!veCNftExtension.isTransferPossible(from, to, tokenId)) {
-            revert TransferError();
+            revert TransferError(from, to, tokenId);
         }
     }
 }

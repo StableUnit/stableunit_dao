@@ -3,9 +3,9 @@
 pragma solidity ^0.8.9;
 
 import "../interfaces/IBonus.sol";
+import "../access-control/SuAccessControlAuthenticated.sol";
+import "@openzeppelin/contracts-upgradeable/token/ERC721/extensions/draft-ERC721VotesUpgradeable.sol";
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
-import "@openzeppelin/contracts/token/ERC721/extensions/draft-ERC721Votes.sol";
-import "@openzeppelin/contracts/token/ERC20/extensions/ERC20Votes.sol";
 
 /**
  * @dev vested escrow NFT contract, allow a beneficiary to extract NFT after a given lock schdule.
@@ -14,20 +14,21 @@ import "@openzeppelin/contracts/token/ERC20/extensions/ERC20Votes.sol";
  * after 1 year".
  */
 
-contract VeERC721Extension is ERC721Votes {
-    ERC721 immutable TOKEN;
-    IBonus immutable BONUS;
-    mapping(uint256 => bool) isUnlocked;
-    mapping(address => bool) whitelistedTransferableAddresses;
+contract VeERC721Extension is SuAccessControlAuthenticated, ERC721VotesUpgradeable {
+    ERC721 TOKEN;
+    IBonus BONUS;
+    mapping(uint256 => bool) public isUnlocked;
+    mapping(address => bool) public whitelistedTransferableAddresses;
 
-    error TransferError();
+    error TransferError(address from, address to, uint256 tokenId);
 
-    constructor(address _nftToken, address _bonus)
-    ERC721(string.concat("vested escrow ", ERC721(_nftToken).name()), string.concat("ve", ERC721(_nftToken).symbol()))
-    EIP712(string.concat("vested escrow ", ERC721(_nftToken).name()), "1")
-    public {
+    function initialize(address _accessControlSingleton, address _nftToken, address _bonus) public initializer
+    {
+        __ERC721_init(string.concat("vested escrow ", ERC721(_nftToken).name()), string.concat("ve", ERC721(_nftToken).symbol()));
+        __SuAuthenticated_init(_accessControlSingleton);
         TOKEN = ERC721(_nftToken);
         BONUS = IBonus(_bonus);
+        whitelistedTransferableAddresses[address(0)] = true;
     }
 
     function isTransferPossible(address from, address to, uint256 tokenId) external view returns (bool) {
@@ -45,16 +46,30 @@ contract VeERC721Extension is ERC721Votes {
         }
     }
 
-    function lock(uint256 tokenId) external {
-        // mint virtual votable balance
-        _mint(TOKEN.ownerOf(tokenId), tokenId);
+    function adminUnlock(uint256 tokenId) external onlyRole(ADMIN_ROLE) {
+        isUnlocked[tokenId] = true;
+        // burn virtual votable balance
+        _burn(tokenId);
     }
 
+    // TODO: access control
+    function lock(address account, uint256 tokenId) external {
+        // mint virtual votable balance
+        _mint(account, tokenId);
+    }
+
+    // voting implementation
     function _beforeTokenTransfer(
         address from,
         address to,
         uint256 tokenId
     ) internal override {
-        revert TransferError();
+        if (from != address(0) && to != address(0)) {
+            revert TransferError(from, to, tokenId);
+        }
+    }
+
+    function supportsInterface(bytes4 interfaceId) public view virtual override(ERC721Upgradeable, SuAccessControlAuthenticated) returns (bool) {
+        return super.supportsInterface(interfaceId);
     }
 }
