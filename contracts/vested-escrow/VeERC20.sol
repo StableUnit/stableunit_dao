@@ -13,6 +13,7 @@ pragma solidity ^0.8.12;
 */
 import "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20Upgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/extensions/ERC20BurnableUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/token/ERC20/extensions/ERC20VotesUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/utils/SafeERC20Upgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/math/SafeCastUpgradeable.sol";
 import "../access-control/SuAccessControlAuthenticated.sol";
@@ -32,7 +33,7 @@ import "../interfaces/IveERC20.sol";
  * To make balance visible in the erc20 wallets, the contact "looks like" erc20 token by implementing its interface
  * however all non-view methods such as transfer or approve aren't active and will be reverted.
 */
-contract VeERC20 is SuAccessControlAuthenticated, ERC20BurnableUpgradeable, IveERC20 {
+contract VeERC20 is SuAccessControlAuthenticated,  ERC20VotesUpgradeable, IveERC20 {
     using SafeERC20Upgradeable for ERC20Upgradeable;
 
     ERC20Upgradeable public LOCKED_TOKEN;
@@ -146,6 +147,10 @@ contract VeERC20 is SuAccessControlAuthenticated, ERC20BurnableUpgradeable, IveE
         LOCKED_TOKEN.safeTransferFrom(msg.sender, address(this), amount);
         // mint more veERC20 tokens for the account
         _mint(account, amount);
+        // if don't delegate, delegate to yourself by default
+        if (delegates(account) == address(0)) {
+            _delegate(account, account);
+        }
     }
 
     /**
@@ -228,13 +233,6 @@ contract VeERC20 is SuAccessControlAuthenticated, ERC20BurnableUpgradeable, IveE
 
     function transfer(address, uint256) public virtual override returns (bool) {
         revert("not possible to transfer vested token");
-    }
-
-    function _burn(address account, uint256 amount)
-    internal
-    override
-    {
-        super._burn(account, amount);
     }
 
     function burnAll() external {
