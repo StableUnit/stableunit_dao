@@ -11,7 +11,7 @@
     "typecheck": "tsc --noEmit",
     "compile": "hardhat compile",
     "test:unit": "hardhat test test/unit-tests/*.test.ts",
-    "test:integration": "hardhat test test/integration-test/*.test.ts",
+    "test:integration": "hardhat test test/integration-tests/*.test.ts",
     "coverage": "npx hardhat coverage",
     "deploy": "hardhat deploy",
     "deploy:goerli": "hardhat deploy --tags Deployer --reset --network goerli",
