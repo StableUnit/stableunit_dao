@@ -127,8 +127,7 @@ describe("VeERC721Extension", () => {
             expect(await veERC721Extension.getVotes(accounts.bob.address)).to.be.equal(0);
             expect(await veERC721Extension.getVotes(accounts.carl.address)).to.be.equal(3);
         })
-
-        //мб добавить тест где делается delegate и потом adminUnlock? Потом lock и снова delegate?
+        
         it( "delegate+adminUnlock gives no voting power, and lock+delegate gives it back", async () => {
             await mintAndDelegate();
 

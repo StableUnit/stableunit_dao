@@ -1,4 +1,4 @@
-import {deployments, ethers, getNamedAccounts} from "hardhat";
+import {ethers, getNamedAccounts} from "hardhat";
 import {expect} from "chai";
 import {SuAccessControlSingleton} from "../../typechain";
 
@@ -7,12 +7,8 @@ describe("checkOwnership", () => {
     let accessControlSingleton: SuAccessControlSingleton;
 
     beforeEach(async () => {
-        // const network = await ethers.provider;
-        // console.log("checkOwnership.test network =  ", network);
         accessControlSingleton = await ethers.getContract("SuAccessControlSingleton") as SuAccessControlSingleton;
-        // console.log("accessControlSingleton = ", accessControlSingleton.address);
         defaultAdminRole = await accessControlSingleton.DEFAULT_ADMIN_ROLE();
-        // console.log("defaultAdminRole = ", defaultAdminRole);
     });
 
     describe("SuAccessControlSingleton", () => {
