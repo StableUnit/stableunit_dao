@@ -1,12 +1,9 @@
-import {deployments, ethers, getNamedAccounts} from "hardhat";
-import {ContractTransaction} from "ethers";
+import {deployments, ethers} from "hardhat";
 import {expect} from "chai";
-import { run } from "hardhat";
 
-import {ADDRESS_ZERO, BN_1E12, BN_1E18, BN_1E6} from "../utils";
+import {ADDRESS_ZERO} from "../utils";
 import {SignerWithAddress} from "@nomiclabs/hardhat-ethers/signers";
-import {latest, waitNBlocks} from "../utils/time";
-import {MockErc721, MockErc721Extended, VeERC20, VeERC721Extension} from "../../typechain";
+import {MockErc721Extended, VeERC721Extension} from "../../typechain";
 
 describe("VeERC721Extension", () => {
     let accounts: Record<string, SignerWithAddress>;
@@ -54,7 +51,7 @@ describe("VeERC721Extension", () => {
 
             await veERC721Extension.connect(accounts.admin).adminUnlock(tokenId);
             const tx2 = mockErc721Extended.connect(accounts.alice).transferFrom(accounts.alice.address, accounts.bob.address, tokenId);
-            await expect(tx2).to.be.not.reverted;
+            await expect(tx2).not.to.be.reverted;
         })
 
         it("mockErc721Extended after several adminUnlock/lock should work correctly", async () => {
@@ -70,10 +67,10 @@ describe("VeERC721Extension", () => {
 
             await veERC721Extension.connect(accounts.admin).adminUnlock(tokenId);
             tx = mockErc721Extended.connect(accounts.alice).transferFrom(accounts.alice.address, accounts.bob.address, tokenId);
-            await expect(tx).to.be.not.reverted;
+            await expect(tx).not.to.be.reverted;
 
             tx = mockErc721Extended.connect(accounts.bob).transferFrom(accounts.bob.address, accounts.alice.address, tokenId);
-            await expect(tx).to.not.reverted;
+            await expect(tx).not.to.be.reverted;
         })
     })
 
@@ -115,15 +112,42 @@ describe("VeERC721Extension", () => {
             expect(await veERC721Extension.getVotes(accounts.carl.address)).to.be.equal(1);
         })
 
-        it("delegate vote and check vote balances", async () => {
+        async function mintAndDelegate() {
             await mockErc721Extended.mint(accounts.alice.address);
             await mockErc721Extended.mint(accounts.bob.address);
             await mockErc721Extended.mint(accounts.carl.address);
-            veERC721Extension.connect(accounts.alice).delegate(accounts.carl.address);
-            veERC721Extension.connect(accounts.bob).delegate(accounts.carl.address);
+            await veERC721Extension.connect(accounts.alice).delegate(accounts.carl.address);
+            await veERC721Extension.connect(accounts.bob).delegate(accounts.carl.address);
+        }
+
+        it("delegate vote and check vote balances", async () => {
+            await mintAndDelegate();
 
             expect(await veERC721Extension.getVotes(accounts.alice.address)).to.be.equal(0);
             expect(await veERC721Extension.getVotes(accounts.bob.address)).to.be.equal(0);
+            expect(await veERC721Extension.getVotes(accounts.carl.address)).to.be.equal(3);
+        })
+
+        //мб добавить тест где делается delegate и потом adminUnlock? Потом lock и снова delegate?
+        it( "delegate+adminUnlock gives no voting power, and lock+delegate gives it back", async () => {
+            await mintAndDelegate();
+
+            await veERC721Extension.connect(accounts.admin).adminUnlock(0);
+            expect(await veERC721Extension.getVotes(accounts.carl.address)).to.be.equal(2);
+
+            await veERC721Extension.connect(accounts.admin).adminUnlock(1);
+            expect(await veERC721Extension.getVotes(accounts.carl.address)).to.be.equal(1);
+
+            await veERC721Extension.connect(accounts.admin).adminUnlock(2);
+            expect(await veERC721Extension.getVotes(accounts.carl.address)).to.be.equal(0);
+
+            await veERC721Extension.connect(accounts.admin).lock(2);
+            expect(await veERC721Extension.getVotes(accounts.carl.address)).to.be.equal(1);
+
+            await veERC721Extension.connect(accounts.admin).lock(1);
+            expect(await veERC721Extension.getVotes(accounts.carl.address)).to.be.equal(2);
+
+            await veERC721Extension.connect(accounts.admin).lock(0);
             expect(await veERC721Extension.getVotes(accounts.carl.address)).to.be.equal(3);
         })
     })

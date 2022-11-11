@@ -17,7 +17,7 @@ contract MockErc721Extended is ERC721Enumerable {
 
     constructor(string memory _name, string memory _symbol, address _veCNftExtension)
     ERC721(_name, _symbol)
-    public {
+    {
         baseURI = "ipfs://QmeSjSinHpPnmXmspMjwiXyN6zS4E9zccariGR3jxcaWtq/";
         veCNftExtension = VeERC721Extension(_veCNftExtension);
     }
@@ -34,11 +34,10 @@ contract MockErc721Extended is ERC721Enumerable {
         return string(abi.encodePacked(baseURI, tokenId));
     }
 
-    function mint(address to) public returns (uint256) {
+    function mint(address to) external {
         _mint(to, _tokenIdCounter.current());
         veCNftExtension.lock(_tokenIdCounter.current());
         _tokenIdCounter.increment();
-        return _tokenIdCounter.current() - 1;
     }
 
     function _beforeTokenTransfer(address from, address to, uint256 tokenId)

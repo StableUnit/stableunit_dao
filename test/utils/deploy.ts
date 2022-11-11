@@ -4,8 +4,6 @@ import {getContractAddress} from "ethers/lib/utils";
 
 export const deployProxy = async (contractName: string, args?: any[], options?: DeployProxyOptions, needLogs = true) => {
     const contractFactory = await ethers.getContractFactory(contractName);
-
-    // console.log("deployProxy(", contractName," ,", ...(args??[]), " )");
     const proxyContract = await upgrades.deployProxy(contractFactory, args, options);
     await proxyContract.deployed();
 

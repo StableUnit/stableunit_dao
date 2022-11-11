@@ -1,5 +1,5 @@
-import { HardhatRuntimeEnvironment } from "hardhat/types";
-import { DeployFunction } from "hardhat-deploy/types";
+import {HardhatRuntimeEnvironment} from "hardhat/types";
+import {DeployFunction} from "hardhat-deploy/types";
 import {
     Bonus,
     MockErc721Extended,
@@ -9,13 +9,13 @@ import {
     VeERC20,
     VeERC721Extension
 } from "../typechain";
-import deployProxy, {deploy, getDeploymentAddress } from "../test/utils/deploy";
+import deployProxy, {deploy, getDeploymentAddress} from "../test/utils/deploy";
 import {expect} from "chai";
 import {ethers} from "hardhat";
 
 const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
     const [deployer, admin, dao] = await hre.ethers.getSigners();
-    const network = await ethers.provider;
+    const network = await ethers.provider.getNetwork();
     console.log("Deployer network =  ", network);
 
     const accessControlSingleton = await deployProxy("SuAccessControlSingleton", [deployer.address, admin.address]) as SuAccessControlSingleton;

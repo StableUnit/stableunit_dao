@@ -17,8 +17,7 @@ import "hardhat-deploy-ethers";
 const envPath = "../.env/.env";
 dotenv.config({ path: envPath });
 
-// This is a sample Hardhat task. To learn how to create your own go to
-// https://hardhat.org/guides/create-task.html
+// To learn how to create Hardhat task, go to https://hardhat.org/guides/create-task.html
 import "./tasks/accounts.ts";
 import "./tasks/setDistributor.ts";
 import "./tasks/setBonus.ts";
@@ -66,7 +65,7 @@ const config: HardhatUserConfig = {
         },
     },
     networks: {
-        hardhat: {
+        hardhat: { 
             gas: 12000000,
             blockGasLimit: 0x1fffffffffffff,
             allowUnlimitedContractSize: true,
