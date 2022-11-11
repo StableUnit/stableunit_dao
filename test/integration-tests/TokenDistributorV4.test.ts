@@ -62,7 +62,7 @@ describe("TokenDistributorV4", () => {
         } = await getNamedAccounts();
 
         deployerSigner = await ethers.getSigner(deployer);
-        daoSigner = await ethers.getSigner(dao);
+        daoSigner = await ethers.getSigner(dao); // TODO: owner? DAO is a contract, not EOA
         adminSigner = await ethers.getSigner(admin);
         userSigner = await ethers.getSigner(userAccount);
         aliceSigner = await ethers.getSigner(alice);

@@ -18,8 +18,10 @@ import "./access-control/SuAccessControlAuthenticated.sol";
 contract Bonus is IBonus, SuAccessControlAuthenticated {
     mapping(address => NFTInfo) public nftInfo;
     mapping(address => UserInfo) public userInfo;
-    mapping(address => CommunityAdminInfo) public communityAdminInfo;
+
     mapping(address => AdminInfo) public adminInfo;
+    mapping(address => CommunityAdminInfo) public communityAdminInfo;
+
 
     function initialize(address _accessControlSingleton, address defaultAdmin) public initializer {
         __SuAuthenticated_init(_accessControlSingleton);
@@ -174,9 +176,9 @@ contract Bonus is IBonus, SuAccessControlAuthenticated {
     }
 
     /**
-     * Returns true/false whether this NFT with tokenId tokens can be transfer
+     * @dev See {IBonus-isTokenTransferable}.
      */
-    function isTokenTransferable(address nft, address from, address to, uint256 tokenId) external view returns (bool) {
+    function isTokenTransferable(address nft, uint256 tokenId) external view returns (bool) {
         return false;
     }
 

@@ -1,24 +1,25 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.7;
 
-import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
-import "@openzeppelin/contracts-upgradeable/token/ERC721/extensions/ERC721EnumerableUpgradeable.sol";
+import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Enumerable.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
 import "../interfaces/IBonus.sol";
+import "../vested-escrow/VeERC721Extension.sol";
 
-contract MockCNft is ERC721EnumerableUpgradeable {
+contract MockErc721Extended is ERC721Enumerable {
     using Counters for Counters.Counter;
     Counters.Counter private _tokenIdCounter;
 
     string baseURI;
-    IBonus bonus;
+    VeERC721Extension public veCNftExtension;
 
-    error TransferError();
+    error TransferError(address from, address to, uint256 tokenId);
 
-    function initialize(string memory name, string memory symbol, IBonus _bonus) initializer public {
-        __ERC721_init(name, symbol);
+    constructor(string memory _name, string memory _symbol, address _veCNftExtension)
+    ERC721(_name, _symbol)
+    {
         baseURI = "ipfs://QmeSjSinHpPnmXmspMjwiXyN6zS4E9zccariGR3jxcaWtq/";
-        bonus = _bonus;
+        veCNftExtension = VeERC721Extension(_veCNftExtension);
     }
 
     function _baseURI() internal view override returns (string memory) {
@@ -33,8 +34,9 @@ contract MockCNft is ERC721EnumerableUpgradeable {
         return string(abi.encodePacked(baseURI, tokenId));
     }
 
-    function mint(address to) public {
-        _safeMint(to, _tokenIdCounter.current());
+    function mint(address to) external {
+        _mint(to, _tokenIdCounter.current());
+        veCNftExtension.lock(_tokenIdCounter.current());
         _tokenIdCounter.increment();
     }
 
@@ -42,18 +44,8 @@ contract MockCNft is ERC721EnumerableUpgradeable {
     internal
     override
     {
-        if (!bonus.isTokenTransferable(address(this), from, to, tokenId)) {
-            revert TransferError();
+        if (!veCNftExtension.isTransferPossible(from, to, tokenId)) {
+            revert TransferError(from, to, tokenId);
         }
-        super._beforeTokenTransfer(from, to, tokenId);
-    }
-
-    function supportsInterface(bytes4 interfaceId)
-    public
-    view
-    override
-    returns (bool)
-    {
-        return super.supportsInterface(interfaceId);
     }
 }

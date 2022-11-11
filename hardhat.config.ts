@@ -17,8 +17,7 @@ import "hardhat-deploy-ethers";
 const envPath = "../.env/.env";
 dotenv.config({ path: envPath });
 
-// This is a sample Hardhat task. To learn how to create your own go to
-// https://hardhat.org/guides/create-task.html
+// To learn how to create Hardhat task, go to https://hardhat.org/guides/create-task.html
 import "./tasks/accounts.ts";
 import "./tasks/setDistributor.ts";
 import "./tasks/setBonus.ts";
@@ -41,8 +40,14 @@ const config: HardhatUserConfig = {
     // learn more https://github.com/wighawag/hardhat-deploy#1-namedaccounts-ability-to-name-addresses
     namedAccounts: {
         deployer: 0,
-        admin: 1, // core team
-        dao: 2, // DAO address
+        admin: { // core team
+            default: 1,
+            "goerli": "0xE2661235b116781a7b30D4a675898cF9E61298Df",
+        },
+        dao: { // DAO multisig address or local EOA for testing
+            default: 2,
+            "goerli": "0xdf92E30b3E8Ad232577087E036c1fDc6138bB2e9",
+        },
         randomAccount: 3,
         userAccount: 4,
         liquidatorAccount: 5,
@@ -50,7 +55,15 @@ const config: HardhatUserConfig = {
         bob: 7,
         carl: 8,
     },
-    solidity: "0.8.15",
+    solidity: {
+        version: "0.8.15",
+        settings: {
+            optimizer: {
+                enabled: true,
+                runs: 1,
+            },
+        },
+    },
     networks: {
         hardhat: {
             gas: 12000000,
@@ -64,9 +77,6 @@ const config: HardhatUserConfig = {
             // // see https://github.com/sc-forks/solidity-coverage/issues/652
             // initialBaseFeePerGas: 0,
         },
-        local: {
-            url: "http://localhost:8545",
-        },
         goerli: {
             url: `https://goerli.infura.io/v3/${INFURA_API_KEY}`,
             accounts: accountsTestnet,
@@ -74,21 +84,6 @@ const config: HardhatUserConfig = {
             timeout: 100000,
             blockGasLimit: 7_000_000,
             gas: 7_000_000,
-        },
-        ropsten: {
-            url: `https://ropsten.infura.io/v3/${INFURA_API_KEY}`,
-            accounts: accountsTestnet,
-        },
-        rinkeby: {
-            url: `https://rinkeby.infura.io/v3/${INFURA_API_KEY}`,
-            accounts: accountsTestnet,
-            blockGasLimit: 7_000_000,
-            gas: 7_000_000,
-            // verify: {
-            //   etherscan: {
-            //     apiUrl: process.env.ETHERSCAN_API_URL || "",
-            //   },
-            // },
         },
         mumbai: {
             url: `https://polygon-mumbai.infura.io/v3/${INFURA_API_KEY}`,
