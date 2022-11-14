@@ -14,7 +14,8 @@ import CROSS_CHAIN_GOERLI from "../submodule-artifacts/goerli/MockErc721CrossCha
 const utf8Encode = new TextEncoder();
 
 async function main() {
-  const { nft, deployer, admin } = await getNamedAccounts();
+  let tx;
+  const { deployer, admin } = await getNamedAccounts();
   const adminSigner = await ethers.getSigner(admin);
   const deployerSigner = await ethers.getSigner(deployer);
 
@@ -22,50 +23,67 @@ async function main() {
   console.log("Current network = ", network.name);
 
   const mockErc721CrossChain = await ethers.getContract("MockErc721CrossChain") as MockErc721CrossChain;
-  await mockErc721CrossChain.connect(deployerSigner).mint();
+  tx = await mockErc721CrossChain.connect(deployerSigner).mint();
+  await tx.wait();
+  console.log('✅ Mint for deployer success');
   await mockErc721CrossChain.connect(adminSigner).mint();
-  console.log('✅ Mint success');
+  await tx.wait();
+  console.log('✅ Mint for admin success');
 
+  console.log('owner', await mockErc721CrossChain.ownerOf(100));
+  console.log('owner', await mockErc721CrossChain.ownerOf(101));
   console.log('deployer balance', (await mockErc721CrossChain.balanceOf(deployerSigner.address)).toString());
   console.log('admin balance', (await mockErc721CrossChain.balanceOf(adminSigner.address)).toString());
 
+  let dstChainId: number;
+  let dstContractAddress: string;
+  let tokenIdToSend: number;
+
   switch (network.chainId) {
     case getIdByNetworkName(NETWORK.goerli): {
-      console.log(getLZIdByNetworkName(NETWORK.mumbai), CROSS_CHAIN_MUMBAI.address);
-      let tx = await mockErc721CrossChain.setTrustedRemoteAddress(getLZIdByNetworkName(NETWORK.mumbai), CROSS_CHAIN_MUMBAI.address);
-      await tx.wait();
-      console.log('✅ setTrustedRemoteAddress success');
+      dstChainId = getLZIdByNetworkName(NETWORK.mumbai);
+      dstContractAddress = CROSS_CHAIN_MUMBAI.address;
+      tokenIdToSend = 0;
       break;
     }
     case getIdByNetworkName(NETWORK.mumbai): {
-      let tx = await mockErc721CrossChain.setTrustedRemoteAddress(getLZIdByNetworkName(NETWORK.goerli), CROSS_CHAIN_GOERLI.address)
-      await tx.wait();
-      console.log('✅ setTrustedRemoteAddress success');
+      dstChainId = getLZIdByNetworkName(NETWORK.goerli);
+      dstContractAddress = CROSS_CHAIN_GOERLI.address;
+      tokenIdToSend = 100;
       break;
+    }
+    default: {
+      tokenIdToSend = 0
+      dstChainId = 0;
+      dstContractAddress = "";
     }
   }
 
+  tx = await mockErc721CrossChain.setTrustedRemoteAddress(dstChainId, dstContractAddress);
+  await tx.wait();
+  console.log('✅ setTrustedRemoteAddress success');
+
   let fee = await mockErc721CrossChain.estimateSendFee(
-    getLZIdByNetworkName(NETWORK.mumbai),
+    dstChainId,
     utf8Encode.encode(adminSigner.address),
-    2,
+    tokenIdToSend,
     false,
     utf8Encode.encode(""),
   );
   console.log('fee:', fee.nativeFee.toString());
 
-  const tx = await mockErc721CrossChain.sendFrom(
+  tx = await mockErc721CrossChain.sendFrom(
     deployerSigner.address,
-    getLZIdByNetworkName(NETWORK.mumbai),
+    dstChainId,
     utf8Encode.encode(adminSigner.address),
-    2,
+    tokenIdToSend,
     deployerSigner.address,
     ADDRESS_ZERO,
     utf8Encode.encode(""),
     { value: fee.nativeFee }
   );
   await tx.wait();
-  console.log('✅ sendFrom success');
+  console.log('✅ sendFrom success', tx);
 
   console.log('deployer balance after send NFT', (await mockErc721CrossChain.balanceOf(deployerSigner.address)).toString());
   console.log('admin balance after send NFT', (await mockErc721CrossChain.balanceOf(adminSigner.address)).toString());
