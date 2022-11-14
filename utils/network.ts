@@ -73,3 +73,26 @@ export const getIdByNetworkName: (name: NetworkType) => number = (name) => {
             return 0;
     }
 };
+
+export const getLZIdByNetworkName: (name: NetworkType) => number = (name) => {
+    switch (name) {
+        case NETWORK.eth:
+            return 101;
+        case NETWORK.goerli:
+            return 10121;
+        case NETWORK.bsc:
+            return 102;
+        case NETWORK.polygon:
+            return 109;
+        case NETWORK.fantom:
+            return 112;
+        case NETWORK.avalanche:
+            return 106;
+        case NETWORK.mumbai:
+            return 10109;
+        case NETWORK.harmony:
+            return 116;
+        default:
+            return 0;
+    }
+};
