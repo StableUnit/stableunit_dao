@@ -54,6 +54,15 @@ const config: HardhatUserConfig = {
         alice: 6,
         bob: 7,
         carl: 8,
+        nft: {
+            default: 9,
+            "goerli": "0xbfD2135BFfbb0B5378b56643c2Df8a87552Bfa23",
+            "mumbai": "0xf69186dfBa60DdB133E91E9A4B5673624293d8F8",
+            "bnb-testnet": "0x6Fcb97553D41516Cb228ac03FdC8B9a0a9df04A1",
+            "polygon": "0x3c2269811836af69497E5F486A85D7316753cf62",
+            "bnb": "0x3c2269811836af69497E5F486A85D7316753cf62",
+            "mainnet": "0x66A71Dcef29A0fFBDBE3c6a460a3B5BC225Cd675",
+        }
     },
     solidity: {
         version: "0.8.15",
@@ -102,7 +111,20 @@ const config: HardhatUserConfig = {
         currency: "USD",
     },
     etherscan: {
-        apiKey: ETHERSCAN_API_KEY,
+        apiKey: {
+            goerli: ETHERSCAN_API_KEY ?? "",
+            polygonMumbai: ETHERSCAN_API_KEY ?? "",
+        },
+        customChains: [
+            {
+                network: "polygonMumbai",
+                chainId: 80001,
+                urls: {
+                    apiURL: "https://api-testnet.polygonscan.com",
+                    browserURL: "https://mumbai.polygonscan.com"
+                }
+            }
+        ]
     },
     paths: {
         deploy: "deploy",

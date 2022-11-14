@@ -42,7 +42,6 @@ contract MockErc721Extended is ERC721Enumerable {
 
     function _beforeTokenTransfer(address from, address to, uint256 tokenId)
     internal
-    override
     {
         if (!veCNftExtension.isTransferPossible(from, to, tokenId)) {
             revert TransferError(from, to, tokenId);

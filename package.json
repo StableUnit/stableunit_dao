@@ -14,8 +14,11 @@
     "test:integration": "hardhat test test/integration-tests/*.test.ts",
     "coverage": "npx hardhat coverage",
     "deploy": "hardhat deploy",
+    "deploy-nft:goerli": "hardhat deploy --tags NFT --network goerli",
+    "deploy-nft:mumbai": "hardhat deploy --tags NFT --network mumbai",
     "deploy:goerli": "hardhat deploy --tags Deployer --reset --network goerli",
     "verify:goerli": "hardhat run ./scripts/verifyEtherscan.ts --network goerli",
+    "verify:mumbai": "hardhat run ./scripts/verifyEtherscan.ts --network mumbai",
     "upgrade:goerli": "hardhat run ./scripts/upgrade.ts --network goerli",
     "upgrade-proposal:goerli": "hardhat run ./scripts/propose-upgrade.ts --network goerli",
     "grant-og-legacy": "npx hardhat ogDistribution --address 0xfffffffff615bee8d0c7d329ebe0d444ab46ee5a --filename ./misc/ogNftAirdrop.txt --verbose"
