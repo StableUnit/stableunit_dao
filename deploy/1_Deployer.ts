@@ -7,7 +7,7 @@ import {
     SuDAO,
     TokenDistributorV4,
     VeERC20,
-    VeERC721Extension
+    VeERC721Extension, VotingPower
 } from "../typechain";
 import deployProxy, {deploy, getDeploymentAddress} from "../test/utils/deploy";
 import {expect} from "chai";
@@ -34,6 +34,10 @@ const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
     const veErc721Extension = await deployProxy("VeERC721Extension", [accessControlSingleton.address, mockErc721Extended.address, bonus.address]) as VeERC721Extension;
     expect(veErc721ExtensionAddress).to.be.equal(veErc721Extension.address);
     await accessControlSingleton.grantRole(await accessControlSingleton.ADMIN_ROLE(), mockErc721Extended.address);
+
+    const votingPower = await deployProxy("VotingPower", ["StableUnit Voting Power", "vpSuDAO"]) as VotingPower;
+    await votingPower.setTokenWeight(veERC20.address,"1");
+    await votingPower.setTokenWeight(veErc721Extension.address,"1");
 
     const mockErc721 = await deployProxy("MockErc721", ["Mock StableUnit NFT", "t_NFT"]);
 };

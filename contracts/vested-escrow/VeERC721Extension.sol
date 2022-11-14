@@ -4,8 +4,10 @@ pragma solidity ^0.8.9;
 
 import "../interfaces/IBonus.sol";
 import "../access-control/SuAccessControlAuthenticated.sol";
-import "@openzeppelin/contracts-upgradeable/token/ERC721/extensions/draft-ERC721VotesUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/interfaces/IERC165Upgradeable.sol";
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
+import "./VotesUpgradable.sol";
+
 
 /**
  * @dev vested escrow NFT contract, allow a beneficiary to extract NFT after a given lock schdule.
@@ -67,23 +69,11 @@ contract VeERC721Extension is SuAccessControlAuthenticated, VotesUpgradeable {
         }
     }
 
-    //    function _afterTokenTransfer(
-    //        address from,
-    //        address to,
-    //        uint256 tokenId
-    //    ) internal virtual override {
-    //        _transferVotingUnits(from, to, 1);
-    //        super._afterTokenTransfer(from, to, tokenId);
-    //    }
-
-    /**
-     * @dev Returns the balance of `account`.
-     */
     function _getVotingUnits(address account) internal view virtual override returns (uint256) {
         return TOKEN.balanceOf(account);
     }
 
-    //    function supportsInterface(bytes4 interfaceId) public view virtual override(ERC721Upgradeable, SuAccessControlAuthenticated) returns (bool) {
-    //        return super.supportsInterface(interfaceId);
-    //    }
+//    function supportsInterface(bytes4 interfaceId) public override (SuAccessControlAuthenticated, VeVoteToken) view returns (bool) {
+//        return interfaceId == type(IVotesUpgradeable).interfaceId || super.supportsInterface(interfaceId);
+//    }
 }

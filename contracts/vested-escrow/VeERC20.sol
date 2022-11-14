@@ -62,6 +62,7 @@ contract VeERC20 is SuAccessControlAuthenticated,  ERC20VotesUpgradeable, IveERC
     * @notice owner of the contract can set up TGE date within set limits.
     */
     function updateTgeTimestamp(uint32 newTgeTimestamp) external onlyRole(ADMIN_ROLE) {
+        // TODO: convert of require to if revert error
         require(uint32(block.timestamp) <= newTgeTimestamp, "veERC20: TGE date can't be in the past");
         require(newTgeTimestamp <= TGE_MAX_TIMESTAMP, "veERC20: new TGE date is beyond limit");
         tgeTimestamp = newTgeTimestamp;
@@ -231,15 +232,20 @@ contract VeERC20 is SuAccessControlAuthenticated,  ERC20VotesUpgradeable, IveERC
     }
     receive() external payable {}
 
-    function transfer(address, uint256) public virtual override returns (bool) {
-        revert("not possible to transfer vested token");
-    }
-
     function burnAll() external {
         uint256 balance = super.balanceOf(msg.sender);
         super._burn(msg.sender, balance);
         vestingInfo[msg.sender].amountAlreadyWithdrawn = 0;
     }
+
+    function transfer(address, uint256) public virtual override returns (bool) {
+        revert("not possible to transfer vested token");
+    }
+
+    //======================voting logic====================================
+    // TODO: override method getVotes that accounts time-lock for voting power, similar to \
+    //       https://curve.readthedocs.io/_/downloads/en/latest/pdf/ p.9.1.3 Boosting
+
 
     /**
      * @dev This empty reserved space is put in place to allow future versions to add new
