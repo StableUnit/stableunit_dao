@@ -265,3 +265,12 @@ npx hardhat transfer-owner --network mumbai --address 0x000000006cD799E2cC7A3Fe6
 4. In the proposal - addresses, that are in the gnosis-safe multisig, can approve this proposal
 5. After that you can execute it.
 6. If proposal is executed you can verify contract via `npm run verify:goerli`
+
+### CrossChain NFT
+
+We use Layer-Zero UniversalONFT721 in the base. So for make NFT cross-chain sendable you should:
+1. Deploy to chain1 with `npm run deploy-nft:goerli`
+2. Deploy to chain2 with `npm run deploy-nft:mumbai`
+3. Prepare NFT in chain1 with `hardhat run ./scripts/prepare-lz-nft.ts --network mumbai`
+4. Prepare NFT in chain2 with `hardhat run ./scripts/prepare-lz-nft.ts --network goerli`
+5. For testing tha all works - run script that send token with id 100 from deployer in mumbai to admin in goerli with `hardhat run ./scripts/send-lz-nft.ts --network mumbai`
