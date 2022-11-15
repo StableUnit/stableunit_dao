@@ -10,6 +10,10 @@ import {MockErc721CrossChain} from "../typechain";
 import CROSS_CHAIN_MUMBAI from "../submodule-artifacts/mumbai/MockErc721CrossChain.json";
 import CROSS_CHAIN_GOERLI from "../submodule-artifacts/goerli/MockErc721CrossChain.json";
 
+/** Here we have a script that make all preparations, set all needed data for transfer
+ * MockErc721CrossChain between two chains and two users (transfer is in send-lz-nft.ts).
+ * It should be called after deploying MockErc721CrossChain.
+ **/
 async function main() {
   let tx;
   const { deployer } = await getNamedAccounts();
