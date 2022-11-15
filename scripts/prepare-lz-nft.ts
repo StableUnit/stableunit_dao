@@ -7,16 +7,12 @@ import { ethers, getNamedAccounts} from "hardhat";
 
 import {getIdByNetworkName, getLZIdByNetworkName, NETWORK} from "../utils/network";
 import {MockErc721CrossChain} from "../typechain";
-import {ADDRESS_ZERO} from "../test/utils";
 import CROSS_CHAIN_MUMBAI from "../submodule-artifacts/mumbai/MockErc721CrossChain.json";
 import CROSS_CHAIN_GOERLI from "../submodule-artifacts/goerli/MockErc721CrossChain.json";
 
-const utf8Encode = new TextEncoder();
-
 async function main() {
   let tx;
-  const { deployer, admin } = await getNamedAccounts();
-  const adminSigner = await ethers.getSigner(admin);
+  const { deployer } = await getNamedAccounts();
   const deployerSigner = await ethers.getSigner(deployer);
 
   const network = await ethers.provider.getNetwork();
@@ -26,67 +22,47 @@ async function main() {
   tx = await mockErc721CrossChain.connect(deployerSigner).mint();
   await tx.wait();
   console.log('✅ Mint for deployer success');
-  await mockErc721CrossChain.connect(adminSigner).mint();
-  await tx.wait();
-  console.log('✅ Mint for admin success');
-
-  console.log('owner', await mockErc721CrossChain.ownerOf(100));
-  console.log('owner', await mockErc721CrossChain.ownerOf(101));
-  console.log('deployer balance', (await mockErc721CrossChain.balanceOf(deployerSigner.address)).toString());
-  console.log('admin balance', (await mockErc721CrossChain.balanceOf(adminSigner.address)).toString());
 
   let dstChainId: number;
+  let localContractAddress: string;
   let dstContractAddress: string;
-  let tokenIdToSend: number;
 
   switch (network.chainId) {
     case getIdByNetworkName(NETWORK.goerli): {
       dstChainId = getLZIdByNetworkName(NETWORK.mumbai);
+      localContractAddress = CROSS_CHAIN_GOERLI.address;
       dstContractAddress = CROSS_CHAIN_MUMBAI.address;
-      tokenIdToSend = 0;
       break;
     }
     case getIdByNetworkName(NETWORK.mumbai): {
       dstChainId = getLZIdByNetworkName(NETWORK.goerli);
+      localContractAddress = CROSS_CHAIN_MUMBAI.address;
       dstContractAddress = CROSS_CHAIN_GOERLI.address;
-      tokenIdToSend = 100;
       break;
     }
     default: {
-      tokenIdToSend = 0
       dstChainId = 0;
+      localContractAddress = "";
       dstContractAddress = "";
     }
   }
+
+  const trustedRemote = ethers.utils.solidityPack(['address', 'address'], [dstContractAddress, localContractAddress]);
+  tx = await mockErc721CrossChain.setTrustedRemote(dstChainId, trustedRemote);
+  await tx.wait();
+  console.log('✅ setTrustedRemote success');
 
   tx = await mockErc721CrossChain.setTrustedRemoteAddress(dstChainId, dstContractAddress);
   await tx.wait();
   console.log('✅ setTrustedRemoteAddress success');
 
-  let fee = await mockErc721CrossChain.estimateSendFee(
-    dstChainId,
-    utf8Encode.encode(adminSigner.address),
-    tokenIdToSend,
-    false,
-    utf8Encode.encode(""),
-  );
-  console.log('fee:', fee.nativeFee.toString());
-
-  tx = await mockErc721CrossChain.sendFrom(
-    deployerSigner.address,
-    dstChainId,
-    utf8Encode.encode(adminSigner.address),
-    tokenIdToSend,
-    deployerSigner.address,
-    ADDRESS_ZERO,
-    utf8Encode.encode(""),
-    { value: fee.nativeFee }
-  );
+  tx = await mockErc721CrossChain.setUseCustomAdapterParams(true);
   await tx.wait();
-  console.log('✅ sendFrom success', tx);
+  console.log('✅ setUseCustomAdapterParams success');
 
-  console.log('deployer balance after send NFT', (await mockErc721CrossChain.balanceOf(deployerSigner.address)).toString());
-  console.log('admin balance after send NFT', (await mockErc721CrossChain.balanceOf(adminSigner.address)).toString());
+  tx = await mockErc721CrossChain.setMinDstGas(dstChainId, 1, 500000);
+  await tx.wait();
+  console.log('✅ setUseCustomAdapterParams success');
 }
 
 // We recommend this pattern to be able to use async/await everywhere
