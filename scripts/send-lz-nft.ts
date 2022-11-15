@@ -11,6 +11,9 @@ import {ADDRESS_ZERO} from "../test/utils";
 
 const utf8Encode = new TextEncoder();
 
+/** Here we have a script that transfer MockErc721CrossChain between two chains and two users.
+ * It should be called after deploying MockErc721CrossChain and running prepare-lz-nft.ts
+ **/
 async function main() {
   let tx;
   const { deployer, admin } = await getNamedAccounts();
