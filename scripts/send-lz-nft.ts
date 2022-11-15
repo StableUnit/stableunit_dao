@@ -21,6 +21,11 @@ async function main() {
   console.log("Current network = ", network.name);
 
   const mockErc721CrossChain = await ethers.getContract("MockErc721CrossChain") as MockErc721CrossChain;
+
+  // tx = await mockErc721CrossChain.connect(deployerSigner).mint();
+  // await tx.wait();
+  // console.log('✅ Mint for deployer success');
+
   console.log('deployer balance', (await mockErc721CrossChain.balanceOf(deployerSigner.address)).toString());
   console.log('admin balance', (await mockErc721CrossChain.balanceOf(adminSigner.address)).toString());
 
@@ -57,7 +62,7 @@ async function main() {
   tx = await mockErc721CrossChain.sendFrom(
     deployerSigner.address,
     dstChainId,
-    utf8Encode.encode(adminSigner.address),
+    adminSigner.address,
     tokenIdToSend,
     deployerSigner.address,
     ADDRESS_ZERO,
