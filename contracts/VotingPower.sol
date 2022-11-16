@@ -44,9 +44,9 @@ import "@openzeppelin/contracts-upgradeable/governance/utils/IVotesUpgradeable.s
 contract VotingPower is SuAccessControlAuthenticated, IERC20, IERC20Metadata, IVotesUpgradeable {
     using EnumerableSet for EnumerableSet.AddressSet;
 
-    uint256 immutable public MAX_LEN = 50;
-    uint256 immutable public MAX_WEIGHT = 1e18;
-    uint256 immutable public TOTAL_VOTING_POWER = 42_000_000 * 1e18;
+    uint256 public MAX_LEN;
+    uint256 public MAX_WEIGHT;
+    uint256 public TOTAL_VOTING_POWER;
 
     string private _name;
     string private _symbol;
@@ -62,6 +62,9 @@ contract VotingPower is SuAccessControlAuthenticated, IERC20, IERC20Metadata, IV
         string memory name_,
         string memory symbol_
     ) initializer public {
+        MAX_LEN = 50;
+        MAX_WEIGHT = 1e18;
+        TOTAL_VOTING_POWER = 42_000_000 * 1e18;
         _name = name_;
         _symbol = symbol_;
     }
@@ -96,7 +99,8 @@ contract VotingPower is SuAccessControlAuthenticated, IERC20, IERC20Metadata, IV
         for (uint256 i = 0; i < l; i++) {
             address token = tokensArray[i];
             votes += TOTAL_VOTING_POWER
-            * IVotesUpgradeable(token).getVotes(account) / IVotesUpgradeable(token).getPastTotalSupply(block.number)
+            // TODO: be sure that tokens has implemented method: getTotalSupply
+            * VotesUpgradeable(token).getVotes(account) / VotesUpgradeable(token).getTotalSupply(block.number)
             * weights[token] / totalWeight;
         }
         return votes;
