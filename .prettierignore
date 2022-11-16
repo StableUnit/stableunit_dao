@@ -1,0 +1,8 @@
+# Ignore artifacts:
+build
+artifacts
+cache
+.openzeppelin
+submodule-artifacts
+coverage
+typechain

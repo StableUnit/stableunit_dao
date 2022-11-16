@@ -1,0 +1,33 @@
+module.exports = {
+    env: {
+        mocha: true,
+        browser: true,
+        es2021: true,
+    },
+    extends: ["airbnb", "plugin:import/errors", "plugin:import/warnings", "plugin:prettier/recommended", "prettier"],
+    parser: "@typescript-eslint/parser",
+    parserOptions: {
+        ecmaVersion: 12,
+        sourceType: "module",
+    },
+    plugins: ["@typescript-eslint"],
+    rules: {
+        semi: [2, "always"],
+        "no-use-before-define": "off",
+        "no-restricted-syntax": "off",
+        "no-await-in-loop": "off",
+        "prefer-destructuring": "warn",
+        "import/extensions": "off",
+        "import/no-unresolved": "off",
+        "import/no-extraneous-dependencies": "warn",
+        "arrow-body-style": "off",
+        "consistent-return": "warn",
+        "import/prefer-default-export": "off",
+        "no-unused-vars": "off",
+        "no-plusplus": "off",
+        "func-names": "off",
+        "no-unused-expressions": "off",
+        "no-console": "off",
+        "no-param-reassign": "warn",
+    },
+};

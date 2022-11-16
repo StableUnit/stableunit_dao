@@ -1,8 +1,13 @@
 import { ethers, upgrades, deployments } from "hardhat";
 import { DeployProxyOptions } from "@openzeppelin/hardhat-upgrades/dist/utils";
-import {getContractAddress} from "ethers/lib/utils";
+import { getContractAddress } from "ethers/lib/utils";
 
-export const deployProxy = async (contractName: string, args?: any[], options?: DeployProxyOptions, needLogs = true) => {
+export const deployProxy = async (
+    contractName: string,
+    args?: any[],
+    options?: DeployProxyOptions,
+    needLogs = true
+) => {
     const contractFactory = await ethers.getContractFactory(contractName);
     const proxyContract = await upgrades.deployProxy(contractFactory, args, options);
     await proxyContract.deployed();
@@ -23,7 +28,7 @@ export const deployProxy = async (contractName: string, args?: any[], options?: 
 
 export const deploy = async (contractName: string, args?: any[], options?: DeployProxyOptions) => {
     const contractFactory = await ethers.getContractFactory(contractName);
-    const contract = await contractFactory.deploy(...(args??[]));
+    const contract = await contractFactory.deploy(...(args ?? []));
 
     console.log(`${contract.address} deployed ${contractName}`);
 
@@ -38,7 +43,7 @@ export const deploy = async (contractName: string, args?: any[], options?: Deplo
 };
 
 export async function getDeploymentAddress(deployer: string, nonceOffset = 0) {
-    let transactionCount = await ethers.provider.getTransactionCount(deployer);
+    const transactionCount = await ethers.provider.getTransactionCount(deployer);
     return getContractAddress({
         from: deployer,
         nonce: transactionCount + nonceOffset,
@@ -67,6 +72,5 @@ export const getDeploymentProxyAddressPredictor = async (deployer: string) => {
         });
     };
 };
-
 
 export default deployProxy;
