@@ -15,6 +15,7 @@ abstract contract SuAccessControlAuthenticated is Initializable, ISuAccessContro
     bytes32 public constant DAO_ROLE = 0x00;
     bytes32 public constant ADMIN_ROLE = keccak256("ADMIN_ROLE");
     bytes32 public constant COMMUNITY_ADMIN_ROLE = keccak256("COMMUNITY_ADMIN_ROLE");
+    // TODO: add role for existing contracts SYSTEM_ROLE
 
     /// @dev the address of SuAccessControlSingleton - it should be one for all contract that inherits SuAuthenticated
     ISuAccessControl public ACCESS_CONTROL_SINGLETON;

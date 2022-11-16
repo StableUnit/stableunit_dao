@@ -16,6 +16,7 @@ import "./VotesUpgradable.sol";
  * after 1 year".
  */
 
+// TODO: inherits from veVoteToken instead of VotesUpg directly
 contract VeERC721Extension is SuAccessControlAuthenticated, VotesUpgradeable {
     ERC721 TOKEN;
     IBonus BONUS;

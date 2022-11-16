@@ -17,7 +17,7 @@ import "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 import "./access-control/SuAccessControlAuthenticated.sol";
 import "@openzeppelin/contracts-upgradeable/governance/utils/IVotesUpgradeable.sol";
 import "./vested-escrow/VotesUpgradable.sol";
-
+import "./vested-escrow/VeVoteToken.sol";
 
 
 //interface IBalanceable {
@@ -71,7 +71,7 @@ contract VotingPower is SuAccessControlAuthenticated, IERC20, IERC20Metadata, IV
     }
 
     function setTokenWeight(address _token, uint256 _weight) external onlyRole(DAO_ROLE) {
-        // TODO: check that token is legit IVotes instance
+        // TODO: check that token is legit VotesUpgradable instance
         if (_weight > MAX_WEIGHT) {
             revert BaseAssumptionError();
         }
@@ -106,6 +106,7 @@ contract VotingPower is SuAccessControlAuthenticated, IERC20, IERC20Metadata, IV
         return votes;
     }
 
+    // =================================implementation of IVotes interfaces =============================
     /**
      * @dev Returns the amount of votes that `account` had at the end of a past block (`blockNumber`).
      */
@@ -115,7 +116,9 @@ contract VotingPower is SuAccessControlAuthenticated, IERC20, IERC20Metadata, IV
         uint256 l = tokensArray.length;
         for (uint256 i = 0; i < l; i++) {
             address token = tokensArray[i];
-            votes += IVotesUpgradeable(token).getPastVotes(account, blockNumber) * weights[token];
+            votes += TOTAL_VOTING_POWER
+            * IVotesUpgradeable(token).getPastVotes(account, blockNumber) / IVotesUpgradeable(token).getPastTotalSupply(blockNumber)
+            * weights[token] / totalWeight;
         }
         return votes;
     }
@@ -165,7 +168,7 @@ contract VotingPower is SuAccessControlAuthenticated, IERC20, IERC20Metadata, IV
         uint256 l = tokensArray.length;
         for (uint256 i = 0; i < l; i++) {
             address token = tokensArray[i];
-            VeVoteToken(token).delegate(delegatee);
+            VeVoteToken(token).delegateOnBehalf(msg.sender, delegatee);
         }
     }
 
@@ -180,7 +183,12 @@ contract VotingPower is SuAccessControlAuthenticated, IERC20, IERC20Metadata, IV
         bytes32 r,
         bytes32 s
     ) external {
-        // TODO: implement
+        address[] memory tokensArray = tokens.values();
+        uint256 l = tokensArray.length;
+        for (uint256 i = 0; i < l; i++) {
+            address token = tokensArray[i];
+            VotesUpgradeable(token).delegateBySig(delegatee, nonce, expiry, v, r, s);
+        }
     }
 
     // ==================== standard erc20 interface ==============================
