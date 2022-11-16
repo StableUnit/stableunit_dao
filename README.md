@@ -74,7 +74,7 @@ Oversimplified plan
 
 ## Compile
 ```
-npm ci
+npm install  --legacy-peer-deps
 npm audit fix
 npx hardhat typechain
 npx hardhat compile
