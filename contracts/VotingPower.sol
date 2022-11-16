@@ -16,6 +16,7 @@ import "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
 import "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 import "./access-control/SuAccessControlAuthenticated.sol";
 import "@openzeppelin/contracts-upgradeable/governance/utils/IVotesUpgradeable.sol";
+import "./vested-escrow/VotesUpgradable.sol";
 
 
 
@@ -99,8 +100,7 @@ contract VotingPower is SuAccessControlAuthenticated, IERC20, IERC20Metadata, IV
         for (uint256 i = 0; i < l; i++) {
             address token = tokensArray[i];
             votes += TOTAL_VOTING_POWER
-            // TODO: be sure that tokens has implemented method: getTotalSupply
-            * VotesUpgradeable(token).getVotes(account) / VotesUpgradeable(token).getTotalSupply(block.number)
+            * VotesUpgradeable(token).getVotes(account) / VotesUpgradeable(token).getTotalSupply()
             * weights[token] / totalWeight;
         }
         return votes;
@@ -109,6 +109,7 @@ contract VotingPower is SuAccessControlAuthenticated, IERC20, IERC20Metadata, IV
     /**
      * @dev Returns the amount of votes that `account` had at the end of a past block (`blockNumber`).
      */
+    // TODO: normalize with getTotalSupply
     function getPastVotes(address account, uint256 blockNumber) external view returns (uint256 votes) {
         address[] memory tokensArray = tokens.values();
         uint256 l = tokensArray.length;
@@ -160,12 +161,12 @@ contract VotingPower is SuAccessControlAuthenticated, IERC20, IERC20Metadata, IV
      * @dev Delegates votes from the sender to `delegatee`.
      */
     function delegate(address delegatee) external {
-        //        address[] memory tokensArray = tokens.values();
-        //        uint256 l = tokensArray.length;
-        //        for (uint256 i = 0; i < l; i++) {
-        //            address token = tokensArray[i];
-        //            IVotesUpgradeable(token).delegate(delegatee);
-        //        }
+        address[] memory tokensArray = tokens.values();
+        uint256 l = tokensArray.length;
+        for (uint256 i = 0; i < l; i++) {
+            address token = tokensArray[i];
+            VeVoteToken(token).delegate(delegatee);
+        }
     }
 
     /**
@@ -179,7 +180,7 @@ contract VotingPower is SuAccessControlAuthenticated, IERC20, IERC20Metadata, IV
         bytes32 r,
         bytes32 s
     ) external {
-
+        // TODO: implement
     }
 
     // ==================== standard erc20 interface ==============================

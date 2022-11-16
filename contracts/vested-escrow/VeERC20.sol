@@ -33,6 +33,7 @@ import "../interfaces/IveERC20.sol";
  * To make balance visible in the erc20 wallets, the contact "looks like" erc20 token by implementing its interface
  * however all non-view methods such as transfer or approve aren't active and will be reverted.
 */
+// TODO: change to local/VotesUpgradable
 contract VeERC20 is SuAccessControlAuthenticated,  ERC20VotesUpgradeable, IveERC20 {
     using SafeERC20Upgradeable for ERC20Upgradeable;
 
