@@ -12,6 +12,7 @@
     "compile": "hardhat compile",
     "test:unit": "hardhat test test/unit-tests/*.test.ts",
     "test:integration": "hardhat test test/integration-tests/*.test.ts",
+    "test:deployment": "hardhat test test/deployment-tests/*.test.ts",
     "coverage": "npx hardhat coverage",
     "deploy": "hardhat deploy",
     "deploy:goerli": "hardhat deploy --tags Deployer --reset --network goerli",
