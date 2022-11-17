@@ -34,7 +34,7 @@ import "../interfaces/IveERC20.sol";
  * however all non-view methods such as transfer or approve aren't active and will be reverted.
 */
 // TODO: change to local/VeVoteToken
-contract VeERC20 is SuAccessControlAuthenticated,  ERC20VotesUpgradeable, IveERC20 {
+contract VeERC20 is SuAccessControlAuthenticated, ERC20VotesUpgradeable, IveERC20 {
     using SafeERC20Upgradeable for ERC20Upgradeable;
 
     ERC20Upgradeable public LOCKED_TOKEN;
@@ -51,6 +51,10 @@ contract VeERC20 is SuAccessControlAuthenticated,  ERC20VotesUpgradeable, IveERC
     }
     mapping(address => VestingInfo) public vestingInfo;
 
+    error TGEInPastError();
+    error TGEBeyondLimitError();
+    error ClaimZeroError();
+
     function initialize(address _accessControlSingleton, ERC20Upgradeable _lockedToken, uint32 maxTgeTimestamp) initializer public {
         __SuAuthenticated_init(_accessControlSingleton);
         __ERC20_init(string.concat("vested escrow ", _lockedToken.name()), string.concat("ve", _lockedToken.symbol()));
@@ -63,9 +67,8 @@ contract VeERC20 is SuAccessControlAuthenticated,  ERC20VotesUpgradeable, IveERC
     * @notice owner of the contract can set up TGE date within set limits.
     */
     function updateTgeTimestamp(uint32 newTgeTimestamp) external onlyRole(ADMIN_ROLE) {
-        // TODO: convert of require to if revert error
-        require(uint32(block.timestamp) <= newTgeTimestamp, "veERC20: TGE date can't be in the past");
-        require(newTgeTimestamp <= TGE_MAX_TIMESTAMP, "veERC20: new TGE date is beyond limit");
+        if (newTgeTimestamp < uint32(block.timestamp)) revert TGEInPastError();
+        if (newTgeTimestamp > TGE_MAX_TIMESTAMP) revert TGEBeyondLimitError();
         tgeTimestamp = newTgeTimestamp;
     }
 
@@ -201,7 +204,7 @@ contract VeERC20 is SuAccessControlAuthenticated,  ERC20VotesUpgradeable, IveERC
      */
     function claim() external {
         uint256 claimAmount = availableToClaim(msg.sender);
-        require(claimAmount > 0, "Can't claim 0 tokens");
+        if (claimAmount == 0) revert ClaimZeroError();
         vestingInfo[msg.sender].amountAlreadyWithdrawn = vestingInfo[msg.sender].amountAlreadyWithdrawn + claimAmount;
         _burn(msg.sender, claimAmount);
         LOCKED_TOKEN.safeTransfer(msg.sender, claimAmount);

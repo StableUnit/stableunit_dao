@@ -25,8 +25,7 @@ abstract contract VeVoteToken is SuAccessControlAuthenticated, VotesUpgradeable,
     /**
      * @dev Delegates votes from the account to `delegatee`.
      */
-    function delegateOnBehalf(address account, address delegatee) public virtual onlyRole(ADMIN_ROLE) {
-        // TODO: system role
+    function delegateOnBehalf(address account, address delegatee) public virtual onlyRole(SYSTEM_ROLE) {
         _delegate(account, delegatee);
     }
 

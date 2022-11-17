@@ -72,16 +72,14 @@ contract VotingPower is SuAccessControlAuthenticated, IERC20, IERC20Metadata, IV
 
     function setTokenWeight(address _token, uint256 _weight) external onlyRole(DAO_ROLE) {
         // TODO: check that token is legit VotesUpgradable instance
-        if (_weight > MAX_WEIGHT) {
-            revert BaseAssumptionError();
-        }
+        if (_weight > MAX_WEIGHT) revert BaseAssumptionError();
+
         if (_weight > 0) {
             tokens.add(_token);
+            if (tokens.length() > MAX_LEN) revert BaseAssumptionError();
+
             totalWeight = totalWeight - weights[_token] + _weight;
             weights[_token] = _weight;
-            if (tokens.length() > MAX_LEN) {
-                revert BaseAssumptionError();
-            }
         } else {
             tokens.remove(_token);
             totalWeight = totalWeight - weights[_token];
@@ -93,6 +91,25 @@ contract VotingPower is SuAccessControlAuthenticated, IERC20, IERC20Metadata, IV
      * @dev Returns the current amount of votes that `account` has.
      * It uses the voting power of the account.
      * If account has not delegated their own votes, also adds the token balance of the account.
+     *
+     * For example: we have 2 tokens:
+     * NFT (weight 99 * 1e18)
+     * suDAO (weight 1 * 1e18) => totalWeight = 100 * 1e18
+     * user have 50 suDAO and 1 NFT
+     * In total there are 1000 suDAO и 50 NFT.
+     *
+     * votes1 =
+     * (42 * 1e6 * 1e18) * 50 / 1000 * 1e18 / 100*1e18 =
+     * (42 * 1e6 * 1e18) * 50 * 1e-5 =
+     * 21 000 * 1e18
+     *
+     * votes2
+     * = (42 * 1e6 * 1e18) * 1 / 50 * 99 * 1e18 / 100*1e18
+     * = (42 * 1e6 * 1e18) * 1 / 50 * 99 / 100
+     * = (42 * 1e6 * 1e18) * 99 / 5 * 1e-3
+     * = 831 600 * 1e18
+     *
+     * In total = 852 600
      */
     function getVotes(address account) public view returns (uint256 votes) {
         address[] memory tokensArray = tokens.values();
@@ -118,7 +135,7 @@ contract VotingPower is SuAccessControlAuthenticated, IERC20, IERC20Metadata, IV
             address token = tokensArray[i];
             votes += TOTAL_VOTING_POWER
             * IVotesUpgradeable(token).getPastVotes(account, blockNumber) / IVotesUpgradeable(token).getPastTotalSupply(blockNumber)
-            * weights[token] / totalWeight;
+            * weights[token] / totalWeight; // weights in the past could be different?
         }
         return votes;
     }

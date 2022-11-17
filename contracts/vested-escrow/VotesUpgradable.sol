@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 /**
  * This is fork of OZ governance code with few changes:
- *          getTotalVotes is public
+ *          getTotalSupply is external
  */
 
 // OpenZeppelin Contracts (last updated v4.6.0) (governance/utils/Votes.sol)
@@ -10,10 +10,9 @@ pragma solidity ^0.8.0;
 import "@openzeppelin/contracts-upgradeable/utils/ContextUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/CountersUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/CheckpointsUpgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/utils/cryptography/draft-EIP712Upgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/utils/cryptography/EIP712Upgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/governance/utils/IVotesUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
-
 
 /**
  * @dev This is a base abstract contract that tracks voting units, which are a measure of voting power that can be
@@ -45,7 +44,7 @@ abstract contract VotesUpgradeable is Initializable, IVotesUpgradeable, ContextU
     using CountersUpgradeable for CountersUpgradeable.Counter;
 
     bytes32 private constant _DELEGATION_TYPEHASH =
-    keccak256("Delegation(address delegatee,uint256 nonce,uint256 expiry)");
+        keccak256("Delegation(address delegatee,uint256 nonce,uint256 expiry)");
 
     mapping(address => address) private _delegation;
     mapping(address => CheckpointsUpgradeable.History) private _delegateCheckpoints;
@@ -68,7 +67,7 @@ abstract contract VotesUpgradeable is Initializable, IVotesUpgradeable, ContextU
      * - `blockNumber` must have been already mined
      */
     function getPastVotes(address account, uint256 blockNumber) public view virtual override returns (uint256) {
-        return _delegateCheckpoints[account].getAtBlock(blockNumber);
+        return _delegateCheckpoints[account].getAtProbablyRecentBlock(blockNumber);
     }
 
     /**
@@ -84,7 +83,7 @@ abstract contract VotesUpgradeable is Initializable, IVotesUpgradeable, ContextU
      */
     function getPastTotalSupply(uint256 blockNumber) public view virtual override returns (uint256) {
         require(blockNumber < block.number, "Votes: block not yet mined");
-        return _totalCheckpoints.getAtBlock(blockNumber);
+        return _totalCheckpoints.getAtProbablyRecentBlock(blockNumber);
     }
 
     /**
@@ -134,7 +133,7 @@ abstract contract VotesUpgradeable is Initializable, IVotesUpgradeable, ContextU
     /**
      * @dev Delegate all of `account`'s voting units to `delegatee`.
      *
-     * Emits events {DelegateChanged} and {DelegateVotesChanged}.
+     * Emits events {IVotes-DelegateChanged} and {IVotes-DelegateVotesChanged}.
      */
     function _delegate(address account, address delegatee) internal virtual {
         address oldDelegate = delegates(account);
