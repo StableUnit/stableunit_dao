@@ -81,8 +81,18 @@ npx hardhat compile
 ```
 
 ## Test
+We have 3 types of test: unit, integration and deployments.
+For clear testing you should delete `.openzeppelin/unknown-31337.json`.
+
+You can run tests by this:
 ```
-npm run test
+npm run test:unit
+npm run test:integration
+npm run test:deployment
+```
+
+To see contracts coverage running all tests run this:
+```
 npm run coverage
 ```
 

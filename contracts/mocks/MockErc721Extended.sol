@@ -40,7 +40,7 @@ contract MockErc721Extended is ERC721Enumerable {
         _tokenIdCounter.increment();
     }
 
-    function _beforeTokenTransfer(address from, address to, uint256 tokenId)
+    function _beforeTokenTransfer(address from, address to, uint256 tokenId, uint256 batchSize)
     internal
     override
     view
