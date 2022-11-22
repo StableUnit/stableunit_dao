@@ -6,7 +6,7 @@ import "../interfaces/IBonus.sol";
 import "../access-control/SuAccessControlAuthenticated.sol";
 import "@openzeppelin/contracts-upgradeable/interfaces/IERC165Upgradeable.sol";
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
-import "./VotesUpgradable.sol";
+import "./VeVoteToken.sol";
 
 
 /**
@@ -16,8 +16,7 @@ import "./VotesUpgradable.sol";
  * after 1 year".
  */
 
-// TODO: inherits from veVoteToken instead of VotesUpg directly
-contract VeERC721Extension is SuAccessControlAuthenticated, VotesUpgradeable {
+contract VeERC721Extension is SuAccessControlAuthenticated, VeVoteToken {
     ERC721 TOKEN;
     IBonus BONUS;
     mapping(uint256 => bool) public isUnlocked;
@@ -27,7 +26,6 @@ contract VeERC721Extension is SuAccessControlAuthenticated, VotesUpgradeable {
 
     function initialize(address _accessControlSingleton, address _nftToken, address _bonus) public initializer
     {
-        //        __ERC721_init(string.concat("vested escrow ", ERC721(_nftToken).name()), string.concat("ve", ERC721(_nftToken).symbol()));
         __SuAuthenticated_init(_accessControlSingleton);
         TOKEN = ERC721(_nftToken);
         BONUS = IBonus(_bonus);
@@ -74,7 +72,7 @@ contract VeERC721Extension is SuAccessControlAuthenticated, VotesUpgradeable {
         return TOKEN.balanceOf(account);
     }
 
-//    function supportsInterface(bytes4 interfaceId) public override (SuAccessControlAuthenticated, VeVoteToken) view returns (bool) {
-//        return interfaceId == type(IVotesUpgradeable).interfaceId || super.supportsInterface(interfaceId);
-//    }
+    function supportsInterface(bytes4 interfaceId) public override (SuAccessControlAuthenticated, VeVoteToken) view returns (bool) {
+        return interfaceId == type(IVotesUpgradeable).interfaceId || super.supportsInterface(interfaceId);
+    }
 }

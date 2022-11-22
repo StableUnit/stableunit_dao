@@ -13,11 +13,10 @@ pragma solidity ^0.8.12;
 */
 import "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20Upgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/extensions/ERC20BurnableUpgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/token/ERC20/extensions/ERC20VotesUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/utils/SafeERC20Upgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/utils/math/SafeCastUpgradeable.sol";
 import "../access-control/SuAccessControlAuthenticated.sol";
 import "../interfaces/IveERC20.sol";
+import "./VeVoteToken.sol";
 
 /*
  * @title The contact enables the storage of erc20 tokens under the linear time-vesting with the cliff time-lock.
@@ -33,8 +32,7 @@ import "../interfaces/IveERC20.sol";
  * To make balance visible in the erc20 wallets, the contact "looks like" erc20 token by implementing its interface
  * however all non-view methods such as transfer or approve aren't active and will be reverted.
 */
-// TODO: change to local/VeVoteToken
-contract VeERC20 is SuAccessControlAuthenticated, ERC20VotesUpgradeable, IveERC20 {
+contract VeERC20 is VeVoteToken, ERC20BurnableUpgradeable, IveERC20 {
     using SafeERC20Upgradeable for ERC20Upgradeable;
 
     ERC20Upgradeable public LOCKED_TOKEN;
@@ -246,10 +244,13 @@ contract VeERC20 is SuAccessControlAuthenticated, ERC20VotesUpgradeable, IveERC2
         revert("not possible to transfer vested token");
     }
 
-    //======================voting logic====================================
-    // TODO: override method getVotes that accounts time-lock for voting power, similar to \
-    //       https://curve.readthedocs.io/_/downloads/en/latest/pdf/ p.9.1.3 Boosting
+    function supportsInterface(bytes4 interfaceId) public virtual view override returns (bool) {
+        return super.supportsInterface(interfaceId);
+    }
 
+    function _getVotingUnits(address account) internal view virtual override returns (uint256) {
+        return super.balanceOf(account);
+    }
 
     /**
      * @dev This empty reserved space is put in place to allow future versions to add new

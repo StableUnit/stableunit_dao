@@ -16,6 +16,7 @@ import "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
 import "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 import "./access-control/SuAccessControlAuthenticated.sol";
 import "@openzeppelin/contracts-upgradeable/governance/utils/IVotesUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/interfaces/IERC165Upgradeable.sol";
 import "./vested-escrow/VotesUpgradable.sol";
 import "./vested-escrow/VeVoteToken.sol";
 
@@ -58,6 +59,7 @@ contract VotingPower is SuAccessControlAuthenticated, IERC20, IERC20Metadata, IV
     error UnavailableFunctionalityError();
     error WrongArgumentsError();
     error BaseAssumptionError();
+    error BadTokenInstance();
 
     function initialize(
         string memory name_,
@@ -71,7 +73,10 @@ contract VotingPower is SuAccessControlAuthenticated, IERC20, IERC20Metadata, IV
     }
 
     function setTokenWeight(address _token, uint256 _weight) external onlyRole(DAO_ROLE) {
-        // TODO: check that token is legit VotesUpgradable instance
+        // DAO could add only token that support Votes (like delegate) feature
+        if (IERC165Upgradeable(_token).supportsInterface(type(IVotesUpgradeable).interfaceId)) {
+            revert BadTokenInstance();
+        }
         if (_weight > MAX_WEIGHT) revert BaseAssumptionError();
 
         if (_weight > 0) {
@@ -110,6 +115,7 @@ contract VotingPower is SuAccessControlAuthenticated, IERC20, IERC20Metadata, IV
      * = 831 600 * 1e18
      *
      * In total = 852 600
+     * Result votes will be less than 42 * 1e24 * 1 * 1
      */
     function getVotes(address account) public view returns (uint256 votes) {
         address[] memory tokensArray = tokens.values();
@@ -126,8 +132,8 @@ contract VotingPower is SuAccessControlAuthenticated, IERC20, IERC20Metadata, IV
     // =================================implementation of IVotes interfaces =============================
     /**
      * @dev Returns the amount of votes that `account` had at the end of a past block (`blockNumber`).
+     * (!!!) DAO should not to change weights after initial settings to have correct getPastVotes behaviour
      */
-    // TODO: normalize with getTotalSupply
     function getPastVotes(address account, uint256 blockNumber) external view returns (uint256 votes) {
         address[] memory tokensArray = tokens.values();
         uint256 l = tokensArray.length;
@@ -135,7 +141,7 @@ contract VotingPower is SuAccessControlAuthenticated, IERC20, IERC20Metadata, IV
             address token = tokensArray[i];
             votes += TOTAL_VOTING_POWER
             * IVotesUpgradeable(token).getPastVotes(account, blockNumber) / IVotesUpgradeable(token).getPastTotalSupply(blockNumber)
-            * weights[token] / totalWeight; // weights in the past could be different?
+            * weights[token] / totalWeight;
         }
         return votes;
     }

@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 /**
  * This is fork of OZ governance code with few changes:
- *          getTotalSupply is external
+ *          getTotalSupply is external [line 92]
  */
 
 // OpenZeppelin Contracts (last updated v4.6.0) (governance/utils/Votes.sol)

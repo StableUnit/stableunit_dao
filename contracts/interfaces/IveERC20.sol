@@ -2,8 +2,6 @@
 
 pragma solidity ^0.8.0;
 
-import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-
 interface IveERC20 {
     /**
     * @notice Creates an account with time-vesting for the user and withdraws these tokens from msg.sender.

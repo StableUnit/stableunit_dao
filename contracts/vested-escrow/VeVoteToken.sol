@@ -3,11 +3,10 @@
 pragma solidity ^0.8.9;
 
 import "../access-control/SuAccessControlAuthenticated.sol";
-import "@openzeppelin/contracts-upgradeable/interfaces/IERC165Upgradeable.sol";
 import "./VotesUpgradable.sol";
+import "../interfaces/ISuVotes.sol";
 
-
-abstract contract VeVoteToken is SuAccessControlAuthenticated, VotesUpgradeable, IERC165Upgradeable {
+abstract contract VeVoteToken is SuAccessControlAuthenticated, VotesUpgradeable, ISuVotes {
     function initialize(address _accessControlSingleton) public initializer
     {
         __SuAuthenticated_init(_accessControlSingleton);
@@ -25,7 +24,7 @@ abstract contract VeVoteToken is SuAccessControlAuthenticated, VotesUpgradeable,
     /**
      * @dev Delegates votes from the account to `delegatee`.
      */
-    function delegateOnBehalf(address account, address delegatee) public virtual onlyRole(SYSTEM_ROLE) {
+    function delegateOnBehalf(address account, address delegatee) public virtual override onlyRole(SYSTEM_ROLE) {
         _delegate(account, delegatee);
     }
 
