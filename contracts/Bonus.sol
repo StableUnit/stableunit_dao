@@ -22,96 +22,95 @@ contract Bonus is IBonus, SuAccessControlAuthenticated {
     mapping(address => AdminInfo) public adminInfo;
     mapping(address => CommunityAdminInfo) public communityAdminInfo;
 
+    mapping(uint16 => uint256) public levelMap;
 
     function initialize(address _accessControlSingleton, address defaultAdmin) public initializer {
         __SuAuthenticated_init(_accessControlSingleton);
         adminInfo[defaultAdmin].isAdmin = true;
+
+        levelMap[1] = 1000;
+        levelMap[2] = 2000;
+        levelMap[3] = 3200;
+        levelMap[4] = 4600;
+        levelMap[5] = 6200;
+        levelMap[6] = 8000;
+        levelMap[7] = 10000;
+        levelMap[8] = 12200;
+        levelMap[9] = 14700;
+        levelMap[10] = 17500;
+        levelMap[11] = 20600;
+        levelMap[12] = 24320;
+        levelMap[13] = 28784;
+        levelMap[14] = 34140;
+        levelMap[15] = 40567;
+        levelMap[16] = 48279;
+        levelMap[17] = 57533;
+        levelMap[18] = 68637;
+        levelMap[19] = 81961;
+        levelMap[20] = 97949;
+        levelMap[21] = 117134;
+        levelMap[22] = 140156;
+        levelMap[23] = 167782;
+        levelMap[24] = 200933;
+        levelMap[25] = 240714;
+        levelMap[26] = 288451;
+        levelMap[27] = 345735;
+        levelMap[28] = 414475;
+        levelMap[29] = 496963;
+        levelMap[30] = 595948;
+        levelMap[31] = 714730;
+        levelMap[32] = 857268;
+        levelMap[33] = 1028313;
+        levelMap[34] = 1233567;
+        levelMap[35] = 1479871;
+        levelMap[36] = 1775435;
+        levelMap[37] = 2130111;
+        levelMap[38] = 2555722;
+        levelMap[39] = 3066455;
+        levelMap[40] = 3679334;
+        levelMap[41] = 4414788;
+        levelMap[42] = 5297332;
+        levelMap[43] = 6356384;
+        levelMap[44] = 7627246;
+        levelMap[45] = 9152280;
+        levelMap[46] = 10982320;
+        levelMap[47] = 13178368;
+        levelMap[48] = 15813625;
+        levelMap[49] = 18975933;
+        levelMap[50] = 22770702;
+        levelMap[51] = 27324424;
+        levelMap[52] = 32788890;
+        levelMap[53] = 39346249;
+        levelMap[54] = 47215079;
+        levelMap[55] = 56657675;
+        levelMap[56] = 67988790;
+        levelMap[57] = 81586128;
+        levelMap[58] = 97902933;
+        levelMap[59] = 117483099;
+        levelMap[60] = 140979298;
+        levelMap[61] = 169174736;
+        levelMap[62] = 203009261;
+        levelMap[63] = 243610691;
+        levelMap[64] = 292332407;
+        levelMap[65] = 350798466;
+        levelMap[66] = 420957736;
+        levelMap[67] = 505148860;
+        levelMap[68] = 606178208;
+        levelMap[69] = 727413425;
+        levelMap[70] = 872895685;
+        levelMap[71] = 1047474397;
+        levelMap[72] = 1256968851;
+        levelMap[73] = 1508362195;
+        levelMap[74] = 1810034207;
+        levelMap[75] = 1810034207;
     }
 
-    function _getLevelByXP(uint256 xp) internal pure returns (uint16) {
-        if (xp < 1000) return 1;
-        if (xp < 2000) return 2;
-        if (xp < 3200) return 3;
-        if (xp < 4600) return 4;
-        if (xp < 6200) return 5;
-        if (xp < 8000) return 6;
-        if (xp < 10000) return 7;
-        if (xp < 12200) return 8;
-        if (xp < 14700) return 9;
-
-        if (xp < 17500) return 10;
-        if (xp < 20600) return 11;
-        if (xp < 24320) return 12;
-        if (xp < 28784) return 13;
-        if (xp < 34140) return 14;
-        if (xp < 40567) return 15;
-        if (xp < 48279) return 16;
-        if (xp < 57533) return 17;
-        if (xp < 68637) return 18;
-        if (xp < 81961) return 19;
-
-        if (xp < 97949) return 20;
-        if (xp < 117134) return 21;
-        if (xp < 140156) return 22;
-        if (xp < 167782) return 23;
-        if (xp < 200933) return 24;
-        if (xp < 240714) return 25;
-        if (xp < 288451) return 26;
-        if (xp < 345735) return 27;
-        if (xp < 414475) return 28;
-        if (xp < 496963) return 29;
-
-        if (xp < 595948) return 30;
-        if (xp < 714730) return 31;
-        if (xp < 857268) return 32;
-        if (xp < 1028313) return 33;
-        if (xp < 1233567) return 34;
-        if (xp < 1479871) return 35;
-        if (xp < 1775435) return 36;
-        if (xp < 2130111) return 37;
-        if (xp < 2555722) return 38;
-        if (xp < 3066455) return 39;
-
-        if (xp < 3679334) return 40;
-        if (xp < 4414788) return 41;
-        if (xp < 5297332) return 42;
-        if (xp < 6356384) return 43;
-        if (xp < 7627246) return 44;
-        if (xp < 9152280) return 45;
-        if (xp < 10982320) return 46;
-        if (xp < 13178368) return 47;
-        if (xp < 15813625) return 48;
-        if (xp < 18975933) return 49;
-
-        if (xp < 22770702) return 50;
-        if (xp < 27324424) return 51;
-        if (xp < 32788890) return 52;
-        if (xp < 39346249) return 53;
-        if (xp < 47215079) return 54;
-        if (xp < 56657675) return 55;
-        if (xp < 67988790) return 56;
-        if (xp < 81586128) return 57;
-        if (xp < 97902933) return 58;
-        if (xp < 117483099) return 59;
-
-        if (xp < 140979298) return 60;
-        if (xp < 169174736) return 61;
-        if (xp < 203009261) return 62;
-        if (xp < 243610691) return 63;
-        if (xp < 292332407) return 64;
-        if (xp < 350798466) return 65;
-        if (xp < 420957736) return 66;
-        if (xp < 505148860) return 67;
-        if (xp < 606178208) return 68;
-        if (xp < 727413425) return 69;
-
-        if (xp < 872895685) return 70;
-        if (xp < 1047474397) return 71;
-        if (xp < 1256968851) return 72;
-        if (xp < 1508362195) return 73;
-        if (xp < 1810034207) return 74;
-        if (xp >= 1810034207) return 75;
-
+    function _getLevelByXP(uint256 xp) internal view returns (uint16) {
+        for (uint16 i = 1; i <= 75; ++i) {
+            if (xp < levelMap[i]) {
+                return i;
+            }
+        }
         return 1;
     }
 
