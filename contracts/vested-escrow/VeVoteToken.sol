@@ -10,6 +10,7 @@ abstract contract VeVoteToken is SuAccessControlAuthenticated, VotesUpgradeable,
     function __VeVoteToken__init(address _accessControlSingleton) public initializer
     {
         __SuAuthenticated_init(_accessControlSingleton);
+        __EIP712_init("VeVoteToken", "1");
     }
 
     error UnavailableFunctionalityError();

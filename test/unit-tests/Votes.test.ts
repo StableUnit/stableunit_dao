@@ -33,6 +33,10 @@ describe('Votes', function () {
         this.accessControlSingleton = accessControlSingleton;
         this.votes = veErc721Extension;
         this.token = mockErc721Extended;
+        this.name = "VeVoteToken";
+
+        const network = await ethers.provider.getNetwork();
+        this.chainId = network.chainId;
     });
 
     describe('getTotalSupply', function () {
@@ -65,17 +69,18 @@ describe('Votes', function () {
         });
     });
 
-    // describe('performs voting workflow', function () {
-    //     beforeEach(async function () {
-    //         this.account1 = user1.address;
-    //         this.account2 = user2.address;
-    //         this.account1Delegatee = user2.address;
-    //         this.NFT0 = new BN('10000000000000000000000000');
-    //         this.NFT1 = new BN('10');
-    //         this.NFT2 = new BN('20');
-    //         this.NFT3 = new BN('30');
-    //     });
-    //
-    //     shouldBehaveLikeVotes();
-    // });
+    describe('performs voting workflow', function () {
+        beforeEach(async function () {
+            this.account1Signer = user1;
+            this.account1 = user1.address;
+            this.account2 = user2.address;
+            this.account1Delegatee = user2.address;
+            this.NFT0 = new BN('10000000000000000000000000');
+            this.NFT1 = new BN('10');
+            this.NFT2 = new BN('20');
+            this.NFT3 = new BN('30');
+        });
+
+        shouldBehaveLikeVotes();
+    });
 });
