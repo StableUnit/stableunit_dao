@@ -7,7 +7,7 @@ import "./VotesUpgradable.sol";
 import "../interfaces/ISuVotes.sol";
 
 abstract contract VeVoteToken is SuAccessControlAuthenticated, VotesUpgradeable, ISuVotes {
-    function initialize(address _accessControlSingleton) public initializer
+    function __VeVoteToken__init(address _accessControlSingleton) public initializer
     {
         __SuAuthenticated_init(_accessControlSingleton);
     }

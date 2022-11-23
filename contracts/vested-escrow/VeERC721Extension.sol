@@ -26,7 +26,7 @@ contract VeERC721Extension is SuAccessControlAuthenticated, VeVoteToken {
 
     function initialize(address _accessControlSingleton, address _nftToken, address _bonus) public initializer
     {
-        __SuAuthenticated_init(_accessControlSingleton);
+        __VeVoteToken__init(_accessControlSingleton);
         TOKEN = ERC721(_nftToken);
         BONUS = IBonus(_bonus);
         whitelistedTransferableAddresses[address(0)] = true;
@@ -57,7 +57,7 @@ contract VeERC721Extension is SuAccessControlAuthenticated, VeVoteToken {
         _transferVotingUnits(account, address(0), 1);
     }
 
-    function lock(uint256 tokenId) external onlyRole(ADMIN_ROLE) {
+    function lock(uint256 tokenId) external onlyRole(SYSTEM_ROLE) {
         isUnlocked[tokenId] = false;
         // mint virtual votable balance
         //        _mint(TOKEN.ownerOf(tokenId), tokenId);

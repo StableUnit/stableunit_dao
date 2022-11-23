@@ -21,11 +21,13 @@ export const deployProxy = async (contractName: string, args?: any[], options?: 
     return proxyContract;
 };
 
-export const deploy = async (contractName: string, args?: any[], options?: DeployProxyOptions) => {
+export const deploy = async (contractName: string, args?: any[], needLogs = true) => {
     const contractFactory = await ethers.getContractFactory(contractName);
     const contract = await contractFactory.deploy(...(args??[]));
 
-    console.log(`${contract.address} deployed ${contractName}`);
+    if (needLogs) {
+        console.log(`${contract.address} deployed ${contractName}`);
+    }
 
     // save proxy address to the artifacts
     const artifact = await deployments.getExtendedArtifact(contractName);

@@ -54,7 +54,7 @@ contract VeERC20 is VeVoteToken, ERC20BurnableUpgradeable, IveERC20 {
     error ClaimZeroError();
 
     function initialize(address _accessControlSingleton, ERC20Upgradeable _lockedToken, uint32 maxTgeTimestamp) initializer public {
-        __SuAuthenticated_init(_accessControlSingleton);
+        __VeVoteToken__init(_accessControlSingleton);
         __ERC20_init(string.concat("vested escrow ", _lockedToken.name()), string.concat("ve", _lockedToken.symbol()));
         LOCKED_TOKEN = _lockedToken;
         TGE_MAX_TIMESTAMP = maxTgeTimestamp;
