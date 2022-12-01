@@ -16,6 +16,7 @@ import "@openzeppelin/contracts-upgradeable/token/ERC20/extensions/ERC20Burnable
 import "@openzeppelin/contracts-upgradeable/token/ERC20/utils/SafeERC20Upgradeable.sol";
 import "../access-control/SuAccessControlAuthenticated.sol";
 import "../interfaces/IveERC20.sol";
+import "../interfaces/ISuVoteToken.sol";
 import "./SuVoteToken.sol";
 
 /*
@@ -245,7 +246,7 @@ contract VeERC20 is SuVoteToken, ERC20BurnableUpgradeable, IveERC20 {
     }
 
     function supportsInterface(bytes4 interfaceId) public virtual view override returns (bool) {
-        return super.supportsInterface(interfaceId);
+        return interfaceId == type(ISuVoteToken).interfaceId || super.supportsInterface(interfaceId);
     }
 
     function _getVotingUnits(address account) internal view virtual override returns (uint256) {

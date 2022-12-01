@@ -14,31 +14,11 @@ import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
 import "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
-import "./access-control/SuAccessControlAuthenticated.sol";
-import "@openzeppelin/contracts-upgradeable/governance/utils/IVotesUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/interfaces/IERC165Upgradeable.sol";
-import "./vested-escrow/VotesUpgradable.sol";
+import "@openzeppelin/contracts-upgradeable/governance/utils/IVotesUpgradeable.sol";
+import "./access-control/SuAccessControlAuthenticated.sol";
 import "./vested-escrow/SuVoteToken.sol";
-
-
-//interface IBalanceable {
-//
-//    /**
-//     * @dev Returns the amount of tokens owned by `account`.
-//     */
-//    function balanceOf(address account) external view returns (uint256);
-//
-//    /**
-//     * @dev Returns the current amount of votes that `account` has.
-//     */
-//    function getVotes(address account) external view returns (uint256);
-//
-//    /**
-//     * @dev Returns the delegate that `account` has chosen.
-//     */
-//    function delegates(address account) external view returns (address);
-//
-//}
+import "./interfaces/ISuVoteToken.sol";
 
 /*
  * @title Abstract token that aggregates voting power of all tokens in SuDAO on particular chain
@@ -74,7 +54,7 @@ contract VotingPower is SuAccessControlAuthenticated, IERC20, IERC20Metadata, IV
 
     function setTokenWeight(address _token, uint256 _weight) external onlyRole(DAO_ROLE) {
         // DAO could add only token that support Votes (like delegate) feature
-        if (IERC165Upgradeable(_token).supportsInterface(type(IVotesUpgradeable).interfaceId)) {
+        if (IERC165Upgradeable(_token).supportsInterface(type(ISuVoteToken).interfaceId)) {
             revert BadTokenInstance();
         }
         if (_weight > MAX_WEIGHT) revert BaseAssumptionError();
@@ -123,7 +103,7 @@ contract VotingPower is SuAccessControlAuthenticated, IERC20, IERC20Metadata, IV
         for (uint256 i = 0; i < l; i++) {
             address token = tokensArray[i];
             votes += TOTAL_VOTING_POWER
-            * VotesUpgradeable(token).getVotes(account) / VotesUpgradeable(token).getTotalSupply()
+            * ISuVoteToken(token).getVotes(account) / ISuVoteToken(token).getTotalSupply()
             * weights[token] / totalWeight;
         }
         return votes;
@@ -140,7 +120,7 @@ contract VotingPower is SuAccessControlAuthenticated, IERC20, IERC20Metadata, IV
         for (uint256 i = 0; i < l; i++) {
             address token = tokensArray[i];
             votes += TOTAL_VOTING_POWER
-            * IVotesUpgradeable(token).getPastVotes(account, blockNumber) / IVotesUpgradeable(token).getPastTotalSupply(blockNumber)
+            * ISuVoteToken(token).getPastVotes(account, blockNumber) / ISuVoteToken(token).getPastTotalSupply(blockNumber)
             * weights[token] / totalWeight;
         }
         return votes;
@@ -158,7 +138,7 @@ contract VotingPower is SuAccessControlAuthenticated, IERC20, IERC20Metadata, IV
         uint256 l = tokensArray.length;
         for (uint256 i = 0; i < l; i++) {
             address token = tokensArray[i];
-            supply += IVotesUpgradeable(token).getPastTotalSupply(blockNumber);
+            supply += ISuVoteToken(token).getPastTotalSupply(blockNumber);
         }
         return supply;
     }
@@ -171,7 +151,7 @@ contract VotingPower is SuAccessControlAuthenticated, IERC20, IERC20Metadata, IV
         uint256 l = tokensArray.length;
         for (uint256 i = 0; i < l; i++) {
             address token = tokensArray[i];
-            address _delegatee = IVotesUpgradeable(token).delegates(account);
+            address _delegatee = ISuVoteToken(token).delegates(account);
             if (i == 0) {
                 delegatee = _delegatee;
             } else {
@@ -210,7 +190,7 @@ contract VotingPower is SuAccessControlAuthenticated, IERC20, IERC20Metadata, IV
         uint256 l = tokensArray.length;
         for (uint256 i = 0; i < l; i++) {
             address token = tokensArray[i];
-            VotesUpgradeable(token).delegateBySig(delegatee, nonce, expiry, v, r, s);
+            ISuVoteToken(token).delegateBySig(delegatee, nonce, expiry, v, r, s);
         }
     }
 

@@ -7,7 +7,7 @@ import "../access-control/SuAccessControlAuthenticated.sol";
 import "@openzeppelin/contracts-upgradeable/interfaces/IERC165Upgradeable.sol";
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "./SuVoteToken.sol";
-
+import "../interfaces/ISuVoteToken.sol";
 
 /**
  * @dev vested escrow NFT contract, allow a beneficiary to extract NFT after a given lock schdule.
@@ -73,6 +73,6 @@ contract VeERC721Extension is SuVoteToken {
     }
 
     function supportsInterface(bytes4 interfaceId) public override view returns (bool) {
-        return interfaceId == type(IVotesUpgradeable).interfaceId || super.supportsInterface(interfaceId);
+        return interfaceId == type(ISuVoteToken).interfaceId || super.supportsInterface(interfaceId);
     }
 }
