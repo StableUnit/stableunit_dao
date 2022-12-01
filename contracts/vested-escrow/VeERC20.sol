@@ -16,7 +16,7 @@ import "@openzeppelin/contracts-upgradeable/token/ERC20/extensions/ERC20Burnable
 import "@openzeppelin/contracts-upgradeable/token/ERC20/utils/SafeERC20Upgradeable.sol";
 import "../access-control/SuAccessControlAuthenticated.sol";
 import "../interfaces/IveERC20.sol";
-import "./VeVoteToken.sol";
+import "./SuVoteToken.sol";
 
 /*
  * @title The contact enables the storage of erc20 tokens under the linear time-vesting with the cliff time-lock.
@@ -32,7 +32,7 @@ import "./VeVoteToken.sol";
  * To make balance visible in the erc20 wallets, the contact "looks like" erc20 token by implementing its interface
  * however all non-view methods such as transfer or approve aren't active and will be reverted.
 */
-contract VeERC20 is VeVoteToken, ERC20BurnableUpgradeable, IveERC20 {
+contract VeERC20 is SuVoteToken, ERC20BurnableUpgradeable, IveERC20 {
     using SafeERC20Upgradeable for ERC20Upgradeable;
 
     ERC20Upgradeable public LOCKED_TOKEN;
@@ -54,7 +54,7 @@ contract VeERC20 is VeVoteToken, ERC20BurnableUpgradeable, IveERC20 {
     error ClaimZeroError();
 
     function initialize(address _accessControlSingleton, ERC20Upgradeable _lockedToken, uint32 maxTgeTimestamp) initializer public {
-        __VeVoteToken__init(_accessControlSingleton);
+        __SuVoteToken__init(_accessControlSingleton);
         __ERC20_init(string.concat("vested escrow ", _lockedToken.name()), string.concat("ve", _lockedToken.symbol()));
         LOCKED_TOKEN = _lockedToken;
         TGE_MAX_TIMESTAMP = maxTgeTimestamp;

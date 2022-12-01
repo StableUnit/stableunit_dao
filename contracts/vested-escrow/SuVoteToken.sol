@@ -6,11 +6,11 @@ import "../access-control/SuAccessControlAuthenticated.sol";
 import "./VotesUpgradable.sol";
 import "../interfaces/ISuVotes.sol";
 
-abstract contract VeVoteToken is SuAccessControlAuthenticated, VotesUpgradeable, ISuVotes {
-    function __VeVoteToken__init(address _accessControlSingleton) public initializer
+abstract contract SuVoteToken is SuAccessControlAuthenticated, VotesUpgradeable, ISuVotes {
+    function __SuVoteToken__init(address _accessControlSingleton) public initializer
     {
         __SuAuthenticated_init(_accessControlSingleton);
-        __EIP712_init("VeVoteToken", "1");
+        __EIP712_init("SuVoteToken", "1");
     }
 
     error UnavailableFunctionalityError();

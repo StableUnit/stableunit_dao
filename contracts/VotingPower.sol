@@ -18,7 +18,7 @@ import "./access-control/SuAccessControlAuthenticated.sol";
 import "@openzeppelin/contracts-upgradeable/governance/utils/IVotesUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/interfaces/IERC165Upgradeable.sol";
 import "./vested-escrow/VotesUpgradable.sol";
-import "./vested-escrow/VeVoteToken.sol";
+import "./vested-escrow/SuVoteToken.sol";
 
 
 //interface IBalanceable {
@@ -191,7 +191,7 @@ contract VotingPower is SuAccessControlAuthenticated, IERC20, IERC20Metadata, IV
         uint256 l = tokensArray.length;
         for (uint256 i = 0; i < l; i++) {
             address token = tokensArray[i];
-            VeVoteToken(token).delegateOnBehalf(msg.sender, delegatee);
+            SuVoteToken(token).delegateOnBehalf(msg.sender, delegatee);
         }
     }
 

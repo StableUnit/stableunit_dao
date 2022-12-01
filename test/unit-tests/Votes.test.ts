@@ -7,6 +7,7 @@ import {ethers} from "hardhat";
 import {deploy, deployProxy, getDeploymentAddress} from "../utils";
 // @ts-ignore
 import { shouldBehaveLikeVotes } from './Votes.behavior.js';
+import {BigNumber} from "ethers";
 
 describe('Votes', function () {
     let deployer: SignerWithAddress,
@@ -33,7 +34,7 @@ describe('Votes', function () {
         this.accessControlSingleton = accessControlSingleton;
         this.votes = veErc721Extension;
         this.token = mockErc721Extended;
-        this.name = "VeVoteToken";
+        this.name = "SuVoteToken";
 
         const network = await ethers.provider.getNetwork();
         this.chainId = network.chainId;
@@ -75,10 +76,10 @@ describe('Votes', function () {
             this.account1 = user1.address;
             this.account2 = user2.address;
             this.account1Delegatee = user2.address;
-            this.NFT0 = new BN('10000000000000000000000000');
-            this.NFT1 = new BN('10');
-            this.NFT2 = new BN('20');
-            this.NFT3 = new BN('30');
+            this.NFT0 = BigNumber.from('10000000000000000000000000');
+            this.NFT1 = BigNumber.from('10');
+            this.NFT2 = BigNumber.from('20');
+            this.NFT3 = BigNumber.from('30');
         });
 
         shouldBehaveLikeVotes();
