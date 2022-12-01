@@ -21,10 +21,12 @@ contract MockSuErc20Votes is SuVoteToken, ERC20BurnableUpgradeable {
         _transferVotingUnits(account, address(0), 1);
     }
 
+    // Only for testing purpose
     function delegate(address account, address newDelegation) public {
         return _delegate(account, newDelegation);
     }
 
+    // Only for testing purpose
     function delegate(address delegatee) public virtual override {
         address account = _msgSender();
         _delegate(account, delegatee);
