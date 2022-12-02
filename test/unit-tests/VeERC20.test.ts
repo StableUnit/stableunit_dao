@@ -216,7 +216,7 @@ describe("VeERC20", () => {
         });
     });
 
-    describe.only("voting ability", async () => {
+    describe("voting ability", async () => {
         it("has voting power by default", async () => {
             await mintAndLockTokens(amountToLock, user1);
             expect(await veERC20.getVotes(user1.address)).to.be.equal(amountToLock);

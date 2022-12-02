@@ -42,9 +42,11 @@ contract VotingPower is SuAccessControlAuthenticated, IERC20, IERC20Metadata, IV
     error BadTokenInstance();
 
     function initialize(
+        address _accessControlSingleton,
         string memory name_,
         string memory symbol_
     ) initializer public {
+        __SuAuthenticated_init(_accessControlSingleton);
         MAX_LEN = 50;
         MAX_WEIGHT = 1e18;
         TOTAL_VOTING_POWER = 42_000_000 * 1e18;
@@ -54,7 +56,7 @@ contract VotingPower is SuAccessControlAuthenticated, IERC20, IERC20Metadata, IV
 
     function setTokenWeight(address _token, uint256 _weight) external onlyRole(DAO_ROLE) {
         // DAO could add only token that support Votes (like delegate) feature
-        if (IERC165Upgradeable(_token).supportsInterface(type(ISuVoteToken).interfaceId)) {
+        if (!IERC165Upgradeable(_token).supportsInterface(type(ISuVoteToken).interfaceId)) {
             revert BadTokenInstance();
         }
         if (_weight > MAX_WEIGHT) revert BaseAssumptionError();

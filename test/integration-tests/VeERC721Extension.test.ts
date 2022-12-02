@@ -3,20 +3,24 @@ import {expect} from "chai";
 
 import {ADDRESS_ZERO} from "../utils";
 import {SignerWithAddress} from "@nomiclabs/hardhat-ethers/signers";
-import {MockErc721Extended, VeERC721Extension} from "../../typechain";
+import {MockErc721Extended, SuAccessControlSingleton, VeERC721Extension} from "../../typechain";
 
 describe("VeERC721Extension", () => {
     let accounts: Record<string, SignerWithAddress>;
+    let accessControlSingleton: SuAccessControlSingleton;
     let mockErc721Extended: MockErc721Extended;
     let veERC721Extension: VeERC721Extension;
 
     beforeEach(async () => {
-        const [deployer, admin, alice, bob, carl] = await ethers.getSigners();
-        accounts = {deployer, admin, alice, bob, carl};
+        const [deployer, admin, dao, alice, bob, carl] = await ethers.getSigners();
+        accounts = {deployer, admin, dao, alice, bob, carl};
 
         await deployments.fixture(["Deployer"]);
+        accessControlSingleton = await ethers.getContract("SuAccessControlSingleton") as SuAccessControlSingleton;
         mockErc721Extended = await ethers.getContract("MockErc721Extended") as MockErc721Extended;
         veERC721Extension = await ethers.getContract("VeERC721Extension") as VeERC721Extension;
+
+        await accessControlSingleton.connect(dao).grantRole(await veERC721Extension.SYSTEM_ROLE(), mockErc721Extended.address);
     })
 
     describe("check base assumptions about setup", function () {
@@ -59,6 +63,8 @@ describe("VeERC721Extension", () => {
             const txReceipt = await txResponse.wait();
             const [TransferEvent] = txReceipt.events ?? [];
             const tokenId = TransferEvent?.args?.tokenId;
+
+            await accessControlSingleton.connect(accounts.dao).grantRole(await veERC721Extension.SYSTEM_ROLE(), accounts.admin.address);
 
             await veERC721Extension.connect(accounts.admin).adminUnlock(tokenId);
             await veERC721Extension.connect(accounts.admin).lock(tokenId);
@@ -116,8 +122,10 @@ describe("VeERC721Extension", () => {
             await mockErc721Extended.mint(accounts.alice.address);
             await mockErc721Extended.mint(accounts.bob.address);
             await mockErc721Extended.mint(accounts.carl.address);
-            await veERC721Extension.connect(accounts.alice).delegate(accounts.carl.address);
-            await veERC721Extension.connect(accounts.bob).delegate(accounts.carl.address);
+            await accessControlSingleton.connect(accounts.dao).grantRole(await veERC721Extension.SYSTEM_ROLE(), accounts.admin.address);
+
+            await veERC721Extension.connect(accounts.admin).delegateOnBehalf(accounts.alice.address, accounts.carl.address);
+            await veERC721Extension.connect(accounts.admin).delegateOnBehalf(accounts.bob.address, accounts.carl.address);
         }
 
         it("delegate vote and check vote balances", async () => {
