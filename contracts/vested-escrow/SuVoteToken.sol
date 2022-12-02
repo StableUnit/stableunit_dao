@@ -7,10 +7,10 @@ import "@openzeppelin/contracts-upgradeable/governance/utils/VotesUpgradeable.so
 import "../interfaces/ISuVoteToken.sol";
 
 abstract contract SuVoteToken is SuAccessControlAuthenticated, VotesUpgradeable, ISuVoteToken {
-    function __SuVoteToken__init(address _accessControlSingleton) public initializer
+    function __SuVoteToken__init(address _accessControlSingleton, string memory _name) public initializer
     {
         __SuAuthenticated_init(_accessControlSingleton);
-        __EIP712_init("SuVoteToken", "1");
+        __EIP712_init(_name, "1");
     }
 
     function getTotalSupply() public view returns (uint256) {

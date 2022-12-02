@@ -5,14 +5,15 @@ const { expect } = require('chai');
 const {
   shouldBehaveLikeVotes,
 } = require('./Votes.behavior');
+const {ZERO_ADDRESS} = require("@openzeppelin/test-helpers/src/constants");
 
-const Votes = artifacts.require('MockSuErc20Votes');
+const Votes = artifacts.require('MockSuVotes');
 
 contract('Votes', function (accounts) {
   const [ account1, account2, account3 ] = accounts;
   beforeEach(async function () {
-    this.name = 'SuVoteToken';
-    this.votes = await Votes.new(this.name);
+    this.name = 'My Vote';
+    this.votes = await Votes.new(ZERO_ADDRESS, this.name);
   });
 
   it('starts with zero votes', async function () {
@@ -28,8 +29,8 @@ contract('Votes', function (accounts) {
 
     it('reverts if block number >= current block', async function () {
       await expectRevert(
-        this.votes.getPastTotalSupply(this.tx3.receipt.blockNumber + 1),
-        'Votes: block not yet mined',
+          this.votes.getPastTotalSupply(this.tx3.receipt.blockNumber + 1),
+          'Votes: block not yet mined',
       );
     });
 
@@ -46,10 +47,7 @@ contract('Votes', function (accounts) {
 
   describe('performs voting workflow', function () {
     beforeEach(async function () {
-      // const network = await ethers.provider.getNetwork();
-      // this.chainId = network.chainId;
       this.chainId = 31337;
-      // console.log(this.chainId);
       this.account1 = account1;
       this.account2 = account2;
       this.account1Delegatee = account2;

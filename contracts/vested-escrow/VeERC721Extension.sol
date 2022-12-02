@@ -26,7 +26,7 @@ contract VeERC721Extension is SuVoteToken {
 
     function initialize(address _accessControlSingleton, address _nftToken, address _bonus) public initializer
     {
-        __SuVoteToken__init(_accessControlSingleton);
+        __SuVoteToken__init(_accessControlSingleton, "VeERC721Extension");
         TOKEN = ERC721(_nftToken);
         BONUS = IBonus(_bonus);
         whitelistedTransferableAddresses[address(0)] = true;
