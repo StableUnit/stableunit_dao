@@ -158,4 +158,34 @@ describe("VeERC721Extension", () => {
             expect(await veERC721Extension.getVotes(accounts.carl.address)).to.be.equal(3);
         })
     })
+
+    describe('getTotalSupply', function () {
+        it('returns total amount of votes', async function () {
+            await mockErc721Extended.connect(accounts.admin).mint(accounts.alice.address);
+            await mockErc721Extended.connect(accounts.admin).mint(accounts.bob.address);
+            const tx = await mockErc721Extended.connect(accounts.admin).mint(accounts.carl.address);
+
+            await expect(
+              veERC721Extension.getPastTotalSupply((tx.blockNumber ?? 0) + 1)
+            ).to.be.revertedWith("Votes: block not yet mined");
+
+            const totalSupply = await veERC721Extension.getTotalSupply();
+            expect(totalSupply).to.be.equal(3);
+        });
+    });
+
+    describe('init', function () {
+        it('starts with zero votes', async function () {
+            expect(await veERC721Extension.getTotalSupply()).to.be.equal(0);
+        });
+    });
+
+    describe('performs voting operations', function () {
+        it('delegates', async function () {
+            await accessControlSingleton.connect(accounts.dao).grantRole(await veERC721Extension.SYSTEM_ROLE(), accounts.admin.address);
+            await veERC721Extension.connect(accounts.admin).delegateOnBehalf(accounts.carl.address, accounts.bob.address);
+
+            expect(await veERC721Extension.delegates(accounts.carl.address)).to.be.equal(accounts.bob.address);
+        });
+    });
 });

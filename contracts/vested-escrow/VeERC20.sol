@@ -151,6 +151,7 @@ contract VeERC20 is SuVoteToken, ERC20BurnableUpgradeable, IveERC20 {
         LOCKED_TOKEN.safeTransferFrom(msg.sender, address(this), amount);
         // mint more veERC20 tokens for the account
         _mint(account, amount);
+        _transferVotingUnits(address(0), account, amount);
         // if don't delegate, delegate to yourself by default
         if (delegates(account) == address(0)) {
             _delegate(account, account);
@@ -206,6 +207,7 @@ contract VeERC20 is SuVoteToken, ERC20BurnableUpgradeable, IveERC20 {
         if (claimAmount == 0) revert ClaimZeroError();
         vestingInfo[msg.sender].amountAlreadyWithdrawn = vestingInfo[msg.sender].amountAlreadyWithdrawn + claimAmount;
         _burn(msg.sender, claimAmount);
+        _transferVotingUnits(msg.sender, address(0), claimAmount);
         LOCKED_TOKEN.safeTransfer(msg.sender, claimAmount);
     }
 
@@ -218,6 +220,7 @@ contract VeERC20 is SuVoteToken, ERC20BurnableUpgradeable, IveERC20 {
         require(balance > 0, "nothing to donate");
         vestingInfo[msg.sender].amountAlreadyWithdrawn = vestingInfo[msg.sender].amountAlreadyWithdrawn + uint64(balance);
         _burn(msg.sender, balance);
+        _transferVotingUnits(msg.sender, address(0), balance);
         LOCKED_TOKEN.safeTransfer(toDAO, balance);
     }
 
@@ -238,6 +241,7 @@ contract VeERC20 is SuVoteToken, ERC20BurnableUpgradeable, IveERC20 {
     function burnAll() external {
         uint256 balance = super.balanceOf(msg.sender);
         super._burn(msg.sender, balance);
+        _transferVotingUnits(msg.sender, address(0), balance);
         vestingInfo[msg.sender].amountAlreadyWithdrawn = 0;
     }
 

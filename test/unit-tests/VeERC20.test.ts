@@ -16,6 +16,7 @@ describe("VeERC20", () => {
         user2: SignerWithAddress,
         user3: SignerWithAddress;
 
+    let accessControlSingleton: SuAccessControlSingleton;
     let suDAO: SuDAO;
     let veERC20: VeERC20;
 
@@ -41,7 +42,7 @@ describe("VeERC20", () => {
     beforeEach(async function () {
         [deployer, admin, dao, user1, user2, user3] = await ethers.getSigners();
 
-        const accessControlSingleton = await deployProxy( "SuAccessControlSingleton", [admin.address, admin.address], undefined, false) as SuAccessControlSingleton;
+        accessControlSingleton = await deployProxy( "SuAccessControlSingleton", [admin.address, admin.address], undefined, false) as SuAccessControlSingleton;
         suDAO = await deployProxy("SuDAO", [accessControlSingleton.address], undefined, false) as SuDAO;
         veERC20 = await deployProxy("VeERC20", [accessControlSingleton.address, suDAO.address, await latest()], undefined, false) as VeERC20;
         await suDAO.connect(admin).mint(admin.address, amountToLock);
@@ -98,7 +99,7 @@ describe("VeERC20", () => {
             const amountToLock = BN_1E18.mul(100);
             await mintAndLockTokens(amountToLock);
             // should have 0 available to claim
-            await expect(veERC20.connect(user2).claim()).to.be.revertedWith("Can't claim 0 tokens");
+            await expect(veERC20.connect(user2).claim()).to.be.reverted;
         })
 
         it("claim all after vesting", async () => {
@@ -211,12 +212,16 @@ describe("VeERC20", () => {
 
     describe("updateTge", async () => {
         it("can't update to the TGE_MAX_TIMESTAMP", async () => {
-            await expect(veERC20.connect(admin).updateTgeTimestamp(await latest() - 100)).to.be.revertedWith('veERC20: TGE date can\'t be in the past');
-            await expect(veERC20.connect(admin).updateTgeTimestamp(await latest() + 100)).to.be.revertedWith('veERC20: new TGE date is beyond limit');
+            await expect(veERC20.connect(admin).updateTgeTimestamp(await latest() - 100)).to.be.reverted;
+            await expect(veERC20.connect(admin).updateTgeTimestamp(await latest() + 100)).to.be.reverted;
         });
     });
 
     describe("voting ability", async () => {
+        beforeEach(async () => {
+            await accessControlSingleton.connect(admin).grantRole(await veERC20.SYSTEM_ROLE(), admin.address);
+        });
+
         it("has voting power by default", async () => {
             await mintAndLockTokens(amountToLock, user1);
             expect(await veERC20.getVotes(user1.address)).to.be.equal(amountToLock);
@@ -224,7 +229,7 @@ describe("VeERC20", () => {
 
         it("can delegate vote power to zero account", async () => {
             await mintAndLockTokens(amountToLock, user1);
-            await veERC20.connect(user1).delegate(user2.address);
+            await veERC20.connect(admin).delegateOnBehalf(user1.address, user2.address);
             expect(await veERC20.getVotes(user2.address)).to.be.equal(amountToLock);
         });
 
@@ -237,7 +242,7 @@ describe("VeERC20", () => {
 
         it("can delegate but after unlock this doesn't add voting power", async () => {
             await mintAndLockTokens(amountToLock, user1);
-            await veERC20.connect(user1).delegate(user2.address);
+            await veERC20.connect(admin).delegateOnBehalf(user1.address, user2.address);
             await increaseTime(vestingPeriodSeconds);
             await veERC20.connect(user1).claim();
             expect(await veERC20.getVotes(user2.address)).to.be.equal(0);
@@ -246,7 +251,7 @@ describe("VeERC20", () => {
         it("if delegatee unlock its tokens, still have others voting power", async () => {
             await mintAndLockTokens(amountToLock, user1);
             await mintAndLockTokens(amountToLock, user2);
-            await veERC20.connect(user1).delegate(user2.address);
+            await veERC20.connect(admin).delegateOnBehalf(user1.address, user2.address);
             expect(await veERC20.getVotes(user2.address)).to.be.equal(amountToLock.mul(2));
 
             await increaseTime(vestingPeriodSeconds);
