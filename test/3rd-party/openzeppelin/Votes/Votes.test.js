@@ -1,3 +1,5 @@
+// It's copy-paste of oz Votes test.
+// Here we changed only artifacts name (to test MockSuVotes), constructor arguments for Votes and this.chainId.
 const { expectRevert, BN } = require('@openzeppelin/test-helpers');
 
 const { expect } = require('chai');
@@ -7,6 +9,8 @@ const {
 } = require('./Votes.behavior');
 const {ZERO_ADDRESS} = require("@openzeppelin/test-helpers/src/constants");
 
+// To test like OZ we can get VotesMock.sol from
+// https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/mocks/VotesMock.sol
 const Votes = artifacts.require('MockSuVotes');
 
 contract('Votes', function (accounts) {

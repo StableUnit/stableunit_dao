@@ -21,12 +21,15 @@ import "./vested-escrow/SuVoteToken.sol";
 import "./interfaces/ISuVoteToken.sol";
 
 /*
- * @title Abstract token that aggregates voting power of all tokens in SuDAO on particular chain
+ * @title ERC20-like and Votes-like contract that aggregates voting power of all tokens in SuDAO on particular chain.
+ * Can't be transferred and approved.
 */
 contract VotingPower is SuAccessControlAuthenticated, IERC20, IERC20Metadata, IVotesUpgradeable {
     using EnumerableSet for EnumerableSet.AddressSet;
 
+    // Max number of tokens in VotingPower. It is set only in initialize
     uint256 public MAX_LEN;
+    // Max weight of each token in VotingPower = 1e18. It is set only in initialize.
     uint256 public MAX_WEIGHT;
     uint256 public TOTAL_VOTING_POWER;
 

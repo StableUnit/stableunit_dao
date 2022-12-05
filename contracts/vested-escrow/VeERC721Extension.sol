@@ -26,7 +26,7 @@ contract VeERC721Extension is SuVoteToken {
 
     function initialize(address _accessControlSingleton, address _nftToken, address _bonus) public initializer
     {
-        __SuVoteToken__init(_accessControlSingleton, "VeERC721Extension");
+        __SuVoteToken__init(_accessControlSingleton, string.concat("ve", ERC721(_nftToken).symbol()));
         TOKEN = ERC721(_nftToken);
         BONUS = IBonus(_bonus);
         whitelistedTransferableAddresses[address(0)] = true;
@@ -57,6 +57,7 @@ contract VeERC721Extension is SuVoteToken {
         _transferVotingUnits(account, address(0), 1);
     }
 
+    // Only contracts that have SYSTEM_ROLE can lock token (like MockErc721Extended).
     function lock(uint256 tokenId) external onlyRole(SYSTEM_ROLE) {
         isUnlocked[tokenId] = false;
         // mint virtual votable balance
@@ -68,6 +69,9 @@ contract VeERC721Extension is SuVoteToken {
         }
     }
 
+    /**
+     * @dev Returns the balance of `account`.
+     */
     function _getVotingUnits(address account) internal view virtual override returns (uint256) {
         return TOKEN.balanceOf(account);
     }

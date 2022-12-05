@@ -13,6 +13,7 @@ import deployProxy, {deploy, getDeploymentAddress} from "../test/utils/deploy";
 import {expect} from "chai";
 import {ethers} from "hardhat";
 
+// TODO: move all mocks deploy in separate deploy script
 const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
     const [deployer, admin, dao] = await hre.ethers.getSigners();
     const network = await ethers.provider.getNetwork();
@@ -35,6 +36,7 @@ const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
     expect(veErc721ExtensionAddress).to.be.equal(veErc721Extension.address);
     await accessControlSingleton.grantRole(await accessControlSingleton.ADMIN_ROLE(), mockErc721Extended.address);
 
+    // TODO: check that vote power of tokens will be 50%/50% and the sum of weight is 1 (or 100).
     const votingPower = await deployProxy("VotingPower", [accessControlSingleton.address, "StableUnit Voting Power", "vpSuDAO"]) as VotingPower;
     let tx = await votingPower.setTokenWeight(veERC20.address,"1");
     await tx.wait();

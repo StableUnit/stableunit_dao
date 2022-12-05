@@ -21,6 +21,8 @@ abstract contract SuVoteToken is SuAccessControlAuthenticated, VotesUpgradeable,
 
     /**
      * @dev Delegates votes from the sender to `delegatee`.
+     * It's DEPRECATED. Only contracts with SYSTEM_ROLE can call delegateOnBehalf().
+     * (like VotingPower that has complex logic to work with SuVoteToken-like tokens)
      */
     function delegate(address) public virtual override(IVotesUpgradeable, VotesUpgradeable) {
         revert UnavailableFunctionalityError();

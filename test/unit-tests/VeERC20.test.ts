@@ -206,7 +206,7 @@ describe("VeERC20", () => {
 
     describe("transfer", async () => {
         it("can't transfer veSuDAO", async () => {
-            await expect(veERC20.transfer(user1.address, BN_1E18)).to.be.revertedWith('not possible to transfer vested token');
+            await expect(veERC20.transfer(user1.address, BN_1E18)).to.be.reverted;
         });
     });
 
@@ -227,7 +227,7 @@ describe("VeERC20", () => {
             expect(await veERC20.getVotes(user1.address)).to.be.equal(amountToLock);
         });
 
-        it("can delegate vote power to zero account", async () => {
+        it("can delegate vote power to account with no balance", async () => {
             await mintAndLockTokens(amountToLock, user1);
             await veERC20.connect(admin).delegateOnBehalf(user1.address, user2.address);
             expect(await veERC20.getVotes(user2.address)).to.be.equal(amountToLock);

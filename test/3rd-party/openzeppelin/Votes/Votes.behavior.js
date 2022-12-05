@@ -1,3 +1,4 @@
+// It's copy-paste of oz Votes test. Here we changed only the path for require(eip712).
 const { constants, expectEvent, expectRevert, time } = require('@openzeppelin/test-helpers');
 
 const { MAX_UINT256, ZERO_ADDRESS } = constants;

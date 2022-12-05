@@ -55,8 +55,10 @@ contract VeERC20 is SuVoteToken, ERC20BurnableUpgradeable, IveERC20 {
     error ClaimZeroError();
 
     function initialize(address _accessControlSingleton, ERC20Upgradeable _lockedToken, uint32 maxTgeTimestamp) initializer public {
-        __SuVoteToken__init(_accessControlSingleton, "VeERC20");
-        __ERC20_init(string.concat("vested escrow ", _lockedToken.name()), string.concat("ve", _lockedToken.symbol()));
+        string memory veSymbol = string.concat("ve", _lockedToken.symbol());
+        __SuVoteToken__init(_accessControlSingleton, veSymbol);
+        __ERC20_init(string.concat("vested escrow ", _lockedToken.name()), veSymbol);
+
         LOCKED_TOKEN = _lockedToken;
         TGE_MAX_TIMESTAMP = maxTgeTimestamp;
         tgeTimestamp = TGE_MAX_TIMESTAMP;
@@ -242,11 +244,12 @@ contract VeERC20 is SuVoteToken, ERC20BurnableUpgradeable, IveERC20 {
         uint256 balance = super.balanceOf(msg.sender);
         super._burn(msg.sender, balance);
         _transferVotingUnits(msg.sender, address(0), balance);
+        // TODO: check if is okay if user withdraw something before burnAll(). Write test for this case.
         vestingInfo[msg.sender].amountAlreadyWithdrawn = 0;
     }
 
     function transfer(address, uint256) public virtual override returns (bool) {
-        revert("not possible to transfer vested token");
+        revert UnavailableFunctionalityError();
     }
 
     function supportsInterface(bytes4 interfaceId) public virtual view override returns (bool) {

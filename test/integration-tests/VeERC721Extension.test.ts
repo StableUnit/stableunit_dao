@@ -64,6 +64,7 @@ describe("VeERC721Extension", () => {
             const [TransferEvent] = txReceipt.events ?? [];
             const tokenId = TransferEvent?.args?.tokenId;
 
+            // TODO: create special contractMock account to make such operations, because only contract can have this role
             await accessControlSingleton.connect(accounts.dao).grantRole(await veERC721Extension.SYSTEM_ROLE(), accounts.admin.address);
 
             await veERC721Extension.connect(accounts.admin).adminUnlock(tokenId);
