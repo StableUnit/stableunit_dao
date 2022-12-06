@@ -7,6 +7,20 @@
     {
       "address": "0x1C10286f1B448186a5526F171f9e24cE299D711B",
       "kind": "transparent"
+    },
+    {
+      "address": "0x71aC34A2cEa5c1283Cb4F33E4aBA31580D288459",
+      "kind": "transparent"
+    },
+    {
+      "address": "0x2E21e3cC1D079dCCe67aaC373C0CA07034F3db1f",
+      "txHash": "0x5c4680f6df9038661642a937ad8af79db852f3571592551ea1475a39a7a4c144",
+      "kind": "transparent"
+    },
+    {
+      "address": "0x214ce23Fb80c51F01F06059bad7ea7677FE5FE12",
+      "txHash": "0x85b4130b5bfb278fb3536c48cc646baa2613875339fbf026e0bbfbcead2cdc7c",
+      "kind": "transparent"
     }
   ],
   "impls": {
@@ -619,6 +633,234 @@
             "numberOfBytes": "64"
           },
           "t_struct(UserInfo)1451_storage": {
+            "label": "struct IBonus.UserInfo",
+            "members": [
+              {
+                "label": "xp",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "allocation",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "1"
+              },
+              {
+                "label": "donationBonusRatio",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "2"
+              }
+            ],
+            "numberOfBytes": "96"
+          },
+          "t_uint16": {
+            "label": "uint16",
+            "numberOfBytes": "2"
+          },
+          "t_uint256": {
+            "label": "uint256",
+            "numberOfBytes": "32"
+          },
+          "t_uint8": {
+            "label": "uint8",
+            "numberOfBytes": "1"
+          }
+        }
+      }
+    },
+    "ce046dddcd1abc3805a8372b5863d8e4f57e82d8103fa2e42f83bc291505c52a": {
+      "address": "0x8689EfC30CAf38d9a77dD2ca48B069Bc4f935F53",
+      "txHash": "0xab42c69d9843448a291c0647fd4d7d5094ffc3006623bf8d8b4274a53fd46ef1",
+      "layout": {
+        "solcVersion": "0.8.15",
+        "storage": [
+          {
+            "label": "_initialized",
+            "offset": 0,
+            "slot": "0",
+            "type": "t_uint8",
+            "contract": "Initializable",
+            "src": "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol:62",
+            "retypedFrom": "bool"
+          },
+          {
+            "label": "_initializing",
+            "offset": 1,
+            "slot": "0",
+            "type": "t_bool",
+            "contract": "Initializable",
+            "src": "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol:67"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "1",
+            "type": "t_array(t_uint256)50_storage",
+            "contract": "ContextUpgradeable",
+            "src": "@openzeppelin/contracts-upgradeable/utils/ContextUpgradeable.sol:36"
+          },
+          {
+            "label": "ACCESS_CONTROL_SINGLETON",
+            "offset": 0,
+            "slot": "51",
+            "type": "t_contract(ISuAccessControl)27677",
+            "contract": "SuAccessControlAuthenticated",
+            "src": "contracts/access-control/SuAccessControlAuthenticated.sol:20"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "52",
+            "type": "t_array(t_uint256)49_storage",
+            "contract": "SuAccessControlAuthenticated",
+            "src": "contracts/access-control/SuAccessControlAuthenticated.sol:54"
+          },
+          {
+            "label": "nftInfo",
+            "offset": 0,
+            "slot": "101",
+            "type": "t_mapping(t_address,t_struct(NFTInfo)27538_storage)",
+            "contract": "Bonus",
+            "src": "contracts/Bonus.sol:18"
+          },
+          {
+            "label": "userInfo",
+            "offset": 0,
+            "slot": "102",
+            "type": "t_mapping(t_address,t_struct(UserInfo)27545_storage)",
+            "contract": "Bonus",
+            "src": "contracts/Bonus.sol:19"
+          },
+          {
+            "label": "adminInfo",
+            "offset": 0,
+            "slot": "103",
+            "type": "t_mapping(t_address,t_struct(AdminInfo)27548_storage)",
+            "contract": "Bonus",
+            "src": "contracts/Bonus.sol:21"
+          },
+          {
+            "label": "communityAdminInfo",
+            "offset": 0,
+            "slot": "104",
+            "type": "t_mapping(t_address,t_struct(CommunityAdminInfo)27553_storage)",
+            "contract": "Bonus",
+            "src": "contracts/Bonus.sol:22"
+          },
+          {
+            "label": "levelMap",
+            "offset": 0,
+            "slot": "105",
+            "type": "t_mapping(t_uint16,t_uint256)",
+            "contract": "Bonus",
+            "src": "contracts/Bonus.sol:24"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "106",
+            "type": "t_array(t_uint256)45_storage",
+            "contract": "Bonus",
+            "src": "contracts/Bonus.sol:188"
+          }
+        ],
+        "types": {
+          "t_address": {
+            "label": "address",
+            "numberOfBytes": "20"
+          },
+          "t_array(t_uint256)45_storage": {
+            "label": "uint256[45]",
+            "numberOfBytes": "1440"
+          },
+          "t_array(t_uint256)49_storage": {
+            "label": "uint256[49]",
+            "numberOfBytes": "1568"
+          },
+          "t_array(t_uint256)50_storage": {
+            "label": "uint256[50]",
+            "numberOfBytes": "1600"
+          },
+          "t_bool": {
+            "label": "bool",
+            "numberOfBytes": "1"
+          },
+          "t_contract(ISuAccessControl)27677": {
+            "label": "contract ISuAccessControl",
+            "numberOfBytes": "20"
+          },
+          "t_mapping(t_address,t_struct(AdminInfo)27548_storage)": {
+            "label": "mapping(address => struct IBonus.AdminInfo)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_address,t_struct(CommunityAdminInfo)27553_storage)": {
+            "label": "mapping(address => struct IBonus.CommunityAdminInfo)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_address,t_struct(NFTInfo)27538_storage)": {
+            "label": "mapping(address => struct IBonus.NFTInfo)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_address,t_struct(UserInfo)27545_storage)": {
+            "label": "mapping(address => struct IBonus.UserInfo)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_uint16,t_uint256)": {
+            "label": "mapping(uint16 => uint256)",
+            "numberOfBytes": "32"
+          },
+          "t_struct(AdminInfo)27548_storage": {
+            "label": "struct IBonus.AdminInfo",
+            "members": [
+              {
+                "label": "isAdmin",
+                "type": "t_bool",
+                "offset": 0,
+                "slot": "0"
+              }
+            ],
+            "numberOfBytes": "32"
+          },
+          "t_struct(CommunityAdminInfo)27553_storage": {
+            "label": "struct IBonus.CommunityAdminInfo",
+            "members": [
+              {
+                "label": "xpLimit",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "levelLimit",
+                "type": "t_uint16",
+                "offset": 0,
+                "slot": "1"
+              }
+            ],
+            "numberOfBytes": "64"
+          },
+          "t_struct(NFTInfo)27538_storage": {
+            "label": "struct IBonus.NFTInfo",
+            "members": [
+              {
+                "label": "allocation",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "donationBonusRatio",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "1"
+              }
+            ],
+            "numberOfBytes": "64"
+          },
+          "t_struct(UserInfo)27545_storage": {
             "label": "struct IBonus.UserInfo",
             "members": [
               {

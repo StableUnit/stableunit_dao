@@ -9,7 +9,6 @@ pragma solidity ^0.8.9;
      /$$  \ $$| $$  | $$| $$  | $$| $$  | $$| $$  | $$
     |  $$$$$$/|  $$$$$$/| $$$$$$$/| $$  | $$|  $$$$$$/
      \______/  \______/ |_______/ |__/  |__/ \______/
-
 */
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "./interfaces/IBonus.sol";
@@ -105,7 +104,7 @@ contract Bonus is IBonus, SuAccessControlAuthenticated {
         levelMap[75] = 1810034207;
     }
 
-    function _getLevelByXP(uint256 xp) internal view returns (uint16) {
+    function getLevelByXP(uint256 xp) public view returns (uint16) {
         for (uint16 i = 1; i <= 75; ++i) {
             if (xp < levelMap[i]) {
                 return i;
@@ -115,7 +114,7 @@ contract Bonus is IBonus, SuAccessControlAuthenticated {
     }
 
     function getLevel(address user) public view override returns (uint16) {
-        return _getLevelByXP(userInfo[user].xp);
+        return getLevelByXP(userInfo[user].xp);
     }
 
     function setAdmin(address admin, bool isAdmin) public onlyRole(DAO_ROLE) override {
@@ -150,7 +149,7 @@ contract Bonus is IBonus, SuAccessControlAuthenticated {
         communityAdminInfo[msg.sender].xpLimit = communityAdminInfo[msg.sender].xpLimit - xp;
         userInfo[user].xp = userInfo[user].xp + xp;
 
-        uint16 newUserLevel = _getLevelByXP(userInfo[user].xp);
+        uint16 newUserLevel = getLevelByXP(userInfo[user].xp);
         require(
             newUserLevel <= communityAdminInfo[msg.sender].levelLimit,
             "User level should be less than admin levelLimit"
