@@ -4,8 +4,10 @@ pragma solidity ^0.8.9;
 
 import "../interfaces/IBonus.sol";
 import "../access-control/SuAccessControlAuthenticated.sol";
-import "@openzeppelin/contracts-upgradeable/token/ERC721/extensions/draft-ERC721VotesUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/interfaces/IERC165Upgradeable.sol";
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
+import "./SuVoteToken.sol";
+import "../interfaces/ISuVoteToken.sol";
 
 /**
  * @dev vested escrow NFT contract, allow a beneficiary to extract NFT after a given lock schdule.
@@ -14,7 +16,7 @@ import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
  * after 1 year".
  */
 
-contract VeERC721Extension is SuAccessControlAuthenticated, VotesUpgradeable {
+contract VeERC721Extension is SuVoteToken {
     ERC721 TOKEN;
     IBonus BONUS;
     mapping(uint256 => bool) public isUnlocked;
@@ -24,8 +26,7 @@ contract VeERC721Extension is SuAccessControlAuthenticated, VotesUpgradeable {
 
     function initialize(address _accessControlSingleton, address _nftToken, address _bonus) public initializer
     {
-        //        __ERC721_init(string.concat("vested escrow ", ERC721(_nftToken).name()), string.concat("ve", ERC721(_nftToken).symbol()));
-        __SuAuthenticated_init(_accessControlSingleton);
+        __SuVoteToken__init(_accessControlSingleton, string.concat("ve", ERC721(_nftToken).symbol()));
         TOKEN = ERC721(_nftToken);
         BONUS = IBonus(_bonus);
         whitelistedTransferableAddresses[address(0)] = true;
@@ -56,7 +57,8 @@ contract VeERC721Extension is SuAccessControlAuthenticated, VotesUpgradeable {
         _transferVotingUnits(account, address(0), 1);
     }
 
-    function lock(uint256 tokenId) external onlyRole(ADMIN_ROLE) {
+    // Only contracts that have SYSTEM_ROLE can lock token (like MockErc721Extended).
+    function lock(uint256 tokenId) external onlyRole(SYSTEM_ROLE) {
         isUnlocked[tokenId] = false;
         // mint virtual votable balance
         //        _mint(TOKEN.ownerOf(tokenId), tokenId);
@@ -67,15 +69,6 @@ contract VeERC721Extension is SuAccessControlAuthenticated, VotesUpgradeable {
         }
     }
 
-    //    function _afterTokenTransfer(
-    //        address from,
-    //        address to,
-    //        uint256 tokenId
-    //    ) internal virtual override {
-    //        _transferVotingUnits(from, to, 1);
-    //        super._afterTokenTransfer(from, to, tokenId);
-    //    }
-
     /**
      * @dev Returns the balance of `account`.
      */
@@ -83,7 +76,7 @@ contract VeERC721Extension is SuAccessControlAuthenticated, VotesUpgradeable {
         return TOKEN.balanceOf(account);
     }
 
-    //    function supportsInterface(bytes4 interfaceId) public view virtual override(ERC721Upgradeable, SuAccessControlAuthenticated) returns (bool) {
-    //        return super.supportsInterface(interfaceId);
-    //    }
+    function supportsInterface(bytes4 interfaceId) public override view returns (bool) {
+        return interfaceId == type(ISuVoteToken).interfaceId || super.supportsInterface(interfaceId);
+    }
 }

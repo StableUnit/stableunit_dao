@@ -1,4 +1,4 @@
-import {web3, ethers} from "hardhat";
+import {ethers, web3} from "hardhat";
 import {expect} from 'chai'
 import {BigNumber} from "ethers";
 import {SignerWithAddress} from "hardhat-deploy-ethers/signers";
@@ -9,10 +9,14 @@ import {ADDRESS_ZERO, BN_1E18} from "../utils";
 import deployProxy from "../utils/deploy";
 
 describe("VeERC20", () => {
-    const UINT256_0 = '0x0000000000000000000000000000000000000000';
+    let deployer: SignerWithAddress,
+        dao: SignerWithAddress,
+        admin: SignerWithAddress,
+        user1: SignerWithAddress,
+        user2: SignerWithAddress,
+        user3: SignerWithAddress;
 
-    let deployer: SignerWithAddress, dao: SignerWithAddress, admin: SignerWithAddress, user1: SignerWithAddress , user2: SignerWithAddress;
-
+    let accessControlSingleton: SuAccessControlSingleton;
     let suDAO: SuDAO;
     let veERC20: VeERC20;
 
@@ -36,11 +40,11 @@ describe("VeERC20", () => {
     }
 
     beforeEach(async function () {
-        [deployer, admin, dao, user1, user2] = await ethers.getSigners();
+        [deployer, admin, dao, user1, user2, user3] = await ethers.getSigners();
 
-        const accessControlSingleton = await deployProxy( "SuAccessControlSingleton", [admin.address, admin.address], undefined, false) as SuAccessControlSingleton;
+        accessControlSingleton = await deployProxy( "SuAccessControlSingleton", [admin.address, admin.address], undefined, false) as SuAccessControlSingleton;
         suDAO = await deployProxy("SuDAO", [accessControlSingleton.address], undefined, false) as SuDAO;
-        veERC20 = await deployProxy("VeERC20", [accessControlSingleton.address, suDAO.address, await latest()]) as VeERC20;
+        veERC20 = await deployProxy("VeERC20", [accessControlSingleton.address, suDAO.address, await latest()], undefined, false) as VeERC20;
         await suDAO.connect(admin).mint(admin.address, amountToLock);
     });
 
@@ -95,7 +99,7 @@ describe("VeERC20", () => {
             const amountToLock = BN_1E18.mul(100);
             await mintAndLockTokens(amountToLock);
             // should have 0 available to claim
-            await expect(veERC20.connect(user2).claim()).to.be.revertedWith("Can't claim 0 tokens");
+            await expect(veERC20.connect(user2).claim()).to.be.reverted;
         })
 
         it("claim all after vesting", async () => {
@@ -154,7 +158,7 @@ describe("VeERC20", () => {
             await web3.eth.sendTransaction({from: admin.address, to: veERC20.address, value: rescueAmountBn.toString()});
 
             const balanceBefore = BigNumber.from(await web3.eth.getBalance(admin.address));
-            await veERC20.connect(admin).rescue(UINT256_0);
+            await veERC20.connect(admin).rescue(ADDRESS_ZERO);
             const balanceAfter = BigNumber.from(await web3.eth.getBalance(admin.address));
 
             const rescuedAmount = balanceAfter.sub(balanceBefore);
@@ -202,14 +206,58 @@ describe("VeERC20", () => {
 
     describe("transfer", async () => {
         it("can't transfer veSuDAO", async () => {
-            await expect(veERC20.transfer(user1.address, BN_1E18)).to.be.revertedWith('not possible to transfer vested token');
+            await expect(veERC20.transfer(user1.address, BN_1E18)).to.be.reverted;
         });
     });
 
     describe("updateTge", async () => {
         it("can't update to the TGE_MAX_TIMESTAMP", async () => {
-            await expect(veERC20.connect(admin).updateTgeTimestamp(await latest() - 100)).to.be.revertedWith('veERC20: TGE date can\'t be in the past');
-            await expect(veERC20.connect(admin).updateTgeTimestamp(await latest() + 100)).to.be.revertedWith('veERC20: new TGE date is beyond limit');
+            await expect(veERC20.connect(admin).updateTgeTimestamp(await latest() - 100)).to.be.reverted;
+            await expect(veERC20.connect(admin).updateTgeTimestamp(await latest() + 100)).to.be.reverted;
         });
+    });
+
+    describe("voting ability", async () => {
+        beforeEach(async () => {
+            await accessControlSingleton.connect(admin).grantRole(await veERC20.SYSTEM_ROLE(), admin.address);
+        });
+
+        it("has voting power by default", async () => {
+            await mintAndLockTokens(amountToLock, user1);
+            expect(await veERC20.getVotes(user1.address)).to.be.equal(amountToLock);
+        });
+
+        it("can delegate vote power to account with no balance", async () => {
+            await mintAndLockTokens(amountToLock, user1);
+            await veERC20.connect(admin).delegateOnBehalf(user1.address, user2.address);
+            expect(await veERC20.getVotes(user2.address)).to.be.equal(amountToLock);
+        });
+
+        it("after unlock no voting power", async () => {
+            await mintAndLockTokens(amountToLock, user1);
+            await increaseTime(vestingPeriodSeconds);
+            await veERC20.connect(user1).claim();
+            expect(await veERC20.getVotes(user1.address)).to.be.equal(0);
+        });
+
+        it("can delegate but after unlock this doesn't add voting power", async () => {
+            await mintAndLockTokens(amountToLock, user1);
+            await veERC20.connect(admin).delegateOnBehalf(user1.address, user2.address);
+            await increaseTime(vestingPeriodSeconds);
+            await veERC20.connect(user1).claim();
+            expect(await veERC20.getVotes(user2.address)).to.be.equal(0);
+        });
+
+        it("if delegatee unlock its tokens, still have others voting power", async () => {
+            await mintAndLockTokens(amountToLock, user1);
+            await mintAndLockTokens(amountToLock, user2);
+            await veERC20.connect(admin).delegateOnBehalf(user1.address, user2.address);
+            expect(await veERC20.getVotes(user2.address)).to.be.equal(amountToLock.mul(2));
+
+            await increaseTime(vestingPeriodSeconds);
+            await veERC20.connect(user2).claim();
+            expect(await veERC20.getVotes(user2.address)).to.be.equal(amountToLock);
+        });
+
     });
 });

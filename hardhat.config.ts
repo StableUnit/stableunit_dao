@@ -10,6 +10,8 @@ import "hardhat-gas-reporter";
 import "solidity-coverage";
 import "hardhat-deploy";
 import "hardhat-deploy-ethers";
+// for 3rd-party tests like openzeppelin tests
+import "@nomiclabs/hardhat-truffle5";
 
 // The environment file stores wallets and API keys
 // and preferably should be stored outside the repo folder

@@ -176,7 +176,7 @@ contract Bonus is IBonus, SuAccessControlAuthenticated {
     /**
      * @dev See {IBonus-isTokenTransferable}.
      */
-    function isTokenTransferable(address nft, uint256 tokenId) external view returns (bool) {
+    function isTokenTransferable(address nft, uint256 tokenId) external pure returns (bool) {
         return false;
     }
 

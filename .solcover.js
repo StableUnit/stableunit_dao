@@ -5,5 +5,6 @@ module.exports = {
         'distributions/SaftForNft_v1',
         'distributions/TokenDistributor_v2',
         '3rd-party',
+        'interfaces',
     ],
 };

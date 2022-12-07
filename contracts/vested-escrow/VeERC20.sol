@@ -14,9 +14,10 @@ pragma solidity ^0.8.12;
 import "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20Upgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/extensions/ERC20BurnableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/utils/SafeERC20Upgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/utils/math/SafeCastUpgradeable.sol";
 import "../access-control/SuAccessControlAuthenticated.sol";
 import "../interfaces/IveERC20.sol";
+import "../interfaces/ISuVoteToken.sol";
+import "./SuVoteToken.sol";
 
 /*
  * @title The contact enables the storage of erc20 tokens under the linear time-vesting with the cliff time-lock.
@@ -32,7 +33,7 @@ import "../interfaces/IveERC20.sol";
  * To make balance visible in the erc20 wallets, the contact "looks like" erc20 token by implementing its interface
  * however all non-view methods such as transfer or approve aren't active and will be reverted.
 */
-contract VeERC20 is SuAccessControlAuthenticated, ERC20BurnableUpgradeable, IveERC20 {
+contract VeERC20 is SuVoteToken, ERC20BurnableUpgradeable, IveERC20 {
     using SafeERC20Upgradeable for ERC20Upgradeable;
 
     ERC20Upgradeable public LOCKED_TOKEN;
@@ -49,9 +50,15 @@ contract VeERC20 is SuAccessControlAuthenticated, ERC20BurnableUpgradeable, IveE
     }
     mapping(address => VestingInfo) public vestingInfo;
 
+    error TGEInPastError();
+    error TGEBeyondLimitError();
+    error ClaimZeroError();
+
     function initialize(address _accessControlSingleton, ERC20Upgradeable _lockedToken, uint32 maxTgeTimestamp) initializer public {
-        __SuAuthenticated_init(_accessControlSingleton);
-        __ERC20_init(string.concat("vested escrow ", _lockedToken.name()), string.concat("ve", _lockedToken.symbol()));
+        string memory veSymbol = string.concat("ve", _lockedToken.symbol());
+        __SuVoteToken__init(_accessControlSingleton, veSymbol);
+        __ERC20_init(string.concat("vested escrow ", _lockedToken.name()), veSymbol);
+
         LOCKED_TOKEN = _lockedToken;
         TGE_MAX_TIMESTAMP = maxTgeTimestamp;
         tgeTimestamp = TGE_MAX_TIMESTAMP;
@@ -61,8 +68,8 @@ contract VeERC20 is SuAccessControlAuthenticated, ERC20BurnableUpgradeable, IveE
     * @notice owner of the contract can set up TGE date within set limits.
     */
     function updateTgeTimestamp(uint32 newTgeTimestamp) external onlyRole(ADMIN_ROLE) {
-        require(uint32(block.timestamp) <= newTgeTimestamp, "veERC20: TGE date can't be in the past");
-        require(newTgeTimestamp <= TGE_MAX_TIMESTAMP, "veERC20: new TGE date is beyond limit");
+        if (newTgeTimestamp < uint32(block.timestamp)) revert TGEInPastError();
+        if (newTgeTimestamp > TGE_MAX_TIMESTAMP) revert TGEBeyondLimitError();
         tgeTimestamp = newTgeTimestamp;
     }
 
@@ -146,6 +153,11 @@ contract VeERC20 is SuAccessControlAuthenticated, ERC20BurnableUpgradeable, IveE
         LOCKED_TOKEN.safeTransferFrom(msg.sender, address(this), amount);
         // mint more veERC20 tokens for the account
         _mint(account, amount);
+        _transferVotingUnits(address(0), account, amount);
+        // if don't delegate, delegate to yourself by default
+        if (delegates(account) == address(0)) {
+            _delegate(account, account);
+        }
     }
 
     /**
@@ -194,9 +206,10 @@ contract VeERC20 is SuAccessControlAuthenticated, ERC20BurnableUpgradeable, IveE
      */
     function claim() external {
         uint256 claimAmount = availableToClaim(msg.sender);
-        require(claimAmount > 0, "Can't claim 0 tokens");
+        if (claimAmount == 0) revert ClaimZeroError();
         vestingInfo[msg.sender].amountAlreadyWithdrawn = vestingInfo[msg.sender].amountAlreadyWithdrawn + claimAmount;
         _burn(msg.sender, claimAmount);
+        _transferVotingUnits(msg.sender, address(0), claimAmount);
         LOCKED_TOKEN.safeTransfer(msg.sender, claimAmount);
     }
 
@@ -209,6 +222,7 @@ contract VeERC20 is SuAccessControlAuthenticated, ERC20BurnableUpgradeable, IveE
         require(balance > 0, "nothing to donate");
         vestingInfo[msg.sender].amountAlreadyWithdrawn = vestingInfo[msg.sender].amountAlreadyWithdrawn + uint64(balance);
         _burn(msg.sender, balance);
+        _transferVotingUnits(msg.sender, address(0), balance);
         LOCKED_TOKEN.safeTransfer(toDAO, balance);
     }
 
@@ -226,21 +240,24 @@ contract VeERC20 is SuAccessControlAuthenticated, ERC20BurnableUpgradeable, IveE
     }
     receive() external payable {}
 
-    function transfer(address, uint256) public virtual override returns (bool) {
-        revert("not possible to transfer vested token");
-    }
-
-    function _burn(address account, uint256 amount)
-    internal
-    override
-    {
-        super._burn(account, amount);
-    }
-
     function burnAll() external {
         uint256 balance = super.balanceOf(msg.sender);
         super._burn(msg.sender, balance);
+        _transferVotingUnits(msg.sender, address(0), balance);
+        // TODO: check if is okay if user withdraw something before burnAll(). Write test for this case.
         vestingInfo[msg.sender].amountAlreadyWithdrawn = 0;
+    }
+
+    function transfer(address, uint256) public virtual override returns (bool) {
+        revert UnavailableFunctionalityError();
+    }
+
+    function supportsInterface(bytes4 interfaceId) public virtual view override returns (bool) {
+        return interfaceId == type(ISuVoteToken).interfaceId || super.supportsInterface(interfaceId);
+    }
+
+    function _getVotingUnits(address account) internal view virtual override returns (uint256) {
+        return super.balanceOf(account);
     }
 
     /**
