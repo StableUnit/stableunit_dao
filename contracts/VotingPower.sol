@@ -24,6 +24,7 @@ import "./interfaces/ISuVoteToken.sol";
  * @title ERC20-like and Votes-like contract that aggregates voting power of all tokens in SuDAO on particular chain.
  * Can't be transferred and approved.
 */
+// TODO: add interface that inherit IVotesUpgradeable
 contract VotingPower is SuAccessControlAuthenticated, IERC20, IERC20Metadata, IVotesUpgradeable {
     using EnumerableSet for EnumerableSet.AddressSet;
 
@@ -35,6 +36,7 @@ contract VotingPower is SuAccessControlAuthenticated, IERC20, IERC20Metadata, IV
 
     string private _name;
     string private _symbol;
+    // TODO: add descriptions
     EnumerableSet.AddressSet private tokens;
     mapping(address => uint256) public weights;
     uint256 public totalWeight;

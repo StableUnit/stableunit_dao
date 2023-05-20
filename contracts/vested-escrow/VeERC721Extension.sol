@@ -10,12 +10,12 @@ import "./SuVoteToken.sol";
 import "../interfaces/ISuVoteToken.sol";
 
 /**
- * @dev vested escrow NFT contract, allow a beneficiary to extract NFT after a given lock schdule.
+ * @dev vested escrow NFT contract, allow a beneficiary to extract NFT after a given lock schedule.
  *
  * Useful for simple vesting schedules like "whitelisted addresses get their NFT
  * after 1 year".
  */
-
+// TODO: add interface and description
 contract VeERC721Extension is SuVoteToken {
     ERC721 TOKEN;
     IBonus BONUS;

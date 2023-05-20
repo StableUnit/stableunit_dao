@@ -24,9 +24,9 @@ import "./access-control/SuAccessControlAuthenticated.sol";
 contract SuDAOv2 is ERC20VotesUpgradeable, ERC20BurnableUpgradeable, SuAccessControlAuthenticated {
     using SafeERC20Upgradeable for ERC20Upgradeable;
 
-    uint256 public constant MAX_SUPPLY = 21_000_000 * 100 * 1e18;
-    uint256 public constant MAX_SUPPLY_1_STAGE = 16_000_000 * 100 * 1e18;
-    uint32 public constant TIME_1_STAGE = 4 * 365 * 24 * 60 * 60; // 4 years in seconds
+    uint256 public constant MAX_SUPPLY = 16_000_000 * 100 * 1e18;
+    uint256 public constant MAX_POST_VESTING_INFLATION = 5_000_000 * 100 * 1e18;
+    uint32 public constant MIN_FULLY_DILUTED_VESTING = 4 * 365 days;
     uint32 public DEPLOY_TIME;
 
     error MaxSupplyExceeded();
@@ -40,8 +40,11 @@ contract SuDAOv2 is ERC20VotesUpgradeable, ERC20BurnableUpgradeable, SuAccessCon
 
     function mint(address account, uint256 amount) external onlyRole(DAO_ROLE) {
         uint32 timePassed = uint32(block.timestamp) - DEPLOY_TIME;
-        uint256 currentMaxSupply = timePassed < TIME_1_STAGE ? MAX_SUPPLY_1_STAGE : MAX_SUPPLY;
+        uint256 currentMaxSupply = timePassed < MIN_FULLY_DILUTED_VESTING
+            ? MAX_SUPPLY
+            : MAX_SUPPLY + MAX_POST_VESTING_INFLATION;
         if (totalSupply() + amount > currentMaxSupply) revert MaxSupplyExceeded();
+
         _mint(account, amount);
     }
 

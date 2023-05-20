@@ -5,14 +5,8 @@ pragma solidity ^0.8.0;
 import "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20Upgradeable.sol";
 
 interface IveERC20v2 {
-    struct VestingInfo {
-        // we keep all data in one 256 bits slot to safe on gas usage
-        uint256 amountAlreadyWithdrawn;
-        uint256 cliffSeconds;
-        uint256 vestingSeconds;
-        uint256 tgeUnlockRatio1e18; // [0..1], uint64 is enough because log2(1e18) ~= 60
-        uint256 vestingFrequencySeconds;
-    }
+    /* ====================== VARS ====================== */
+    function alreadyWithdrawn (address user) external view returns (uint256 amountAlreadyWithdrawn);
 
     /* ===================== ERRORS ===================== */
 
@@ -30,33 +24,12 @@ interface IveERC20v2 {
     // @notice owner of the contract can set up TGE date within set limits.
     function updateTgeTimestamp(uint32 newTgeTimestamp) external;
 
-    // @notice owner of the contract can set up IDO date (token release data)
-    function updateIdoTimestamp(uint32 newTgeTimestamp) external;
-
     /**
     * @notice Creates an account with time-vesting for the user and withdraws these tokens from msg.sender.
     * @param account Beneficiary of the vesting account.
     * @param amount Amount of tokens to be send, which will be deducted from msg.sender.
-    * @param vestingSeconds Amount of seconds when linear vesting would be over. Starts from cliff.
-    * @param cliffSeconds Amount of seconds while tokens would be completely locked.
-    * @param tgeUnlockRatio1e18 ratio/1e18 ⊂ [0..1] that indicates how many tokens are going to be unlocked during TGE
-    * @param vestingFrequencySeconds how frequently token are going to be unlocked after the cliff.
     */
-    function lockUnderVesting(
-        address account,
-        uint256 amount,
-        uint256 vestingSeconds,
-        uint256 cliffSeconds,
-        uint256 tgeUnlockRatio1e18,
-        uint256 vestingFrequencySeconds
-    ) external;
-
-    /**
-    * @notice Adds more tokens to the existing (possibly zero) vesting account. Doesn't change vesting period!
-    * @param account Beneficiary of the vesting account.
-    * @param amount Amount of token to be send to user under vesting, which will be deducted from msg.sender.
-    */
-    function addBalance(address account, uint256 amount) external;
+    function lockUnderVesting(address account, uint256 amount) external;
 
     // @notice User can claim their vested tokens.
     function claim() external;
