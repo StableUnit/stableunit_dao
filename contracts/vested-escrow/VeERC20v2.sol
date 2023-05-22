@@ -43,7 +43,7 @@ contract VeERC20v2 is SuVoteToken, ERC20BurnableUpgradeable, IveERC20v2 {
     // Amount of seconds while tokens would be completely locked.
     uint32 public cliffSeconds;
 
-    // Amount of seconds when linear vesting would be over. Starts from cliff.
+    // Amount of seconds when vesting would be over. Starts from cliff.
     uint32 public vestingSeconds;
 
     // ratio/1e18 ⊂ [0..1] that indicates how many tokens are going to be unlocked during TGE
@@ -67,6 +67,11 @@ contract VeERC20v2 is SuVoteToken, ERC20BurnableUpgradeable, IveERC20v2 {
         LOCKED_TOKEN = _lockedToken;
         TGE_MAX_TIMESTAMP = _maxTgeTimestamp;
         tgeTimestamp = TGE_MAX_TIMESTAMP;
+
+        cliffSeconds = 6 * 30 days;
+        vestingSeconds = 24 * 30 days;
+        vestingFrequencySeconds = 6 * 30 days;
+        tgeUnlockRatio1e18 = 10 * 1e16; // 10%
     }
 
     function updateTgeTimestamp(uint32 newTgeTimestamp) external onlyRole(ADMIN_ROLE) {
@@ -119,28 +124,26 @@ contract VeERC20v2 is SuVoteToken, ERC20BurnableUpgradeable, IveERC20v2 {
         // if the time is before the TGE - there's nothing vested yet
         if (t < tgeTimestamp) return 0;
 
+        uint256 N = totalDeposited(user);
+
         // if it's past TGE, there's at lest tgeUnlockRatio is vested
-         uint256 vested = totalDeposited(user) * tgeUnlockRatio1e18 / 1e18;
+        uint256 vested = N * tgeUnlockRatio1e18 / 1e18;
 
         // if the time is before the cliff
         if (t < (tgeTimestamp + cliffSeconds)) {
             // there's nothing additional vested yet
         } else { // if after the cliff
-            // if it's beyond vesting time
+            // if it's beyond vesting time = everything is vested
             if ((tgeTimestamp + vestingSeconds) < t) {
-                // everything is vested
-                vested = totalDeposited(user);
+                vested = N;
             } else {
-                // otherwise the amount is proportional to the amount after the cliff before end of vesting
-                uint256 x = totalDeposited(user);
                 // how much second passed after cliff
-                uint256 y = (t - (tgeTimestamp + cliffSeconds));
-                // how much seconds from cliff to end of vesting
-                uint256 z = (uint256(vestingSeconds) - uint256(cliffSeconds));
-                // y2 := max y2 : vestingFrequencySeconds*N <= y
-                uint256 y2 = y / vestingFrequencySeconds * vestingFrequencySeconds;
+                uint256 timePassed = (t - (tgeTimestamp + cliffSeconds)); // 13m
+                // last full vesting part (i.e 13 month => k = 12 month with vestingFrequencySeconds = 6 month)
+                uint256 fullVestingPart = timePassed / vestingFrequencySeconds * vestingFrequencySeconds;
 
-                vested = x * y2 / z;
+                // (N - vested) = tokens left to be vested after tge
+                vested = vested + (N - vested) * fullVestingPart / vestingSeconds;
             }
         }
 
