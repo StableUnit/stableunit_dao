@@ -91,7 +91,7 @@ contract VeERC20v2 is SuVoteToken, ERC20BurnableUpgradeable, IveERC20v2 {
         vestingSeconds = newVestingSeconds;
     }
 
-    function updateTgeUnlockRatio(uint32 newTgeUnlockRatio) external onlyRole(ADMIN_ROLE) {
+    function updateTgeUnlockRatio(uint64 newTgeUnlockRatio) external onlyRole(ADMIN_ROLE) {
         if (tgeUnlockRatio1e18 > 1e18) revert BadUnlockRatio();
         tgeUnlockRatio1e18 = newTgeUnlockRatio;
     }
@@ -119,14 +119,14 @@ contract VeERC20v2 is SuVoteToken, ERC20BurnableUpgradeable, IveERC20v2 {
         }
     }
 
-    function availableToClaim(address user) public view returns (uint256) {
+    function availableToClaim(address account) public view returns (uint256) {
         uint256 t = block.timestamp;
         // if the time is before the TGE - there's nothing vested yet
         if (t < tgeTimestamp) return 0;
 
-        uint256 N = totalDeposited(user);
+        uint256 N = totalDeposited(account);
 
-        // if it's past TGE, there's at lest tgeUnlockRatio is vested
+        // if it's past TGE, there's at least tgeUnlockRatio is vested
         uint256 vested = N * tgeUnlockRatio1e18 / 1e18;
 
         // if the time is before the cliff
@@ -134,11 +134,11 @@ contract VeERC20v2 is SuVoteToken, ERC20BurnableUpgradeable, IveERC20v2 {
             // there's nothing additional vested yet
         } else { // if after the cliff
             // if it's beyond vesting time = everything is vested
-            if ((tgeTimestamp + vestingSeconds) < t) {
+            if ((tgeTimestamp + cliffSeconds + vestingSeconds) < t) {
                 vested = N;
             } else {
                 // how much second passed after cliff
-                uint256 timePassed = (t - (tgeTimestamp + cliffSeconds)); // 13m
+                uint256 timePassed = (t - (tgeTimestamp + cliffSeconds));
                 // last full vesting part (i.e 13 month => k = 12 month with vestingFrequencySeconds = 6 month)
                 uint256 fullVestingPart = timePassed / vestingFrequencySeconds * vestingFrequencySeconds;
 
@@ -148,7 +148,7 @@ contract VeERC20v2 is SuVoteToken, ERC20BurnableUpgradeable, IveERC20v2 {
         }
 
         // the answer is how much is vested in total minus how much already withdrawn
-        return vested - alreadyWithdrawn[user];
+        return vested - alreadyWithdrawn[account];
     }
 
     function claim() external {
@@ -164,7 +164,7 @@ contract VeERC20v2 is SuVoteToken, ERC20BurnableUpgradeable, IveERC20v2 {
     function donateTokens(address toDAO) external {
         if (hasRole(DAO_ROLE, toDAO) == false) revert BadDAOAddress(toDAO);
         uint256 balance = super.balanceOf(msg.sender);
-        if (balance > 0) revert NoBalance();
+        if (balance == 0) revert NoBalance();
         alreadyWithdrawn[msg.sender] = alreadyWithdrawn[msg.sender] + balance;
         _burn(msg.sender, balance);
         _transferVotingUnits(msg.sender, address(0), balance);
