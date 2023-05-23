@@ -34,7 +34,7 @@ contract MockErc721CrossChain is UniversalONFT721 {
     string baseURI;
 
     constructor(address _layerZeroEndpoint, uint _startMintId, uint _endMintId)
-    UniversalONFT721("StableUnit MockErc721CrossChain", "MockErc721CrossChain", _layerZeroEndpoint, _startMintId, _endMintId) {
+    UniversalONFT721("StableUnit MockErc721CrossChain", "MockErc721CrossChain", 1, _layerZeroEndpoint, _startMintId, _endMintId) {
         baseURI = "ipfs://QmeSjSinHpPnmXmspMjwiXyN6zS4E9zccariGR3jxcaWtq/";
     }
 

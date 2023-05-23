@@ -1,22 +1,19 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity >=0.5.0;
+pragma solidity ^0.8.2;
 
-import "@openzeppelin/contracts/utils/introspection/IERC165.sol";
+import "@openzeppelin/contracts-upgradeable/utils/introspection/ERC165Upgradeable.sol";
 
 /**
- * @dev Interface of the ONFT Core standard
+ * @dev Interface of the ONFT Core Upgradeable standard
  */
-interface IONFT721Core is IERC165 {
+interface IONFT721CoreUpgradeable is IERC165Upgradeable {
     /**
      * @dev Emitted when `_tokenIds[]` are moved from the `_sender` to (`_dstChainId`, `_toAddress`)
      * `_nonce` is the outbound nonce from
      */
     event SendToChain(uint16 indexed _dstChainId, address indexed _from, bytes indexed _toAddress, uint[] _tokenIds);
     event ReceiveFromChain(uint16 indexed _srcChainId, bytes indexed _srcAddress, address indexed _toAddress, uint[] _tokenIds);
-    event SetMinGasToTransferAndStore(uint256 _minGasToTransferAndStore);
-    event SetDstChainIdToTransferGas(uint16 _dstChainId, uint256 _dstChainIdToTransferGas);
-    event SetDstChainIdToBatchLimit(uint16 _dstChainId, uint256 _dstChainIdToBatchLimit);
 
     /**
      * @dev Emitted when `_payload` was received from lz, but not enough gas to deliver all tokenIds
