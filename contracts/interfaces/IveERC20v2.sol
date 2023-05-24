@@ -8,6 +8,9 @@ interface IveERC20v2 {
     /* ====================== VARS ====================== */
     function alreadyWithdrawn (address user) external view returns (uint256 amountAlreadyWithdrawn);
 
+    /* ===================== EVENTS ===================== */
+    event Claimed(address account, uint256 claimAmount);
+
     /* ===================== ERRORS ===================== */
 
     error TGEInPastError();

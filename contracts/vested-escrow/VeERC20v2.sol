@@ -158,6 +158,8 @@ contract VeERC20v2 is SuVoteToken, ERC20BurnableUpgradeable, IveERC20v2 {
         _burn(msg.sender, claimAmount);
         _transferVotingUnits(msg.sender, address(0), claimAmount);
         LOCKED_TOKEN.safeTransfer(msg.sender, claimAmount);
+
+        emit Claimed(msg.sender, claimAmount);
     }
 
     // TODO: check if we need that and it's secure
