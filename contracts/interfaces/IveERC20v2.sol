@@ -14,18 +14,21 @@ interface IveERC20v2 {
     /* ===================== ERRORS ===================== */
 
     error TGEInPastError();
-    error IDOInPastError();
-    error TGEBeyondLimitError();
     error ClaimZeroError();
-    error BadCliffAndVesting();
+    error BadVestingTimestamps();
     error BadUnlockRatio();
     error BadDAOAddress(address dao);
     error NoBalance();
 
     /* ==================== MUTABLE METHODS ==================== */
 
-    // @notice owner of the contract can set up TGE date within set limits.
-    function updateTgeTimestamp(uint32 newTgeTimestamp) external;
+    function updateTimestamps(
+        uint32 newTgeTimestamp,
+        uint32 newCliffSeconds,
+        uint32 newVestingSeconds,
+        uint64 newTgeUnlockRatio,
+        uint32 newVestingFrequencySeconds
+    ) external;
 
     /**
     * @notice Creates an account with time-vesting for the user and withdraws these tokens from msg.sender.

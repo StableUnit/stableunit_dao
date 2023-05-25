@@ -37,7 +37,6 @@ contract VeERC20v2 is SuVoteToken, ERC20BurnableUpgradeable, IveERC20v2 {
     using SafeERC20Upgradeable for ERC20Upgradeable;
 
     ERC20Upgradeable public LOCKED_TOKEN;
-    uint32 public TGE_MAX_TIMESTAMP;
     uint32 public tgeTimestamp;
 
     // Amount of seconds while tokens would be completely locked.
@@ -65,8 +64,7 @@ contract VeERC20v2 is SuVoteToken, ERC20BurnableUpgradeable, IveERC20v2 {
         __ERC20_init(string.concat("vested escrow ", _lockedToken.name()), veSymbol);
 
         LOCKED_TOKEN = _lockedToken;
-        TGE_MAX_TIMESTAMP = _maxTgeTimestamp;
-        tgeTimestamp = TGE_MAX_TIMESTAMP;
+        tgeTimestamp = _maxTgeTimestamp;
 
         cliffSeconds = 6 * 30 days;
         vestingSeconds = 24 * 30 days;
@@ -74,29 +72,25 @@ contract VeERC20v2 is SuVoteToken, ERC20BurnableUpgradeable, IveERC20v2 {
         tgeUnlockRatio1e18 = 10 * 1e16; // 10%
     }
 
-    function updateTgeTimestamp(uint32 newTgeTimestamp) external onlyRole(ADMIN_ROLE) {
+    function updateTimestamps(
+        uint32 newTgeTimestamp,
+        uint32 newCliffSeconds,
+        uint32 newVestingSeconds,
+        uint64 newTgeUnlockRatio,
+        uint32 newVestingFrequencySeconds
+    ) external onlyRole(ADMIN_ROLE) {
         if (newTgeTimestamp < uint32(block.timestamp)) revert TGEInPastError();
-        if (newTgeTimestamp > TGE_MAX_TIMESTAMP) revert TGEBeyondLimitError();
+        if (newTgeUnlockRatio > 1e18) revert BadUnlockRatio();
+        if (newVestingSeconds == 0) revert BadVestingTimestamps();
+        if (
+            newVestingSeconds == 0 ||
+            newVestingSeconds / newVestingFrequencySeconds * newVestingFrequencySeconds != newVestingSeconds
+        ) revert BadVestingTimestamps();
+
         tgeTimestamp = newTgeTimestamp;
-    }
-
-    // TODO: can we decrease cliff seconds or only increase?
-    function updateCliffSeconds(uint32 newCliffSeconds) external onlyRole(ADMIN_ROLE) {
-        if (newCliffSeconds > vestingSeconds) revert BadCliffAndVesting();
         cliffSeconds = newCliffSeconds;
-    }
-
-    function updateVestingSeconds(uint32 newVestingSeconds) external onlyRole(ADMIN_ROLE) {
-        if (cliffSeconds > newVestingSeconds) revert BadCliffAndVesting();
         vestingSeconds = newVestingSeconds;
-    }
-
-    function updateTgeUnlockRatio(uint64 newTgeUnlockRatio) external onlyRole(ADMIN_ROLE) {
-        if (tgeUnlockRatio1e18 > 1e18) revert BadUnlockRatio();
         tgeUnlockRatio1e18 = newTgeUnlockRatio;
-    }
-
-    function updateVestingFrequencySeconds(uint32 newVestingFrequencySeconds) external onlyRole(ADMIN_ROLE) {
         vestingFrequencySeconds = newVestingFrequencySeconds;
     }
 
@@ -148,7 +142,7 @@ contract VeERC20v2 is SuVoteToken, ERC20BurnableUpgradeable, IveERC20v2 {
         }
 
         // the answer is how much is vested in total minus how much already withdrawn
-        return vested - alreadyWithdrawn[account];
+        return vested <= alreadyWithdrawn[account] ? 0 : vested - alreadyWithdrawn[account];
     }
 
     function claim() external {

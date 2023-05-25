@@ -48,10 +48,13 @@ describe("VeERC20", () => {
         deployTimestamp = await latest();
         veERC20 = await deployProxy("VeERC20v2", [accessControlSingleton.address, suDAO.address, deployTimestamp + tgeSeconds], undefined, false) as VeERC20v2;
 
-        await veERC20.connect(admin).updateCliffSeconds(cliffSeconds);
-        await veERC20.connect(admin).updateVestingSeconds(vestingSeconds);
-        await veERC20.connect(admin).updateVestingFrequencySeconds(vestingFrequencySeconds);
-        await veERC20.connect(admin).updateTgeUnlockRatio(tgeUnlockRatio1e18);
+        await veERC20.connect(admin).updateTimestamps(
+          deployTimestamp + tgeSeconds,
+          cliffSeconds,
+          vestingSeconds,
+          tgeUnlockRatio1e18,
+          vestingFrequencySeconds
+        );
     });
 
     describe("checkGlobalVars", async () => {
@@ -61,7 +64,51 @@ describe("VeERC20", () => {
             expect(await veERC20.vestingSeconds()).to.be.equal(vestingSeconds);
             expect(await veERC20.vestingFrequencySeconds()).to.be.equal(vestingFrequencySeconds);
             expect(await veERC20.tgeUnlockRatio1e18()).to.be.equal(tgeUnlockRatio1e18);
-        })
+        });
+
+        it("updateTimestamps: bad tgeTimestamp", async () => {
+            const tx = veERC20.connect(admin).updateTimestamps(
+              deployTimestamp - 1, // in the past
+              cliffSeconds,
+              vestingSeconds,
+              tgeUnlockRatio1e18,
+              vestingFrequencySeconds
+            );
+            await expect(tx).to.be.reverted;
+        });
+
+        it("updateTimestamps: bad ratio", async () => {
+            const tx = veERC20.connect(admin).updateTimestamps(
+              deployTimestamp +tgeSeconds,
+              cliffSeconds,
+              vestingSeconds,
+              BN_1E18.add(1), // should be less that 1e18
+              vestingFrequencySeconds
+            );
+            await expect(tx).to.be.reverted;
+        });
+
+        it("updateTimestamps: bad frequency", async () => {
+            const tx = veERC20.connect(admin).updateTimestamps(
+              deployTimestamp +tgeSeconds,
+              cliffSeconds,
+              500,
+              tgeUnlockRatio1e18,
+              300 // 500/300 is not int
+            );
+            await expect(tx).to.be.reverted;
+        });
+
+        it("updateTimestamps: good frequency", async () => {
+            const tx = veERC20.connect(admin).updateTimestamps(
+              deployTimestamp +tgeSeconds,
+              cliffSeconds,
+              900,
+              tgeUnlockRatio1e18,
+              300
+            );
+            await expect(tx).not.to.be.reverted;
+        });
     });
 
     describe("lockUnderVesting", async () => {
@@ -226,14 +273,6 @@ describe("VeERC20", () => {
     describe("transfer", async () => {
         it("can't transfer veSuDAO", async () => {
             await expect(veERC20.transfer(user1.address, BN_1E18)).to.be.reverted;
-        });
-    });
-
-    describe("updateTge", async () => {
-        it("can't update to the TGE_MAX_TIMESTAMP", async () => {
-            await expect(veERC20.connect(admin).updateTgeTimestamp(await latest() - 100)).to.be.reverted;
-            await expect(veERC20.connect(admin).updateTgeTimestamp(await latest() + tgeSeconds)).to.be.reverted;
-            await expect(veERC20.connect(admin).updateTgeTimestamp(await latest() + tgeSeconds / 2)).not.to.be.reverted;
         });
     });
 
