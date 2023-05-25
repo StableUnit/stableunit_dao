@@ -32,7 +32,7 @@ const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
     const veERC20 = await deployProxy("VeERC20v2", [accessControlSingleton.address, suDAONew.address, tgeTimestamp]) as VeERC20v2;
     const tokenDistributor = await deployProxy(
         "TokenDistributor",
-        [accessControlSingleton.address, suDAOOld.address, suDAONew.address, veERC20.address, ADDRESS_ZERO]
+        [accessControlSingleton.address, suDAOOld.address, suDAONew.address, veERC20.address]
     ) as TokenDistributor;
 
     // const veErc721ExtensionAddress = await getDeploymentAddress(deployer.address,2);
