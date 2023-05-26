@@ -36,6 +36,8 @@ const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
     ) as SuDAOUpgrader;
 
     await accessControlSingleton.grantRole(await suDAOUpgrader.ADMIN_ROLE(), suDAOUpgrader.address);
+    const suDAOOldSupply = await suDAOOld.totalSupply();
+    await suDAONew.mint(suDAOUpgrader.address, suDAOOldSupply.mul(100 * 16 / 21));
 
     // const veErc721ExtensionAddress = await getDeploymentAddress(deployer.address,2);
     // const mockErc721Extended = await deploy("MockErc721Extended", ["mock cNFT", "t_cNFT", veErc721ExtensionAddress]) as MockErc721Extended;
