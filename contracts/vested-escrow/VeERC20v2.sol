@@ -170,8 +170,6 @@ contract VeERC20v2 is SuVoteToken, ERC20Upgradeable, IveERC20v2 {
     // }
 
     function rescue(ERC20Upgradeable token) external onlyRole(DAO_ROLE) {
-        // TODO: check if we need that
-        require(token != LOCKED_TOKEN, "No allowed to rescue this token");
         // allow to rescue ether
         if (address(token) == address(0)) {
             payable(msg.sender).transfer(address(this).balance);
@@ -198,6 +196,7 @@ contract VeERC20v2 is SuVoteToken, ERC20Upgradeable, IveERC20v2 {
 
     function transfer(address to, uint256 amount) public virtual override returns (bool) {
         if (isTransferable[msg.sender]) {
+            _transferVotingUnits(msg.sender, to, amount);
             super._transfer(msg.sender, to, amount);
         } else {
             revert UnableToTransfer(msg.sender);
@@ -205,11 +204,8 @@ contract VeERC20v2 is SuVoteToken, ERC20Upgradeable, IveERC20v2 {
         return true;
     }
 
-    /**
-     * @dev it's possible to burn veERC20 token, but the underlying token should be burn as well.
-     * statistics, such is amount of already withdrawn stay the same
-     */
     function burn(uint256 amount) public virtual {
+        _transferVotingUnits(msg.sender, address(0), amount);
         _burn(_msgSender(), amount);
         LOCKED_TOKEN.burn(amount);
     }

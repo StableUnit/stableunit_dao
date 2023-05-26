@@ -44,6 +44,12 @@ interface IveERC20v2 {
     // @notice The DAO can take away tokens accidentally sent to the contract.
     function rescue(ERC20Upgradeable token) external;
 
+    /**
+     * @dev it's possible to burn veERC20 token, but the underlying token should be burn as well.
+     * Statistics, such is amount of already withdrawn stay the same
+     */
+    function burn(uint256 amount) external;
+
     /* ==================== VIEW METHODS ==================== */
 
     // @notice Total amount of token was deposited under vesting on behalf of the user.

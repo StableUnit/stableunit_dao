@@ -120,6 +120,15 @@ describe("VeERC20", () => {
             const balanceAfter = await suDAO.balanceOf(admin.address);
             expect(balanceBefore).to.be.equal(balanceAfter.add(amountToLock));
         });
+
+        it("can't lockUnderVesting after burn and rescue", async () => {
+            await mintAndLockTokens(BN_1E18, user1);
+
+            await veERC20.connect(admin).rescue(suDAO.address);
+            await suDAO.connect(admin).burn(BN_1E18);
+            await suDAO.connect(admin).approve(veERC20.address, BN_1E18);
+            await expect(veERC20.connect(admin).lockUnderVesting(user1.address, BN_1E18)).to.be.reverted;
+        });
     });
 
     describe("availableToClaim", async () => {
@@ -250,29 +259,93 @@ describe("VeERC20", () => {
 
             expect(balanceAfter.sub(balanceBefore)).to.be.equal(rescueAmountBn);
         })
-
-        it("donate token to admin", async () => {
-            await mintAndLockTokens();
-
-            const balanceBefore = await suDAO.balanceOf(admin.address);
-            await veERC20.connect(user2).donateTokens(admin.address);
-            const balanceAfter = await suDAO.balanceOf(admin.address);
-
-            const donated = balanceAfter.sub(balanceBefore);
-            expect(donated).to.be.equal(amountToLock);
-        })
-
-        it("donate token to invalid DAO address should fail", async () => {
-            await mintAndLockTokens();
-            await expect(veERC20.connect(user2).donateTokens(user1.address)).to.be.reverted;
-            await expect(veERC20.connect(user2).donateTokens(deployer.address)).to.be.reverted;
-        })
-
     });
 
     describe("transfer", async () => {
-        it("can't transfer veSuDAO", async () => {
+        it("can't as default transfer veSuDAO", async () => {
             await expect(veERC20.transfer(user1.address, BN_1E18)).to.be.reverted;
+        });
+
+        it("can't do transfer with 0 veSuDAO by dao", async () => {
+            await veERC20.connect(admin).adminTransferUnlock(admin.address, true);
+
+            await expect(veERC20.connect(admin).transfer(user1.address, BN_1E18)).to.be.reverted;
+        });
+
+        it("can do transfer veSuDAO by dao", async () => {
+            const amount = BN_1E18;
+            await veERC20.connect(admin).adminTransferUnlock(admin.address, true);
+            await mintAndLockTokens(amount, admin);
+
+            const balanceUserBefore = await veERC20.balanceOf(user1.address);
+            const balanceAdminBefore = await veERC20.balanceOf(admin.address);
+
+            await veERC20.connect(admin).transfer(user1.address, amount);
+
+            const balanceUserAfter = await veERC20.balanceOf(user1.address);
+            const balanceAdminAfter = await veERC20.balanceOf(admin.address);
+
+            expect(balanceUserAfter).to.be.equal(balanceUserBefore.add(amount));
+            expect(balanceAdminAfter).to.be.equal(balanceAdminBefore.sub(amount));
+
+            await veERC20.connect(admin).adminTransferUnlock(admin.address, false);
+            await expect(veERC20.connect(admin).transfer(user1.address, BN_1E18)).to.be.reverted;
+        });
+    });
+
+    describe("burn", async () => {
+        it("can't burn more that in balance", async () => {
+            await expect(veERC20.connect(user1).burn(BN_1E18)).to.be.reverted;
+        });
+
+        it("can burn less that in balance after transfer", async () => {
+            const amount = BN_1E18;
+            await veERC20.connect(admin).adminTransferUnlock(admin.address, true);
+            await mintAndLockTokens(amount, admin);
+
+            const balanceAdminBefore = await veERC20.balanceOf(admin.address);
+
+            await veERC20.connect(admin).transfer(user1.address, amount);
+            await veERC20.connect(user1).burn(amount.sub(1));
+
+            const balanceUserAfter = await veERC20.balanceOf(user1.address);
+            const balanceAdminAfter = await veERC20.balanceOf(admin.address);
+
+            expect(balanceUserAfter).to.be.equal(1);
+            expect(balanceAdminAfter).to.be.equal(balanceAdminBefore.sub(amount));
+        });
+
+        it("can burn less that in balance after lock", async () => {
+            const amount = BN_1E18;
+            await mintAndLockTokens(amount, user1);
+
+            const suDaoBalanceContractBefore = await suDAO.balanceOf(veERC20.address);
+            const balanceUserBefore = await veERC20.balanceOf(user1.address);
+            const balanceAdminBefore = await veERC20.balanceOf(admin.address);
+
+            expect(balanceUserBefore).to.be.equal(amount);
+            await veERC20.connect(user1).burn(amount.sub(1));
+
+            const suDaoBalanceContractAfter = await suDAO.balanceOf(veERC20.address);
+            const balanceUserAfter = await veERC20.balanceOf(user1.address);
+            const balanceAdminAfter = await veERC20.balanceOf(admin.address);
+
+            expect(balanceUserAfter).to.be.equal(1);
+            expect(balanceAdminAfter).to.be.equal(balanceAdminBefore);
+            expect(suDaoBalanceContractAfter).to.be.equal(suDaoBalanceContractBefore.sub(amount.sub(1)));
+
+            // in balance user1 have only 1 after burn
+            await expect(veERC20.connect(user1).burn(2)).to.be.reverted;
+
+            await veERC20.connect(user1).burn(1);
+            expect(await veERC20.balanceOf(user1.address)).to.be.equal(0);
+        });
+
+        it("can't burn if locked tokens are not enough", async () => {
+            await mintAndLockTokens(BN_1E18, user1);
+
+            await veERC20.connect(admin).rescue(suDAO.address);
+            await expect(veERC20.connect(user1).burn(1)).to.be.reverted;
         });
     });
 
