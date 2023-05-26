@@ -35,28 +35,30 @@ import "../interfaces/IveERC20v2.sol";
 */
 contract VeERC20v2 is SuVoteToken, ERC20BurnableUpgradeable, IveERC20v2 {
     using SafeERC20Upgradeable for ERC20Upgradeable;
+    using SafeERC20Upgradeable for ERC20BurnableUpgradeable;
 
-    ERC20Upgradeable public LOCKED_TOKEN;
-    uint32 public tgeTimestamp;
-
-    // Amount of seconds while tokens would be completely locked.
-    uint32 public cliffSeconds;
-
-    // Amount of seconds when vesting would be over. Starts from cliff.
-    uint32 public vestingSeconds;
+    ERC20BurnableUpgradeable public LOCKED_TOKEN;
+    uint32 public tgeTimestamp ;
 
     // ratio/1e18 ⊂ [0..1] that indicates how many tokens are going to be unlocked during TGE
     // uint64 is enough because log2(1e18) ~= 60
-    uint64 public tgeUnlockRatio1e18;
+    uint64 public tgeUnlockRatio1e18 = 10 * 1e16; // 10%
+
+    // Amount of seconds while tokens would be completely locked.
+    uint32 public cliffSeconds = 6 * 30 days;
+
+    // Amount of seconds when vesting would be over. Starts from cliff.
+    uint32 public vestingSeconds = 24 * 30 days;
 
     // how frequently token are going to be unlocked after the cliff.
-    uint32 public vestingFrequencySeconds;
+    uint32 public vestingFrequencySeconds =  6 * 30 days;
 
     mapping(address => uint256) public alreadyWithdrawn;
+    mapping(address => bool) public isTransfrable;
 
     function initialize(
         address _accessControlSingleton,
-        ERC20Upgradeable _lockedToken,
+        ERC20BurnableUpgradeable _lockedToken,
         uint32 _maxTgeTimestamp
     ) initializer public {
         string memory veSymbol = string.concat("ve", _lockedToken.symbol());
@@ -66,10 +68,10 @@ contract VeERC20v2 is SuVoteToken, ERC20BurnableUpgradeable, IveERC20v2 {
         LOCKED_TOKEN = _lockedToken;
         tgeTimestamp = _maxTgeTimestamp;
 
-        cliffSeconds = 6 * 30 days;
-        vestingSeconds = 24 * 30 days;
-        vestingFrequencySeconds = 6 * 30 days;
-        tgeUnlockRatio1e18 = 10 * 1e16; // 10%
+        // cliffSeconds = 6 * 30 days;
+        // vestingSeconds = 24 * 30 days;
+        // vestingFrequencySeconds = 6 * 30 days;
+        // tgeUnlockRatio1e18 = 10 * 1e16; // 10%
     }
 
     function updateTimestamps(
@@ -157,15 +159,15 @@ contract VeERC20v2 is SuVoteToken, ERC20BurnableUpgradeable, IveERC20v2 {
     }
 
     // TODO: check if we need that and it's secure
-    function donateTokens(address toDAO) external {
-        if (hasRole(DAO_ROLE, toDAO) == false) revert BadDAOAddress(toDAO);
-        uint256 balance = super.balanceOf(msg.sender);
-        if (balance == 0) revert NoBalance();
-        alreadyWithdrawn[msg.sender] = alreadyWithdrawn[msg.sender] + balance;
-        _burn(msg.sender, balance);
-        _transferVotingUnits(msg.sender, address(0), balance);
-        LOCKED_TOKEN.safeTransfer(toDAO, balance);
-    }
+    // function donateTokens(address toDAO) external {
+    //     if (hasRole(DAO_ROLE, toDAO) == false) revert BadDAOAddress(toDAO);
+    //     uint256 balance = super.balanceOf(msg.sender);
+    //     if (balance == 0) revert NoBalance();
+    //     alreadyWithdrawn[msg.sender] = alreadyWithdrawn[msg.sender] + balance;
+    //     _burn(msg.sender, balance);
+    //     _transferVotingUnits(msg.sender, address(0), balance);
+    //     LOCKED_TOKEN.safeTransfer(toDAO, balance);
+    // }
 
     function rescue(ERC20Upgradeable token) external onlyRole(DAO_ROLE) {
         // TODO: check if we need that
@@ -179,16 +181,37 @@ contract VeERC20v2 is SuVoteToken, ERC20BurnableUpgradeable, IveERC20v2 {
     }
     receive() external payable {}
 
-    function burnAll() external {
-        uint256 balance = super.balanceOf(msg.sender);
-        super._burn(msg.sender, balance);
-        _transferVotingUnits(msg.sender, address(0), balance);
-        // TODO: check if is okay if user withdraw something before burnAll(). Write test for this case.
-        alreadyWithdrawn[msg.sender] = 0;
+    // function burnAll() external {
+    //     uint256 balance = super.balanceOf(msg.sender);
+    //     super._burn(msg.sender, balance);
+    //     _transferVotingUnits(msg.sender, address(0), balance);
+    //     // TODO: check if is okay if user withdraw something before burnAll(). Write test for this case.
+    //     alreadyWithdrawn[msg.sender] = 0;
+    // }
+
+    /*
+     * @dev Admin can set expections for veERC20 and let some accounts to tranfer locked tokens
+     */
+    function adminTransferUnlock(address account, bool _isTransfrable) external onlyRole(ADMIN_ROLE) {
+        isTransfrable[account] = _isTransfrable;
     }
 
-    function transfer(address, uint256) public virtual override returns (bool) {
-        revert UnavailableFunctionalityError();
+    function transfer(address to, uint256 amount) public virtual override returns (bool) {
+        if (isTransfrable[msg.sender]) {
+            super._transfer(msg.sender, to, amount);
+        } else {
+            revert UnableToTransfer(msg.sender);
+        }
+        return true;
+    }
+
+    /**
+     * @dev it's possible to burn veERC20 token, but the underlying token should be burn as well.
+     * statistics, such is amount of already withdrawn stay the same
+     */
+    function burn(uint256 amount) public virtual override {
+        _burn(_msgSender(), amount);
+        LOCKED_TOKEN.burn(amount);
     }
 
     function supportsInterface(bytes4 interfaceId) public virtual view override returns (bool) {

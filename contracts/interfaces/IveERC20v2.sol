@@ -19,6 +19,7 @@ interface IveERC20v2 {
     error BadUnlockRatio();
     error BadDAOAddress(address dao);
     error NoBalance();
+    error UnableToTransfer(address);
 
     /* ==================== MUTABLE METHODS ==================== */
 
@@ -40,13 +41,8 @@ interface IveERC20v2 {
     // @notice User can claim their vested tokens.
     function claim() external;
 
-    // @notice User can donate tokens under vesting to DAO or other admin contract as us treasury.
-    function donateTokens(address toDAO) external;
-
     // @notice The DAO can take away tokens accidentally sent to the contract.
     function rescue(ERC20Upgradeable token) external;
-
-    function burnAll() external;
 
     /* ==================== VIEW METHODS ==================== */
 
