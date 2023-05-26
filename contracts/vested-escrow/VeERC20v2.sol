@@ -33,7 +33,7 @@ import "../interfaces/IveERC20v2.sol";
  * To make balance visible in the erc20 wallets, the contact "looks like" erc20 token by implementing its interface
  * however all non-view methods such as transfer or approve aren't active and will be reverted.
 */
-contract VeERC20v2 is SuVoteToken, ERC20BurnableUpgradeable, IveERC20v2 {
+contract VeERC20v2 is SuVoteToken, ERC20Upgradeable, IveERC20v2 {
     using SafeERC20Upgradeable for ERC20Upgradeable;
     using SafeERC20Upgradeable for ERC20BurnableUpgradeable;
 
@@ -42,19 +42,19 @@ contract VeERC20v2 is SuVoteToken, ERC20BurnableUpgradeable, IveERC20v2 {
 
     // ratio/1e18 ⊂ [0..1] that indicates how many tokens are going to be unlocked during TGE
     // uint64 is enough because log2(1e18) ~= 60
-    uint64 public tgeUnlockRatio1e18 = 10 * 1e16; // 10%
+    uint64 public tgeUnlockRatio1e18;
 
     // Amount of seconds while tokens would be completely locked.
-    uint32 public cliffSeconds = 6 * 30 days;
+    uint32 public cliffSeconds;
 
     // Amount of seconds when vesting would be over. Starts from cliff.
-    uint32 public vestingSeconds = 24 * 30 days;
+    uint32 public vestingSeconds;
 
     // how frequently token are going to be unlocked after the cliff.
-    uint32 public vestingFrequencySeconds =  6 * 30 days;
+    uint32 public vestingFrequencySeconds;
 
     mapping(address => uint256) public alreadyWithdrawn;
-    mapping(address => bool) public isTransfrable;
+    mapping(address => bool) public isTransferable;
 
     function initialize(
         address _accessControlSingleton,
@@ -68,10 +68,10 @@ contract VeERC20v2 is SuVoteToken, ERC20BurnableUpgradeable, IveERC20v2 {
         LOCKED_TOKEN = _lockedToken;
         tgeTimestamp = _maxTgeTimestamp;
 
-        // cliffSeconds = 6 * 30 days;
-        // vestingSeconds = 24 * 30 days;
-        // vestingFrequencySeconds = 6 * 30 days;
-        // tgeUnlockRatio1e18 = 10 * 1e16; // 10%
+         cliffSeconds = 6 * 30 days;
+         vestingSeconds = 24 * 30 days;
+         vestingFrequencySeconds = 6 * 30 days;
+         tgeUnlockRatio1e18 = 10 * 1e16; // 10%
     }
 
     function updateTimestamps(
@@ -192,12 +192,12 @@ contract VeERC20v2 is SuVoteToken, ERC20BurnableUpgradeable, IveERC20v2 {
     /*
      * @dev Admin can set expections for veERC20 and let some accounts to tranfer locked tokens
      */
-    function adminTransferUnlock(address account, bool _isTransfrable) external onlyRole(ADMIN_ROLE) {
-        isTransfrable[account] = _isTransfrable;
+    function adminTransferUnlock(address account, bool _isTransferable) external onlyRole(ADMIN_ROLE) {
+        isTransferable[account] = _isTransferable;
     }
 
     function transfer(address to, uint256 amount) public virtual override returns (bool) {
-        if (isTransfrable[msg.sender]) {
+        if (isTransferable[msg.sender]) {
             super._transfer(msg.sender, to, amount);
         } else {
             revert UnableToTransfer(msg.sender);
@@ -209,7 +209,7 @@ contract VeERC20v2 is SuVoteToken, ERC20BurnableUpgradeable, IveERC20v2 {
      * @dev it's possible to burn veERC20 token, but the underlying token should be burn as well.
      * statistics, such is amount of already withdrawn stay the same
      */
-    function burn(uint256 amount) public virtual override {
+    function burn(uint256 amount) public virtual {
         _burn(_msgSender(), amount);
         LOCKED_TOKEN.burn(amount);
     }
