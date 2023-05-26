@@ -15,7 +15,7 @@
     "test:deployment": "hardhat test test/deployment-tests/*.test.ts",
     "coverage": "npx hardhat coverage",
     "deploy": "hardhat deploy",
-    "deploy:goerli": "hardhat deploy --tags Deployer --reset --network goerli",
+    "deploy:goerli": "hardhat deploy --tags Deployer --network goerli",
     "verify:goerli": "hardhat run ./scripts/verifyEtherscan.ts --network goerli",
     "upgrade:goerli": "hardhat run ./scripts/upgrade.ts --network goerli",
     "upgrade-proposal:goerli": "hardhat run ./scripts/propose-upgrade.ts --network goerli",

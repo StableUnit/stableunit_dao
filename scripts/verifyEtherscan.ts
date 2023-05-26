@@ -19,11 +19,14 @@ const verify = async (contractName: string, contractPath?: string) => {
 
 async function main() {
   await verify("SuAccessControlSingleton");
-  await verify("SuDAO");
-  await verify("Bonus");
-  await verify("VeERC20");
-  await verify("TokenDistributorV4");
-  await verify("MockErc721");
+  await verify("SuDAOv2");
+  await verify("VeERC20v2");
+  await verify("SuDAOUpgrader");
+  // await verify("SuDAO");
+  // await verify("Bonus");
+  // await verify("VeERC20");
+  // await verify("TokenDistributorV4");
+  // await verify("MockErc721");
 }
 
 main().catch((error) => {

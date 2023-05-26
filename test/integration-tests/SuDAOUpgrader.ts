@@ -2,14 +2,21 @@ import {deployments, ethers, getNamedAccounts} from "hardhat";
 import {ContractTransaction} from "ethers";
 import {expect} from "chai";
 
-import {MockErc721, SuAccessControlSingleton, SuDAO, SuDAOv2, TokenDistributor, VeERC20v2} from "../../typechain";
+import {
+    MockErc721,
+    SuAccessControlSingleton,
+    SuDAO,
+    SuDAOUpgrader,
+    SuDAOv2,
+    VeERC20v2
+} from "../../typechain";
 import {ADDRESS_ZERO, BN_1E18} from "../utils";
 import {SignerWithAddress} from "@nomiclabs/hardhat-ethers/signers";
 
-describe("TokenDistributorV4", () => {
+describe("SuDAOUpgrader", () => {
     let tx: ContractTransaction | Promise<ContractTransaction>;
 
-    let distributor: TokenDistributor;
+    let distributor: SuDAOUpgrader;
     let suDAOOld: SuDAO;
     let suDAONew: SuDAOv2;
     let veERC20: VeERC20v2;
@@ -39,7 +46,7 @@ describe("TokenDistributorV4", () => {
         await deployments.fixture(["Deployer"]);
 
         accessControlSingleton = await ethers.getContract("SuAccessControlSingleton") as SuAccessControlSingleton;
-        distributor = await ethers.getContract("TokenDistributor") as TokenDistributor;
+        distributor = await ethers.getContract("SuDAOUpgrader") as SuDAOUpgrader;
         suDAOOld = await ethers.getContract("SuDAO") as SuDAO;
         suDAONew = await ethers.getContract("SuDAOv2") as SuDAOv2;
         veERC20 = await ethers.getContract("VeERC20v2") as VeERC20v2;

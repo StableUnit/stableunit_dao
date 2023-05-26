@@ -86,6 +86,7 @@ const config: HardhatUserConfig = {
             timeout: 100000,
             blockGasLimit: 7_000_000,
             gas: 7_000_000,
+            gasPrice: 100_000_000,
         },
         mumbai: {
             url: `https://polygon-mumbai.infura.io/v3/${INFURA_API_KEY}`,

@@ -16,13 +16,13 @@ import "@openzeppelin/contracts-upgradeable/token/ERC20/utils/SafeERC20Upgradeab
 import "@openzeppelin/contracts-upgradeable/token/ERC20/IERC20Upgradeable.sol";
 
 import "../access-control/SuAccessControlAuthenticated.sol";
-import "../interfaces/ITokenDistributor.sol";
+import "../interfaces/ISuDAOUpgrader.sol";
 import "../interfaces/IveERC20v2.sol";
 
 /**
  * @title The contract that distribute suDAO tokens for community based on NFT membership
  */
-contract TokenDistributor is SuAccessControlAuthenticated, ITokenDistributor {
+contract SuDAOUpgrader is SuAccessControlAuthenticated, ISuDAOUpgrader {
     using SafeERC20Upgradeable for IERC20Upgradeable;
 
     IveERC20v2 public VE_ERC_20;

@@ -6,7 +6,7 @@ import {
     SuAccessControlSingleton,
     SuDAO,
     SuDAOv2,
-    TokenDistributor,
+    SuDAOUpgrader,
     VeERC20v2,
     VeERC721Extension, VotingPower
 } from "../typechain";
@@ -30,10 +30,12 @@ const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
     // Unix Timestamp	1685577600 = GMT+0 Thu Jun 01 2023 00:00:00 GMT+0000
     const tgeTimestamp = 1685577600;
     const veERC20 = await deployProxy("VeERC20v2", [accessControlSingleton.address, suDAONew.address, tgeTimestamp]) as VeERC20v2;
-    const tokenDistributor = await deployProxy(
-        "TokenDistributor",
+    const suDAOUpgrader = await deployProxy(
+        "SuDAOUpgrader",
         [accessControlSingleton.address, suDAOOld.address, suDAONew.address, veERC20.address]
-    ) as TokenDistributor;
+    ) as SuDAOUpgrader;
+
+    await accessControlSingleton.grantRole(await suDAOUpgrader.ADMIN_ROLE(), suDAOUpgrader.address);
 
     // const veErc721ExtensionAddress = await getDeploymentAddress(deployer.address,2);
     // const mockErc721Extended = await deploy("MockErc721Extended", ["mock cNFT", "t_cNFT", veErc721ExtensionAddress]) as MockErc721Extended;

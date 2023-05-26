@@ -4,7 +4,7 @@ pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts-upgradeable/token/ERC20/IERC20Upgradeable.sol";
 
-interface ITokenDistributor {
+interface ISuDAOUpgrader {
 
     /* ===================== EVENTS ===================== */
     event Participated(address account, uint256 donationAmount);
