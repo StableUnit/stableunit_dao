@@ -38,7 +38,7 @@ contract VeERC20v2 is SuVoteToken, ERC20Upgradeable, IveERC20v2 {
     using SafeERC20Upgradeable for ERC20BurnableUpgradeable;
 
     ERC20BurnableUpgradeable public LOCKED_TOKEN;
-    uint32 public tgeTimestamp ;
+    uint32 public tgeTimestamp;
 
     // ratio/1e18 ⊂ [0..1] that indicates how many tokens are going to be unlocked during TGE
     // uint64 is enough because log2(1e18) ~= 60
@@ -68,10 +68,10 @@ contract VeERC20v2 is SuVoteToken, ERC20Upgradeable, IveERC20v2 {
         LOCKED_TOKEN = _lockedToken;
         tgeTimestamp = _maxTgeTimestamp;
 
-         cliffSeconds = 6 * 30 days;
-         vestingSeconds = 24 * 30 days;
-         vestingFrequencySeconds = 6 * 30 days;
-         tgeUnlockRatio1e18 = 10 * 1e16; // 10%
+        cliffSeconds = 6 * 30 days;
+        vestingSeconds = 24 * 30 days;
+        vestingFrequencySeconds = 6 * 30 days;
+        tgeUnlockRatio1e18 = 10 * 1e16; // 10%
     }
 
     function updateTimestamps(
@@ -206,7 +206,7 @@ contract VeERC20v2 is SuVoteToken, ERC20Upgradeable, IveERC20v2 {
 
     function burn(uint256 amount) public virtual {
         _transferVotingUnits(msg.sender, address(0), amount);
-        _burn(_msgSender(), amount);
+        _burn(msg.sender, amount);
         LOCKED_TOKEN.burn(amount);
     }
 

@@ -61,7 +61,7 @@ contract SuDAOUpgrader is SuAccessControlAuthenticated, ISuDAOUpgrader {
      * @notice The owner of the contact can take away tokens sent to the contract.
      * @dev The owner can't take away SuDAO token already distributed to users, because they are stored on timelockVault
      */
-    function adminWithdraw(IERC20Upgradeable token) external onlyRole(DEFAULT_ADMIN_ROLE) {
+    function adminWithdraw(IERC20Upgradeable token) external onlyRole(ADMIN_ROLE) {
         if (token == IERC20Upgradeable(address(0))) {
             payable(msg.sender).transfer(address(this).balance);
         } else {

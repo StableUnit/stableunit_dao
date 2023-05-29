@@ -27,8 +27,8 @@ const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
       : await ethers.getContract("SuDAO") as SuDAO;
     const suDAONew = await deployProxy("SuDAOv2", [accessControlSingleton.address]) as SuDAOv2;
     // const bonus = await deployProxy("Bonus", [accessControlSingleton.address, admin.address]) as Bonus;
-    // Unix Timestamp	1685577600 = GMT+0 Thu Jun 01 2023 00:00:00 GMT+0000
-    const tgeTimestamp = 1685577600;
+    // Unix Timestamp	1704056400 = GMT+0 Thu Jan 01 2024 00:00:00 GMT+0000
+    const tgeTimestamp = 1704056400; // change to 2024
     const veERC20 = await deployProxy("VeERC20v2", [accessControlSingleton.address, suDAONew.address, tgeTimestamp]) as VeERC20v2;
     const suDAOUpgrader = await deployProxy(
         "SuDAOUpgrader",
