@@ -30,9 +30,14 @@ const {
     ETHERSCAN_API_KEY,
     PRIVATE_KEY_TESTNET_DEPLOYER,
     PRIVATE_KEY_TESTNET_ADMIN,
+    PRIVATE_KEY_TESTNET_VANITY_1,
 } = process.env;
 
-const accountsTestnetEnv = [PRIVATE_KEY_TESTNET_DEPLOYER, PRIVATE_KEY_TESTNET_ADMIN] as string[];
+const accountsTestnetEnv = [
+    PRIVATE_KEY_TESTNET_DEPLOYER,
+    PRIVATE_KEY_TESTNET_ADMIN,
+    PRIVATE_KEY_TESTNET_VANITY_1
+] as string[];
 const accountsTestnet = accountsTestnetEnv.filter((v) => v);
 
 // You need to export an object to set up your config
@@ -86,7 +91,7 @@ const config: HardhatUserConfig = {
             timeout: 100000,
             blockGasLimit: 7_000_000,
             gas: 7_000_000,
-            gasPrice: 100_000_000,
+            gasPrice: 50_000_000_000,
         },
         mumbai: {
             url: `https://polygon-mumbai.infura.io/v3/${INFURA_API_KEY}`,
