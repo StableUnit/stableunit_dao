@@ -196,8 +196,8 @@ contract VeERC20v2 is SuVoteToken, ERC20Upgradeable, IveERC20v2 {
 
     function transfer(address to, uint256 amount) public virtual override returns (bool) {
         if (isTransferable[msg.sender]) {
-            _transferVotingUnits(msg.sender, to, amount);
             super._transfer(msg.sender, to, amount);
+            _transferVotingUnits(msg.sender, to, amount);
         } else {
             revert UnableToTransfer(msg.sender);
         }
@@ -205,8 +205,8 @@ contract VeERC20v2 is SuVoteToken, ERC20Upgradeable, IveERC20v2 {
     }
 
     function burn(uint256 amount) public virtual {
-        _transferVotingUnits(msg.sender, address(0), amount);
         _burn(msg.sender, amount);
+        _transferVotingUnits(msg.sender, address(0), amount);
         LOCKED_TOKEN.burn(amount);
     }
 
