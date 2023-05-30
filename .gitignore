@@ -3,6 +3,7 @@
 
 node_modules
 typechain
+build
 
 
 # Created by https://www.toptal.com/developers/gitignore/api/node,solidity

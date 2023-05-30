@@ -7,5 +7,7 @@
     "target": "ES2018",
     "sourceMap": true,
     "esModuleInterop": true
-  }
+  },
+  "include": ["migrations-ts"],
+  "exclude": ["typechain", "node_modules"],
 }
