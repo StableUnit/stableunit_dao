@@ -12,17 +12,18 @@
 */
 pragma solidity ^0.8.7;
 
-import "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20Upgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/token/ERC20/extensions/ERC20VotesUpgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/token/ERC20/extensions/ERC20BurnableUpgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/token/ERC20/utils/SafeERC20Upgradeable.sol";
-import "./access-control/SuAccessControlAuthenticated.sol";
+import "@openzeppelin/contracts/token/ERC20/extensions/ERC20Burnable.sol";
+import "@openzeppelin/contracts/token/ERC20/extensions/ERC20Votes.sol";
+import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
+import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+
+import "./access-control/SuAccessControlAuthenticatedNonUpgradeable.sol";
 
 /**
  * @title Governance token for StableUnit Decentralized Autonomous Organisation
  */
-contract SuDAOv2 is ERC20VotesUpgradeable, ERC20BurnableUpgradeable, SuAccessControlAuthenticated {
-    using SafeERC20Upgradeable for ERC20Upgradeable;
+contract SuDAOv2 is ERC20Votes, ERC20Burnable, SuAccessControlAuthenticatedNonUpgradeable {
+    using SafeERC20 for ERC20;
 
     uint256 public constant MAX_SUPPLY = 16_000_000 * 100 * 1e18;
     uint256 public constant MAX_POST_VESTING_INFLATION = 5_000_000 * 100 * 1e18;
@@ -31,10 +32,11 @@ contract SuDAOv2 is ERC20VotesUpgradeable, ERC20BurnableUpgradeable, SuAccessCon
 
     error MaxSupplyExceeded();
 
-    function initialize(address _accessControlSingleton) initializer public {
-        __SuAuthenticated_init(_accessControlSingleton);
-        __ERC20_init("StableUnit DAO v2", "SuDAO");
-
+    constructor(address _accessControlSingleton)
+    ERC20("StableUnit DAO v2", "SuDAO")
+    ERC20Permit("StableUnit DAO v2")
+    SuAccessControlAuthenticatedNonUpgradeable(_accessControlSingleton)
+    {
         DEPLOY_TIME = uint32(block.timestamp);
     }
 
@@ -51,7 +53,7 @@ contract SuDAOv2 is ERC20VotesUpgradeable, ERC20BurnableUpgradeable, SuAccessCon
     /**
      * @notice The DAO can take away tokens accidentally sent to the contract.
      */
-    function rescueTokens(ERC20Upgradeable token) external onlyRole(DAO_ROLE) {
+    function rescueTokens(ERC20 token) external onlyRole(DAO_ROLE) {
         // allow to rescue ether
         if (address(token) == address(0)) {
             payable(msg.sender).transfer(address(this).balance);
@@ -64,31 +66,15 @@ contract SuDAOv2 is ERC20VotesUpgradeable, ERC20BurnableUpgradeable, SuAccessCon
 
     // The following functions are overrides required by Solidity.
 
-    function _afterTokenTransfer(address from, address to, uint256 amount)
-    internal
-    override(ERC20Upgradeable, ERC20VotesUpgradeable)
-    {
+    function _afterTokenTransfer(address from, address to, uint256 amount) internal override(ERC20, ERC20Votes) {
         super._afterTokenTransfer(from, to, amount);
     }
 
-    function _mint(address to, uint256 amount)
-    internal
-    override(ERC20Upgradeable, ERC20VotesUpgradeable)
-    {
+    function _mint(address to, uint256 amount) internal override(ERC20, ERC20Votes) {
         super._mint(to, amount);
     }
 
-    function _burn(address account, uint256 amount)
-    internal
-    override(ERC20Upgradeable, ERC20VotesUpgradeable)
-    {
+    function _burn(address account, uint256 amount) internal override(ERC20, ERC20Votes) {
         super._burn(account, amount);
     }
-
-    /**
-     * @dev This empty reserved space is put in place to allow future versions to add new
-     * variables without shifting down storage in the inheritance chain.
-     * See https://docs.openzeppelin.com/contracts/4.x/upgradeable#storage_gaps
-     */
-    uint256[49] private __gap;
 }

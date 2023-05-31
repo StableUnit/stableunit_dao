@@ -1,7 +1,7 @@
 import Web3 from "web3";
 
 const RLP = require('rlp');
-const DEPLOYER_MIN_BALANCE = Web3.utils.toBN(1e18 * 1);
+const DEPLOYER_MIN_BALANCE = Web3.utils.toBN(1e18 * 1.5);
 const ACCOUNT_DUST_THRESHOLD = Web3.utils.toBN(1e18 * 0.00001);
 
 
@@ -43,6 +43,7 @@ export const fundDeployer = async (web3: Web3, fromAccount: string, toAccount: s
 }
 
 export const withdrawEther = async (web3: Web3, fromAccount: string, toAccount: string) => {
+    console.log('start withdraw');
     if (fromAccount === toAccount) return;
 
     // sometimes fromBalance doesn't count for the last tx, so we have to wait a bit
@@ -50,7 +51,7 @@ export const withdrawEther = async (web3: Web3, fromAccount: string, toAccount: 
 
     const fromBalance = web3.utils.toBN(await web3.eth.getBalance(fromAccount));
     const gasPrice = web3.utils.toBN(await web3.eth.getGasPrice());
-    const fromMaxToSend = fromBalance.sub(gasPrice.muln(5_000_000));
+    const fromMaxToSend = fromBalance.sub(gasPrice.muln(10_000_000));
 
     if (fromMaxToSend.gt(ACCOUNT_DUST_THRESHOLD)) {
         console.log(`withdrawEther: fromBalance ${fromBalance} gasPrice=${gasPrice} maxSend = ${fromMaxToSend}`);

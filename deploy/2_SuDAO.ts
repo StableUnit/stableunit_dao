@@ -5,6 +5,13 @@ import deployProxy from "../test/utils/deploy";
 import {ethers, upgrades, web3} from "hardhat";
 import {checkVanityAddress, fundDeployer, withdrawEther} from "../scripts/utils";
 
+const defaultOptions = {
+    log: true,
+    waitConfirmations: 1,
+    gasLimit: 7_000_000,
+    estimatedGasLimit: 7_000_000,
+}
+
 // TODO: move all mocks deploy in separate deploy script
 const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
     const [deployer, admin, vanity1] = await hre.ethers.getSigners();
@@ -20,7 +27,12 @@ const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
 
     await checkVanityAddress(web3, vanity1.address);
     await fundDeployer(web3, deployer.address, vanity1.address);
-    const suDAONew = await deployProxy("SuDAOv2", [accessControlSingleton.address], undefined, true, vanity1) as SuDAOv2;
+
+    await hre.deployments.deploy("SuDAOv2", {
+        ...defaultOptions,
+        from: vanity1.address,
+        args: [accessControlSingleton.address]
+    });
     await withdrawEther(web3, vanity1.address, deployer.address);
 
     await upgrades.admin.transferProxyAdminOwnership(deployer.address);

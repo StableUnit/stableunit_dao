@@ -4,9 +4,19 @@ import { getContractAddress } from "ethers/lib/utils";
 import { Signer } from "ethers";
 
 export const deployProxy = async (contractName: string, args?: any[], options?: DeployProxyOptions, needLogs = true, signer?: Signer) => {
-    const contractFactory = await ethers.getContractFactory(contractName, signer);
+    const contractFactoryDefault = await ethers.getContractFactory(contractName);
+    const contractFactoryWithSigner = await ethers.getContractFactory(contractName, signer);
+    await upgrades.deployImplementation(contractFactoryDefault, { unsafeAllow: ['delegatecall'] });
     // unsafeAllow because of https://github.com/OpenZeppelin/openzeppelin-upgrades/issues/455
-    const proxyContract = await upgrades.deployProxy(contractFactory, args, {...(options ?? {}), unsafeAllow: ['delegatecall']});
+    const proxyContract = await upgrades.deployProxy(
+      contractFactoryWithSigner,
+      args,
+      {
+          useDeployedImplementation: true,
+          unsafeAllow: ['delegatecall'],
+          ...(options ?? {}),
+      }
+    );
     await proxyContract.deployed();
 
     if (needLogs) {
