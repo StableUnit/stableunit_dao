@@ -1,6 +1,6 @@
-import { deployments, run } from "hardhat";
+import {deployments, ethers, run} from "hardhat";
 
-const verify = async (contractName: string, contractPath?: string) => {
+const verify = async (contractName: string, contractPath?: string, constructorArguments?: any[]) => {
   try {
     const Contract = await deployments.get(contractName);
 
@@ -9,6 +9,7 @@ const verify = async (contractName: string, contractPath?: string) => {
     await run("verify:verify", {
       address: Contract.address,
       contract: contractPath,
+      constructorArguments
     });
 
     console.log(`✅ ${contractName} verified`);
@@ -18,7 +19,9 @@ const verify = async (contractName: string, contractPath?: string) => {
 };
 
 async function main() {
-  await verify("SuDAOv2");
+  const suAccessControlSingleton = await ethers.getContract("SuAccessControlSingleton");
+
+  await verify("SuDAOv2", undefined, [suAccessControlSingleton.address]);
   await verify("VeERC20v2");
   await verify("SuDAOUpgrader");
   await verify("SuAccessControlSingleton");

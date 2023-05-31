@@ -63,7 +63,7 @@ contract VeERC20v2 is SuVoteToken, ERC20Upgradeable, IveERC20v2 {
     ) initializer public {
         string memory veSymbol = string.concat("ve", _lockedToken.symbol());
         __SuVoteToken__init(_accessControlSingleton, veSymbol);
-        __ERC20_init(string.concat("vested escrow ", _lockedToken.name()), veSymbol);
+        __ERC20_init(string.concat("voted escrow ", _lockedToken.name()), veSymbol);
 
         LOCKED_TOKEN = _lockedToken;
         tgeTimestamp = _maxTgeTimestamp;
