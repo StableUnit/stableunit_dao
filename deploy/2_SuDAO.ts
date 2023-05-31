@@ -1,19 +1,9 @@
 import {HardhatRuntimeEnvironment} from "hardhat/types";
 import {DeployFunction} from "hardhat-deploy/types";
-import {
-    Bonus,
-    MockErc721Extended,
-    SuAccessControlSingleton,
-    SuDAO,
-    SuDAOv2,
-    SuDAOUpgrader,
-    VeERC20v2,
-    VeERC721Extension, VotingPower
-} from "../typechain";
-import deployProxy, {deploy, getDeploymentAddress} from "../test/utils/deploy";
-import {expect} from "chai";
-import {ethers, upgrades} from "hardhat";
-import {ADDRESS_ZERO} from "../test/utils";
+import {SuAccessControlSingleton, SuDAO, SuDAOv2} from "../typechain";
+import deployProxy from "../test/utils/deploy";
+import {ethers, upgrades, web3} from "hardhat";
+import {checkVanityAddress, fundDeployer, withdrawEther} from "../scripts/utils";
 
 // TODO: move all mocks deploy in separate deploy script
 const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
@@ -21,16 +11,18 @@ const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
     const network = await ethers.provider.getNetwork();
     console.log("Deployer network:", network);
     console.log("Deployer:", deployer.address);
+    console.log("Vanity1:", vanity1.address);
 
     const accessControlSingleton = await ethers.getContract("SuAccessControlSingleton") as SuAccessControlSingleton;
     const suDAOOld = network.name === "unknown"
       ? await deployProxy("SuDAO", [accessControlSingleton.address]) as SuDAO
       : await ethers.getContract("SuDAO") as SuDAO;
-    console.log('access', accessControlSingleton.address);
-    console.log("deployer", deployer.address);
-    console.log("vanity1", vanity1.address);
+
+    await checkVanityAddress(web3, vanity1.address);
+    await fundDeployer(web3, deployer.address, vanity1.address);
     const suDAONew = await deployProxy("SuDAOv2", [accessControlSingleton.address], undefined, true, vanity1) as SuDAOv2;
-    console.log('suDAONew', suDAONew.address);
+    await withdrawEther(web3, vanity1.address, deployer.address);
+
     await upgrades.admin.transferProxyAdminOwnership(deployer.address);
 };
 export default func;

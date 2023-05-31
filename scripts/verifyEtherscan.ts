@@ -18,10 +18,10 @@ const verify = async (contractName: string, contractPath?: string) => {
 };
 
 async function main() {
-  await verify("SuAccessControlSingleton");
   await verify("SuDAOv2");
   await verify("VeERC20v2");
   await verify("SuDAOUpgrader");
+  await verify("SuAccessControlSingleton");
   // await verify("SuDAO");
   // await verify("Bonus");
   // await verify("VeERC20");

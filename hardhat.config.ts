@@ -31,12 +31,16 @@ const {
     PRIVATE_KEY_TESTNET_DEPLOYER,
     PRIVATE_KEY_TESTNET_ADMIN,
     PRIVATE_KEY_TESTNET_VANITY_1,
+    PRIVATE_KEY_TESTNET_VANITY_2,
+    PRIVATE_KEY_TESTNET_VANITY_3,
 } = process.env;
 
 const accountsTestnetEnv = [
     PRIVATE_KEY_TESTNET_DEPLOYER,
     PRIVATE_KEY_TESTNET_ADMIN,
-    PRIVATE_KEY_TESTNET_VANITY_1
+    PRIVATE_KEY_TESTNET_VANITY_1,
+    PRIVATE_KEY_TESTNET_VANITY_2,
+    PRIVATE_KEY_TESTNET_VANITY_3,
 ] as string[];
 const accountsTestnet = accountsTestnetEnv.filter((v) => v);
 
@@ -91,7 +95,7 @@ const config: HardhatUserConfig = {
             timeout: 100000,
             blockGasLimit: 7_000_000,
             gas: 7_000_000,
-            gasPrice: 50_000_000_000,
+            gasPrice: 150_000_000_000,
         },
         mumbai: {
             url: `https://polygon-mumbai.infura.io/v3/${INFURA_API_KEY}`,

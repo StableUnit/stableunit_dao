@@ -29,7 +29,8 @@ const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
 
     await accessControlSingleton.grantRole(await suDAOUpgrader.ADMIN_ROLE(), suDAOUpgrader.address);
     const suDAOOldSupply = await suDAOOld.totalSupply();
-    await suDAONew.mint(suDAOUpgrader.address, suDAOOldSupply.mul(100 * 16 / 21));
+    await suDAONew.mint(suDAOUpgrader.address, suDAOOldSupply.mul(100 * 16).div(21));
+    console.log('Config success');
 };
 export default func;
-func.tags = ["Deployer", "4_SuDAOUpgrader"];
+func.tags = ["Deployer", "Config"];
