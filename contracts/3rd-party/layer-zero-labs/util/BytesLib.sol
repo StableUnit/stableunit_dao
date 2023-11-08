@@ -80,8 +80,8 @@ library BytesLib {
         // 32. If the sum of the length of the two arrays is zero then add
         // one before rounding down to leave a blank 32 bytes (the length block with 0).
             mstore(0x40, and(
-            add(add(end, iszero(add(length, mload(_preBytes)))), 31),
-            not(31) // Round down to the nearest 32 bytes.
+                add(add(end, iszero(add(length, mload(_preBytes)))), 31),
+                not(31) // Round down to the nearest 32 bytes.
             ))
         }
 
@@ -113,30 +113,30 @@ library BytesLib {
             // update the contents of the slot.
             // uint256(bytes_storage) = uint256(bytes_storage) + uint256(bytes_memory) + new_length
                 sstore(
-                _preBytes.slot,
+                    _preBytes.slot,
                 // all the modifications to the slot are inside this
                 // next block
-                add(
-                // we can just add to the slot contents because the
-                // bytes we want to change are the LSBs
-                fslot,
-                add(
-                mul(
-                div(
-                // load the bytes from memory
-                mload(add(_postBytes, 0x20)),
-                // zero all bytes to the right
-                exp(0x100, sub(32, mlength))
-                ),
-                // and now shift left the number of bytes to
-                // leave space for the length in the slot
-                exp(0x100, sub(32, newlength))
-                ),
-                // increase length by the double of the memory
-                // bytes length
-                mul(mlength, 2)
-                )
-                )
+                    add(
+                    // we can just add to the slot contents because the
+                    // bytes we want to change are the LSBs
+                        fslot,
+                        add(
+                            mul(
+                                div(
+                                // load the bytes from memory
+                                    mload(add(_postBytes, 0x20)),
+                                // zero all bytes to the right
+                                    exp(0x100, sub(32, mlength))
+                                ),
+                            // and now shift left the number of bytes to
+                            // leave space for the length in the slot
+                                exp(0x100, sub(32, newlength))
+                            ),
+                        // increase length by the double of the memory
+                        // bytes length
+                            mul(mlength, 2)
+                        )
+                    )
                 )
             }
             case 1 {
@@ -164,14 +164,14 @@ library BytesLib {
                 let mask := sub(exp(0x100, submod), 1)
 
                 sstore(
-                sc,
-                add(
-                and(
-                fslot,
-                0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff00
-                ),
-                and(mload(mc), mask)
-                )
+                    sc,
+                    add(
+                        and(
+                            fslot,
+                            0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff00
+                        ),
+                        and(mload(mc), mask)
+                    )
                 )
 
                 for {

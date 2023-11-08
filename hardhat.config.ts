@@ -1,6 +1,6 @@
 import * as dotenv from "dotenv";
 
-import { HardhatUserConfig, task } from "hardhat/config";
+import { HardhatUserConfig } from "hardhat/config";
 import "@nomiclabs/hardhat-etherscan";
 import "@nomiclabs/hardhat-waffle";
 import "@openzeppelin/hardhat-upgrades";
@@ -27,7 +27,6 @@ import "./tasks/setBonus.ts";
 const {
     INFURA_API_KEY,
     ALCHEMY_API_KEY,
-    ETHERSCAN_API_KEY,
     PRIVATE_KEY_TESTNET_DEPLOYER,
     PRIVATE_KEY_TESTNET_ADMIN,
     PRIVATE_KEY_TESTNET_VANITY_1,
@@ -101,10 +100,9 @@ const config: HardhatUserConfig = {
             url: `https://goerli.infura.io/v3/${INFURA_API_KEY}`,
             accounts: accountsTestnet,
             allowUnlimitedContractSize: true,
-            timeout: 100000,
-            blockGasLimit: 7_000_000,
-            gas: 7_000_000,
-            gasPrice: 150_000_000_000,
+            // timeout: 100000,
+            // blockGasLimit: 7_000_000,
+            // gas: 7_000_000,
         },
         mumbai: {
             url: `https://polygon-mumbai.infura.io/v3/${INFURA_API_KEY}`,
@@ -123,7 +121,13 @@ const config: HardhatUserConfig = {
         currency: "USD",
     },
     etherscan: {
-        apiKey: ETHERSCAN_API_KEY ?? "",
+        apiKey: {
+            mainnet: process.env.ETHERSCAN_API_KEY as string,
+            goerli: process.env.ETHERSCAN_API_KEY as string,
+            polygon: process.env.POLYGONSCAN_API_KEY as string,
+            polygonMumbai: process.env.POLYGONSCAN_API_KEY as string,
+            arbitrumOne: process.env.ARBISCAN_API_KEY as string,
+        },
     },
     paths: {
         deploy: "deploy",

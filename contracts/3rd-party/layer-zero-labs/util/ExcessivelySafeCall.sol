@@ -36,13 +36,13 @@ library ExcessivelySafeCall {
         // returned by a malicious contract
         assembly {
             _success := call(
-            _gas, // gas
-            _target, // recipient
-            0, // ether value
-            add(_calldata, 0x20), // inloc
-            mload(_calldata), // inlen
-            0, // outloc
-            0 // outlen
+                _gas, // gas
+                _target, // recipient
+                0, // ether value
+                add(_calldata, 0x20), // inloc
+                mload(_calldata), // inlen
+                0, // outloc
+                0 // outlen
             )
         // limit our copy to 256 bytes
             _toCopy := returndatasize()
@@ -88,12 +88,12 @@ library ExcessivelySafeCall {
         // returned by a malicious contract
         assembly {
             _success := staticcall(
-            _gas, // gas
-            _target, // recipient
-            add(_calldata, 0x20), // inloc
-            mload(_calldata), // inlen
-            0, // outloc
-            0 // outlen
+                _gas, // gas
+                _target, // recipient
+                add(_calldata, 0x20), // inloc
+                mload(_calldata), // inlen
+                0, // outloc
+                0 // outlen
             )
         // limit our copy to 256 bytes
             _toCopy := returndatasize()

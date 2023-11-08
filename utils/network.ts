@@ -2,6 +2,8 @@ export type NetworkType =
     | "eth"
     | "goerli"
     | "mumbai"
+    | "arbitrum"
+    | "arbitrumGoerli"
     | "polygon"
     | "bsc"
     | "fantom"
@@ -15,6 +17,8 @@ export const NETWORK: Record<NetworkType, NetworkType> = {
     goerli: "goerli",
     mumbai: "mumbai",
     polygon: "polygon",
+    arbitrum: "arbitrum",
+    arbitrumGoerli: "arbitrumGoerli",
     aurora: "aurora",
     harmony: "harmony",
     bsc: "bsc",
@@ -22,6 +26,8 @@ export const NETWORK: Record<NetworkType, NetworkType> = {
     avalanche: "avalanche",
     unsupported: "unsupported",
 };
+
+export const SUPPORTED_NETWORKS = [NETWORK.goerli, NETWORK.mumbai, NETWORK.eth, NETWORK.polygon, NETWORK.arbitrum, NETWORK.arbitrumGoerli];
 
 export const getNetworkNameById: (chainId?: number) => NetworkType = (chainId) => {
     switch (chainId) {
@@ -35,6 +41,10 @@ export const getNetworkNameById: (chainId?: number) => NetworkType = (chainId) =
             return NETWORK.polygon;
         case 250:
             return NETWORK.fantom;
+        case 42161:
+            return NETWORK.arbitrum;
+        case 421613:
+            return NETWORK.arbitrumGoerli;
         case 43114:
             return NETWORK.avalanche;
         case 80001:
@@ -61,6 +71,10 @@ export const getIdByNetworkName: (name: NetworkType) => number = (name) => {
             return 137;
         case NETWORK.fantom:
             return 250;
+        case NETWORK.arbitrum:
+            return 42161;
+        case NETWORK.arbitrumGoerli:
+            return 421613;
         case NETWORK.avalanche:
             return 43114;
         case NETWORK.mumbai:
@@ -69,29 +83,6 @@ export const getIdByNetworkName: (name: NetworkType) => number = (name) => {
             return 1313161554;
         case NETWORK.harmony:
             return 1666600000;
-        default:
-            return 0;
-    }
-};
-
-export const getLZIdByNetworkName: (name: NetworkType) => number = (name) => {
-    switch (name) {
-        case NETWORK.eth:
-            return 101;
-        case NETWORK.goerli:
-            return 10121;
-        case NETWORK.bsc:
-            return 102;
-        case NETWORK.polygon:
-            return 109;
-        case NETWORK.fantom:
-            return 112;
-        case NETWORK.avalanche:
-            return 106;
-        case NETWORK.mumbai:
-            return 10109;
-        case NETWORK.harmony:
-            return 116;
         default:
             return 0;
     }
