@@ -3,7 +3,6 @@
 pragma solidity ^0.8.9;
 
 import "../interfaces/IBonus.sol";
-import "../access-control/SuAccessControlAuthenticated.sol";
 import "@openzeppelin/contracts-upgradeable/interfaces/IERC165Upgradeable.sol";
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "./SuVoteToken.sol";

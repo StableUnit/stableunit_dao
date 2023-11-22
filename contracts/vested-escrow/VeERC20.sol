@@ -14,7 +14,6 @@ pragma solidity ^0.8.12;
 import "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20Upgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/extensions/ERC20BurnableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/utils/SafeERC20Upgradeable.sol";
-import "../access-control/SuAccessControlAuthenticated.sol";
 import "../interfaces/IveERC20.sol";
 import "../interfaces/ISuVoteToken.sol";
 import "./SuVoteToken.sol";

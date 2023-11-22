@@ -6,3 +6,4 @@ cache
 submodule-artifacts
 coverage
 typechain
+contracts/periphery

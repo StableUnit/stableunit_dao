@@ -13,7 +13,6 @@ pragma solidity ^0.8.9;
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 import "@openzeppelin/contracts-upgradeable/interfaces/IERC165Upgradeable.sol";
-import "./access-control/SuAccessControlAuthenticated.sol";
 import "./vested-escrow/SuVoteToken.sol";
 import "./interfaces/ISuVoteToken.sol";
 import "./interfaces/IVotingPower.sol";
@@ -23,7 +22,7 @@ import "./interfaces/IVotingPower.sol";
  * Can't be transferred and approved.
  * TODO: How it works?
 */
-contract VotingPower is SuAccessControlAuthenticated, IVotingPower {
+contract VotingPower is SuAuthenticated, IVotingPower {
     using EnumerableSet for EnumerableSet.AddressSet;
 
     // Max number of tokens in VotingPower

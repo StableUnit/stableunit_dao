@@ -5,13 +5,13 @@ import "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20Upgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/extensions/ERC20VotesUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/extensions/ERC20BurnableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/utils/SafeERC20Upgradeable.sol";
-import "./access-control/SuAccessControlAuthenticated.sol";
 import "./cross-chain/CrossChainToken.sol";
+import "./periphery/contracts/access-control/SuAuthenticated.sol";
 
 /**
  * @title Governance token
  */
-contract SomeTokenDAO is ERC20VotesUpgradeable, SuAccessControlAuthenticated, CrossChainToken {
+contract SomeTokenDAO is ERC20VotesUpgradeable, SuAuthenticated, CrossChainToken {
     using SafeERC20Upgradeable for ERC20Upgradeable;
 
     uint256 public constant MAX_SUPPLY = 21_000_000 * 1e18;

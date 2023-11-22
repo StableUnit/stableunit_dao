@@ -16,13 +16,12 @@ import "@openzeppelin/contracts/token/ERC20/extensions/ERC20Burnable.sol";
 import "@openzeppelin/contracts/token/ERC20/extensions/ERC20Votes.sol";
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
-
-import "./access-control/SuAccessControlAuthenticatedNonUpgradeable.sol";
+import "./periphery/contracts/access-control/SuAuthenticatedNonUpgradeable.sol";
 
 /**
  * @title Governance token for StableUnit Decentralized Autonomous Organisation
  */
-contract SuDAOv2 is ERC20Votes, ERC20Burnable, SuAccessControlAuthenticatedNonUpgradeable {
+contract SuDAOv2 is ERC20Votes, ERC20Burnable, SuAuthenticatedNonUpgradeable {
     using SafeERC20 for ERC20;
 
     uint256 public constant MAX_SUPPLY = 16_000_000 * 100 * 1e18;

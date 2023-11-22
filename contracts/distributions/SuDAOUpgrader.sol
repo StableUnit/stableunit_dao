@@ -15,14 +15,14 @@ pragma solidity ^0.8.12;
 import "@openzeppelin/contracts-upgradeable/token/ERC20/utils/SafeERC20Upgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/IERC20Upgradeable.sol";
 
-import "../access-control/SuAccessControlAuthenticated.sol";
 import "../interfaces/ISuDAOUpgrader.sol";
 import "../interfaces/IveERC20v2.sol";
+import "../periphery/contracts/access-control/SuAuthenticated.sol";
 
 /**
  * @title The contract that distribute suDAO tokens for community based on NFT membership
  */
-contract SuDAOUpgrader is SuAccessControlAuthenticated, ISuDAOUpgrader {
+contract SuDAOUpgrader is SuAuthenticated, ISuDAOUpgrader {
     using SafeERC20Upgradeable for IERC20Upgradeable;
 
     IveERC20v2 public VE_ERC_20;
