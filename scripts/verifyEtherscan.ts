@@ -1,6 +1,6 @@
-import { deployments, run } from "hardhat";
+import {deployments, ethers, run} from "hardhat";
 
-const verify = async (contractName: string, contractPath?: string) => {
+export const verify = async (contractName: string, contractPath?: string, constructorArguments?: any[]) => {
     try {
         const Contract = await deployments.get(contractName);
 
@@ -9,6 +9,7 @@ const verify = async (contractName: string, contractPath?: string) => {
         await run("verify:verify", {
             address: Contract.address,
             contract: contractPath,
+            constructorArguments
         });
 
         console.log(`✅ ${contractName} verified`);
@@ -18,12 +19,18 @@ const verify = async (contractName: string, contractPath?: string) => {
 };
 
 async function main() {
+    const suAccessControlSingleton = await ethers.getContract("SuAccessControlSingleton");
+
+    await verify("SuDAOv2", undefined, [suAccessControlSingleton.address]);
+    await verify("VeERC20v2");
+    await verify("SuDAOUpgrader");
     await verify("SuAccessControlSingleton");
-    await verify("SuDAO");
-    await verify("Bonus");
-    await verify("VeERC20");
-    await verify("TokenDistributorV4");
-    await verify("MockErc721");
+    // await verify("SuDAO");
+    // await verify("Bonus");
+    // await verify("VeERC20");
+    // await verify("TokenDistributorV4");
+    // await verify("MockErc721");
+    await verify("MockErc721CrossChain");
 }
 
 main().catch((error) => {

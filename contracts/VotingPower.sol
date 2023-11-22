@@ -11,48 +11,40 @@ pragma solidity ^0.8.9;
      \______/  \______/ |_______/ |__/  |__/ \______/
 */
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
-import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
 import "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 import "@openzeppelin/contracts-upgradeable/interfaces/IERC165Upgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/governance/utils/IVotesUpgradeable.sol";
 import "./access-control/SuAccessControlAuthenticated.sol";
 import "./vested-escrow/SuVoteToken.sol";
 import "./interfaces/ISuVoteToken.sol";
+import "./interfaces/IVotingPower.sol";
 
 /*
  * @title ERC20-like and Votes-like contract that aggregates voting power of all tokens in SuDAO on particular chain.
  * Can't be transferred and approved.
+ * TODO: How it works?
 */
-contract VotingPower is SuAccessControlAuthenticated, IERC20, IERC20Metadata, IVotesUpgradeable {
+contract VotingPower is SuAccessControlAuthenticated, IVotingPower {
     using EnumerableSet for EnumerableSet.AddressSet;
 
-    // Max number of tokens in VotingPower. It is set only in initialize
-    uint256 public MAX_LEN;
-    // Max weight of each token in VotingPower = 1e18. It is set only in initialize.
-    uint256 public MAX_WEIGHT;
-    uint256 public TOTAL_VOTING_POWER;
+    // Max number of tokens in VotingPower
+    uint256 public constant MAX_LEN = 50;
+    // Max weight of each token in VotingPower
+    uint256 public constant MAX_WEIGHT = 1e18;
+    // TODO: What is it? Is it MAX voting power?
+    uint256 public constant TOTAL_VOTING_POWER = 42_000_000 * 1e18;
 
     string private _name;
     string private _symbol;
+
+    // Tokens that participate in voting power
     EnumerableSet.AddressSet private tokens;
+
+    // Each token have correspondent weight used in getVotes()
     mapping(address => uint256) public weights;
     uint256 public totalWeight;
 
-    error UnavailableFunctionalityError();
-    error WrongArgumentsError();
-    error BaseAssumptionError();
-    error BadTokenInstance();
-
-    function initialize(
-        address _accessControlSingleton,
-        string memory name_,
-        string memory symbol_
-    ) initializer public {
+    function initialize(address _accessControlSingleton, string memory name_, string memory symbol_) initializer public {
         __SuAuthenticated_init(_accessControlSingleton);
-        MAX_LEN = 50;
-        MAX_WEIGHT = 1e18;
-        TOTAL_VOTING_POWER = 42_000_000 * 1e18;
         _name = name_;
         _symbol = symbol_;
     }
@@ -77,6 +69,7 @@ contract VotingPower is SuAccessControlAuthenticated, IERC20, IERC20Metadata, IV
         }
     }
 
+    // ========================== override implementation of IVotes interfaces ==========================
     /**
      * @dev Returns the current amount of votes that `account` has.
      * It uses the voting power of the account.
@@ -114,7 +107,6 @@ contract VotingPower is SuAccessControlAuthenticated, IERC20, IERC20Metadata, IV
         return votes;
     }
 
-    // =================================implementation of IVotes interfaces =============================
     /**
      * @dev Returns the amount of votes that `account` had at the end of a past block (`blockNumber`).
      * (!!!) DAO should not to change weights after initial settings to have correct getPastVotes behaviour
