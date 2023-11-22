@@ -34,7 +34,7 @@ contract SuDAOv2 is ERC20Votes, ERC20Burnable, SuAuthenticatedNonUpgradeable {
     constructor(address _accessControlSingleton)
     ERC20("StableUnit DAO v2", "SuDAO")
     ERC20Permit("StableUnit DAO v2")
-    SuAccessControlAuthenticatedNonUpgradeable(_accessControlSingleton)
+    SuAuthenticatedNonUpgradeable(_accessControlSingleton)
     {
         DEPLOY_TIME = uint32(block.timestamp);
     }

@@ -3,8 +3,8 @@ import { ContractTransaction } from "ethers";
 import { expect } from "chai";
 
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
-import { MockErc721, SuAccessControlSingleton, SuDAO, SuDAOUpgrader, SuDAOv2, VeERC20v2 } from "../../typechain";
-import { ADDRESS_ZERO, BN_1E18 } from "../utils";
+import { SuAccessControlSingleton, SuDAOUpgrader, SuDAOv2, VeERC20v2 } from "../../typechain";
+import { BN_1E18 } from "../utils";
 
 describe("SuDAOUpgrader", () => {
     let tx: ContractTransaction | Promise<ContractTransaction>;
@@ -51,7 +51,7 @@ describe("SuDAOUpgrader", () => {
 
         it("initial data is correct", async () => {
             expect(await distributor.SU_DAO()).to.be.equal(suDAONew.address);
-            expect(await distributor.SU_DAO_OLD()).to.be.equal(suDAOOld.address);
+            expect(await distributor.SU_DAO_LEGACY()).to.be.equal(suDAOOld.address);
             expect(await distributor.VE_ERC_20()).to.be.equal(veERC20.address);
         });
     });

@@ -6,5 +6,6 @@ module.exports = {
         'distributions/TokenDistributor_v2',
         '3rd-party',
         'interfaces',
+        'periphery',
     ],
 };

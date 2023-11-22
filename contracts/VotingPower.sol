@@ -43,7 +43,7 @@ contract VotingPower is SuAuthenticated, IVotingPower {
     uint256 public totalWeight;
 
     function initialize(address _accessControlSingleton, string memory name_, string memory symbol_) initializer public {
-        __SuAuthenticated_init(_accessControlSingleton);
+        __suAuthenticatedInit(_accessControlSingleton);
         _name = name_;
         _symbol = symbol_;
     }

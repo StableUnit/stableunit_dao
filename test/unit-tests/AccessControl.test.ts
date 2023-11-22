@@ -1,24 +1,23 @@
 import { ethers } from "hardhat";
 import { expect } from "chai";
 import { SignerWithAddress } from "hardhat-deploy-ethers/signers";
-import { SuAccessControlSingleton } from "../../typechain";
 import deployProxy from "../utils/deploy";
+import { SuAccessControlSingleton } from "../../contracts/periphery/typechain-types";
 
 describe("SuAccessControlSingleton", function () {
     let accounts: Record<string, SignerWithAddress>;
     let accessControlSingleton: SuAccessControlSingleton;
     let defaultAdminRole: string;
-    let adminRole: string;
+    let daoRole: string;
 
     const beforeAllFunc = async () => {
         const [deployer, admin, dao] = await ethers.getSigners();
         accounts = { deployer, dao, admin };
         accessControlSingleton = (await deployProxy("SuAccessControlSingleton", [
             dao.address,
-            admin.address,
         ])) as SuAccessControlSingleton;
         defaultAdminRole = await accessControlSingleton.DEFAULT_ADMIN_ROLE();
-        adminRole = await accessControlSingleton.ADMIN_ROLE();
+        daoRole = await accessControlSingleton.DAO_ROLE();
     };
 
     describe("hasRole", function () {
@@ -28,9 +27,9 @@ describe("SuAccessControlSingleton", function () {
         });
 
         it("deployer has DEFAULT_ADMIN_ROLE", async () => {
-            expect(await accessControlSingleton.hasRole(defaultAdminRole, accounts.deployer.address)).to.be.false;
-            expect(await accessControlSingleton.hasRole(defaultAdminRole, accounts.dao.address)).to.be.true;
-            expect(await accessControlSingleton.hasRole(adminRole, accounts.admin.address)).to.be.true;
+            expect(await accessControlSingleton.hasRole(defaultAdminRole, accounts.deployer.address)).to.be.true;
+            expect(await accessControlSingleton.hasRole(defaultAdminRole, accounts.dao.address)).to.be.false;
+            expect(await accessControlSingleton.hasRole(daoRole, accounts.dao.address)).to.be.true;
         });
 
         it("can grant role", async () => {

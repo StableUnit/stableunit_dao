@@ -20,7 +20,6 @@ const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
         console.log("SuAccessControlSingleton not found, deploying...");
         accessControlSingleton = (await deployProxy("SuAccessControlSingleton", [
             deployer.address,
-            admin.address,
         ])) as SuAccessControlSingleton;
     }
 

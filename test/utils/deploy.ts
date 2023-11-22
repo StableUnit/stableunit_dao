@@ -8,13 +8,11 @@ export const deployProxy = async (
     args?: any[],
     options?: DeployProxyOptions,
     needLogs = true,
-    needDelegateCall = false,
     signer?: Signer
 ) => {
     const contractFactoryDefault = await ethers.getContractFactory(contractName);
     const contractFactoryWithSigner = await ethers.getContractFactory(contractName, signer);
-    // TODO: check delegatecall
-    await upgrades.deployImplementation(contractFactoryDefault, { unsafeAllow: ["delegatecall"] });
+    await upgrades.deployImplementation(contractFactoryDefault);
     // await upgrades.deployImplementation(
     //     contractFactoryDefault,
     //     needDelegateCall ? { unsafeAllow: ["delegatecall"] } : undefined
@@ -22,8 +20,6 @@ export const deployProxy = async (
     // unsafeAllow because of https://github.com/OpenZeppelin/openzeppelin-upgrades/issues/455
     const proxyContract = await upgrades.deployProxy(contractFactoryWithSigner, args, {
         useDeployedImplementation: true,
-        unsafeAllow: ["delegatecall"],
-        // unsafeAllow: needDelegateCall ? ["delegatecall"] : [],
         ...(options ?? {}),
     });
     await proxyContract.deployed();

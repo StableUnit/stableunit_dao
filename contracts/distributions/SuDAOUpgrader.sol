@@ -35,7 +35,7 @@ contract SuDAOUpgrader is SuAuthenticated, ISuDAOUpgrader {
         address _suDaoNew,
         address _veErc20
     ) initializer public {
-        __SuAuthenticated_init(_accessControlSingleton);
+        __suAuthenticatedInit(_accessControlSingleton);
         SU_DAO_LEGACY = IERC20Upgradeable(_suDaoOld);
         SU_DAO = IERC20Upgradeable(_suDaoNew);
         VE_ERC_20 = IveERC20v2(_veErc20);

@@ -79,7 +79,7 @@ contract TokenDistributorV4 is SuAuthenticated {
 
 
     function initialize(address _accessControlSingleton, address _suDAO, address _veErc20, address _bonusContract) initializer public {
-        __SuAuthenticated_init(_accessControlSingleton);
+        __suAuthenticatedInit(_accessControlSingleton);
         SU_DAO = _suDAO;
         VE_ERC_20 = _veErc20;
         BONUS_CONTRACT = IBonus(_bonusContract);

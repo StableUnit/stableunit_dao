@@ -18,7 +18,7 @@ contract SomeTokenDAO is ERC20VotesUpgradeable, SuAuthenticated, CrossChainToken
 
     // Check _lzEndpoint in cross-chain/CrossChainToken.sol comments
     function initialize(address _accessControlSingleton, address _lzEndpoint) initializer public {
-        __SuAuthenticated_init(_accessControlSingleton);
+        __suAuthenticatedInit(_accessControlSingleton);
         // TODO: rename
         __CrossChainToken_init("SomeToken DAO", "SomeTokenDAO", _lzEndpoint);
     }

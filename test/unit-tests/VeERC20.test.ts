@@ -30,7 +30,7 @@ describe("VeERC20", () => {
     const vestingPeriodsCount = vestingSeconds / vestingFrequencySeconds; // should be int
 
     const mintAndLockTokens = async (_amountToLock = amountToLock, toUser = user2) => {
-        await suDAO.connect(admin).mint(admin.address, _amountToLock);
+        await suDAO.connect(dao).mint(admin.address, _amountToLock);
         await suDAO.connect(admin).approve(veERC20.address, _amountToLock);
         await veERC20.connect(admin).lockUnderVesting(toUser.address, _amountToLock);
     };
@@ -45,11 +45,12 @@ describe("VeERC20", () => {
 
         accessControlSingleton = (await deployProxy(
             "SuAccessControlSingleton",
-            [admin.address, admin.address],
+            [dao.address],
             undefined,
             false
         )) as SuAccessControlSingleton;
-        suDAO = (await deployProxy("SuDAOv2", [accessControlSingleton.address], undefined, false)) as SuDAOv2;
+        await accessControlSingleton.connect(dao).grantRole(await accessControlSingleton.ADMIN_ROLE(), admin.address);
+        suDAO = (await (await ethers.getContractFactory("SuDAOv2")).deploy(accessControlSingleton.address)) as SuDAOv2;
         deployTimestamp = await latest();
         veERC20 = (await deployProxy(
             "VeERC20v2",
@@ -58,15 +59,13 @@ describe("VeERC20", () => {
             false
         )) as VeERC20v2;
 
-        await veERC20
-            .connect(admin)
-            .updateTimestamps(
-                deployTimestamp + tgeSeconds,
-                cliffSeconds,
-                vestingSeconds,
-                tgeUnlockRatio1e18,
-                vestingFrequencySeconds
-            );
+        await veERC20.updateTimestamps(
+            deployTimestamp + tgeSeconds,
+            cliffSeconds,
+            vestingSeconds,
+            tgeUnlockRatio1e18,
+            vestingFrequencySeconds
+        );
     });
 
     describe("checkGlobalVars", async () => {
@@ -79,7 +78,7 @@ describe("VeERC20", () => {
         });
 
         it("updateTimestamps: bad tgeTimestamp", async () => {
-            const tx = veERC20.connect(admin).updateTimestamps(
+            const tx = veERC20.updateTimestamps(
                 deployTimestamp - 1, // in the past
                 cliffSeconds,
                 vestingSeconds,
@@ -90,7 +89,7 @@ describe("VeERC20", () => {
         });
 
         it("updateTimestamps: bad ratio", async () => {
-            const tx = veERC20.connect(admin).updateTimestamps(
+            const tx = veERC20.updateTimestamps(
                 deployTimestamp + tgeSeconds,
                 cliffSeconds,
                 vestingSeconds,
@@ -101,7 +100,7 @@ describe("VeERC20", () => {
         });
 
         it("updateTimestamps: bad frequency", async () => {
-            const tx = veERC20.connect(admin).updateTimestamps(
+            const tx = veERC20.updateTimestamps(
                 deployTimestamp + tgeSeconds,
                 cliffSeconds,
                 500,
@@ -112,16 +111,20 @@ describe("VeERC20", () => {
         });
 
         it("updateTimestamps: good frequency", async () => {
-            const tx = veERC20
-                .connect(admin)
-                .updateTimestamps(deployTimestamp + tgeSeconds, cliffSeconds, 900, tgeUnlockRatio1e18, 300);
+            const tx = veERC20.updateTimestamps(
+                deployTimestamp + tgeSeconds,
+                cliffSeconds,
+                900,
+                tgeUnlockRatio1e18,
+                300
+            );
             await expect(tx).not.to.be.reverted;
         });
     });
 
     describe("lockUnderVesting", async () => {
         it("should pull coins from the caller", async () => {
-            await suDAO.connect(admin).mint(admin.address, amountToLock);
+            await suDAO.connect(dao).mint(admin.address, amountToLock);
             const balanceBefore = await suDAO.balanceOf(admin.address);
             await suDAO.connect(admin).approve(veERC20.address, amountToLock);
             await veERC20.connect(admin).lockUnderVesting(user2.address, amountToLock);
@@ -132,8 +135,8 @@ describe("VeERC20", () => {
         it("can't lockUnderVesting after burn and rescue", async () => {
             await mintAndLockTokens(BN_1E18, user1);
 
-            await veERC20.connect(admin).rescue(suDAO.address);
-            await suDAO.connect(admin).burn(BN_1E18);
+            await veERC20.connect(dao).rescue(suDAO.address);
+            await suDAO.connect(dao).burn(BN_1E18);
             await suDAO.connect(admin).approve(veERC20.address, BN_1E18);
             await expect(veERC20.connect(admin).lockUnderVesting(user1.address, BN_1E18)).to.be.reverted;
         });
@@ -248,9 +251,9 @@ describe("VeERC20", () => {
                 value: rescueAmountBn.toString(),
             });
 
-            const balanceBefore = BigNumber.from(await web3.eth.getBalance(admin.address));
-            await veERC20.connect(admin).rescue(ADDRESS_ZERO);
-            const balanceAfter = BigNumber.from(await web3.eth.getBalance(admin.address));
+            const balanceBefore = BigNumber.from(await web3.eth.getBalance(dao.address));
+            await veERC20.connect(dao).rescue(ADDRESS_ZERO);
+            const balanceAfter = BigNumber.from(await web3.eth.getBalance(dao.address));
 
             const rescuedAmount = balanceAfter.sub(balanceBefore);
             const gas = BigNumber.from(1e9).mul(100_000 * 20);
@@ -265,9 +268,9 @@ describe("VeERC20", () => {
             await mintAndLockTokens();
             await DAI.mint(veERC20.address, rescueAmountBn);
 
-            const balanceBefore = await DAI.balanceOf(admin.address);
-            await veERC20.connect(admin).rescue(DAI.address);
-            const balanceAfter = await DAI.balanceOf(admin.address);
+            const balanceBefore = await DAI.balanceOf(dao.address);
+            await veERC20.connect(dao).rescue(DAI.address);
+            const balanceAfter = await DAI.balanceOf(dao.address);
 
             expect(balanceAfter.sub(balanceBefore)).to.be.equal(rescueAmountBn);
         });
@@ -279,14 +282,14 @@ describe("VeERC20", () => {
         });
 
         it("can't do transfer with 0 veSuDAO by dao", async () => {
-            await veERC20.connect(admin).adminTransferUnlock(admin.address, true);
+            await veERC20.adminTransferUnlock(admin.address, true);
 
-            await expect(veERC20.connect(admin).transfer(user1.address, BN_1E18)).to.be.reverted;
+            await expect(veERC20.transfer(user1.address, BN_1E18)).to.be.reverted;
         });
 
         it("can do transfer veSuDAO by dao", async () => {
             const amount = BN_1E18;
-            await veERC20.connect(admin).adminTransferUnlock(admin.address, true);
+            await veERC20.adminTransferUnlock(admin.address, true);
             await mintAndLockTokens(amount, admin);
 
             const balanceUserBefore = await veERC20.balanceOf(user1.address);
@@ -312,7 +315,7 @@ describe("VeERC20", () => {
 
         it("can burn less that in balance after transfer", async () => {
             const amount = BN_1E18;
-            await veERC20.connect(admin).adminTransferUnlock(admin.address, true);
+            await veERC20.adminTransferUnlock(admin.address, true);
             await mintAndLockTokens(amount, admin);
 
             const balanceAdminBefore = await veERC20.balanceOf(admin.address);
@@ -356,14 +359,14 @@ describe("VeERC20", () => {
         it("can't burn if locked tokens are not enough", async () => {
             await mintAndLockTokens(BN_1E18, user1);
 
-            await veERC20.connect(admin).rescue(suDAO.address);
+            await veERC20.connect(dao).rescue(suDAO.address);
             await expect(veERC20.connect(user1).burn(1)).to.be.reverted;
         });
     });
 
     describe("voting ability", async () => {
         beforeEach(async () => {
-            await accessControlSingleton.connect(admin).grantRole(await veERC20.SYSTEM_ROLE(), admin.address);
+            await accessControlSingleton.grantRole(await veERC20.SYSTEM_ROLE(), admin.address);
         });
 
         it("has voting power by default", async () => {

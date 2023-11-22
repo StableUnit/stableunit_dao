@@ -3,6 +3,7 @@
 
 node_modules
 typechain
+typechain-types
 contracts/periphery
 
 

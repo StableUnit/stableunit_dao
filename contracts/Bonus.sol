@@ -24,7 +24,7 @@ contract Bonus is IBonus, SuAuthenticated {
     mapping(uint16 => uint256) public levelMap;
 
     function initialize(address _accessControlSingleton, address defaultAdmin) public initializer {
-        __SuAuthenticated_init(_accessControlSingleton);
+        __suAuthenticatedInit(_accessControlSingleton);
         adminInfo[defaultAdmin].isAdmin = true;
 
         levelMap[1] = 1000;

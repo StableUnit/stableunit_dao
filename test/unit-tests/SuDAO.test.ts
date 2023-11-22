@@ -30,11 +30,11 @@ describe("SuDAO", () => {
 
         accessControlSingleton = (await deployProxy(
             "SuAccessControlSingleton",
-            [admin.address, admin.address],
+            [admin.address],
             undefined,
             false
         )) as SuAccessControlSingleton;
-        suDAO = (await deployProxy("SuDAOv2", [accessControlSingleton.address], undefined, false)) as SuDAOv2;
+        suDAO = (await (await ethers.getContractFactory("SuDAOv2")).deploy(accessControlSingleton.address)) as SuDAOv2;
         DEPLOY_TIME = await latest();
     });
 
