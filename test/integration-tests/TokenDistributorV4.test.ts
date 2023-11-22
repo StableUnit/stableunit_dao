@@ -3,9 +3,16 @@ import { ContractTransaction } from "ethers";
 import { expect } from "chai";
 
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
-import { MockErc20, MockErc721, SuAccessControlSingleton, SuDAO, TokenDistributorV4, VeERC20 } from "../../typechain";
 import { BN_1E12, BN_1E18, BN_1E6 } from "../utils";
 import { latest, waitNBlocks } from "../utils/time";
+import {
+    MockErc20,
+    MockErc721,
+    SuAccessControlSingleton,
+    SuDAO,
+    TokenDistributorV4,
+    VeERC20,
+} from "../../typechain-types";
 
 type DataType = {
     startTimestamp: number;

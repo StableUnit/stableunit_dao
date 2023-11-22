@@ -3,10 +3,10 @@ import { expect } from "chai";
 import { BigNumber } from "ethers";
 import { SignerWithAddress } from "hardhat-deploy-ethers/signers";
 
-import { MockErc20, SuAccessControlSingleton, SuDAOv2, VeERC20v2 } from "../../typechain";
 import { increaseTime, latest } from "../utils/time";
 import { ADDRESS_ZERO, BN_1E18 } from "../utils";
 import deployProxy from "../utils/deploy";
+import { MockErc20, SuAccessControlSingleton, SuDAOv2, VeERC20v2 } from "../../typechain-types";
 
 describe("VeERC20", () => {
     let deployer: SignerWithAddress;

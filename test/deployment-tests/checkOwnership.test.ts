@@ -1,6 +1,6 @@
 import { deployments, ethers, getNamedAccounts } from "hardhat";
 import { expect } from "chai";
-import { SuAccessControlSingleton } from "../../typechain";
+import { SuAccessControlSingleton } from "../../typechain-types";
 
 describe("checkOwnership", () => {
     let defaultAdminRole: string;

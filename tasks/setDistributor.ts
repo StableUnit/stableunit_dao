@@ -2,7 +2,7 @@ import "@nomiclabs/hardhat-web3";
 import "@nomiclabs/hardhat-waffle";
 import { task } from "hardhat/config";
 
-import { MockErc721, TokenDistributorV4 } from "../typechain";
+import { MockErc721, TokenDistributorV4 } from "../typechain-types";
 
 /**
  * launch with the  command:

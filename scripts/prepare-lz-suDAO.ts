@@ -6,11 +6,11 @@
 import { ethers, getNamedAccounts } from "hardhat";
 
 import { getIdByNetworkName, NETWORK } from "../utils/network";
-import { SomeTokenDAO } from "../typechain";
 import SU_DAO_MUMBAI from "../submodule-artifacts/mumbai/SomeTokenDAO.json";
 import SU_DAO_GOERLI from "../submodule-artifacts/goerli/SomeTokenDAO.json";
 import { lzChainId } from "../utils/endpoint";
 import { createBN1e18 } from "../test/utils";
+import { SomeTokenDAO } from "../typechain-types/SomeTokenDAO";
 
 /** Here we have a script that make all preparations,
  * set all needed data for transfer SuDAO between two chains and two users.

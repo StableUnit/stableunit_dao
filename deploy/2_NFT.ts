@@ -4,6 +4,7 @@ import { ethers, getNamedAccounts, run } from "hardhat";
 import { getNetworkNameById, NETWORK } from "../utils/network";
 
 const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
+    console.log("NFT");
     const TOKENS = {
         [NETWORK.goerli]: { range: [0, 99] },
         [NETWORK.mumbai]: { range: [100, 199] },

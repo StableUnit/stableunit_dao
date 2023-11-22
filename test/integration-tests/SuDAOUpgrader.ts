@@ -3,8 +3,8 @@ import { ContractTransaction } from "ethers";
 import { expect } from "chai";
 
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
-import { SuAccessControlSingleton, SuDAOUpgrader, SuDAOv2, VeERC20v2 } from "../../typechain";
 import { BN_1E18 } from "../utils";
+import { SuAccessControlSingleton, SuDAO, SuDAOUpgrader, SuDAOv2, VeERC20v2 } from "../../typechain-types";
 
 describe("SuDAOUpgrader", () => {
     let tx: ContractTransaction | Promise<ContractTransaction>;
@@ -34,7 +34,7 @@ describe("SuDAOUpgrader", () => {
         aliceSigner = await ethers.getSigner(alice);
         randomSigner = await ethers.getSigner(randomAccount);
 
-        await deployments.fixture(["Deployer"]);
+        await deployments.fixture(["Deployer", "TransferOwnership"]);
 
         accessControlSingleton = (await ethers.getContract("SuAccessControlSingleton")) as SuAccessControlSingleton;
         distributor = (await ethers.getContract("SuDAOUpgrader")) as SuDAOUpgrader;
@@ -140,7 +140,7 @@ describe("SuDAOUpgrader", () => {
         });
     });
 
-    describe.only("adminWithdraw", function () {
+    describe("adminWithdraw", function () {
         this.beforeEach(beforeAllFunc);
 
         it("Admin can withdraw suDAO old", async () => {
@@ -153,32 +153,32 @@ describe("SuDAOUpgrader", () => {
             await distributor.connect(userSigner).participate(amount);
 
             const suDAOOldDistributorBalanceBefore = await suDAOOld.balanceOf(distributor.address);
-            const suDAOOldDaoBalanceBefore = await suDAOOld.balanceOf(daoSigner.address);
+            const suDAOOldAdminBalanceBefore = await suDAOOld.balanceOf(adminSigner.address);
 
-            await distributor.connect(daoSigner).adminWithdraw(suDAOOld.address);
+            await distributor.connect(adminSigner).adminWithdraw(suDAOOld.address);
 
             const suDAOOldDistributorBalanceAfter = await suDAOOld.balanceOf(distributor.address);
-            const suDAOOldDaoBalanceAfter = await suDAOOld.balanceOf(daoSigner.address);
+            const suDAOOldAdminBalanceAfter = await suDAOOld.balanceOf(adminSigner.address);
 
             expect(suDAOOldDistributorBalanceBefore).to.be.equal(amount);
             expect(suDAOOldDistributorBalanceAfter).to.be.equal(0);
-            expect(suDAOOldDaoBalanceAfter).to.be.equal(suDAOOldDaoBalanceBefore.add(amount));
+            expect(suDAOOldAdminBalanceAfter).to.be.equal(suDAOOldAdminBalanceBefore.add(amount));
         });
 
         it("Admin can withdraw suDAO new with no participate", async () => {
             await suDAONew.connect(daoSigner).mint(distributor.address, sudaoToDistribute);
 
             const suDAONewDistributorBalanceBefore = await suDAONew.balanceOf(distributor.address);
-            const suDAONewDaoBalanceBefore = await suDAONew.balanceOf(daoSigner.address);
+            const suDAONewAdminBalanceBefore = await suDAONew.balanceOf(adminSigner.address);
 
-            await distributor.connect(daoSigner).adminWithdraw(suDAONew.address);
+            await distributor.connect(adminSigner).adminWithdraw(suDAONew.address);
 
             const suDAONewDistributorBalanceAfter = await suDAONew.balanceOf(distributor.address);
-            const suDAONewDaoBalanceAfter = await suDAONew.balanceOf(daoSigner.address);
+            const suDAONewAdminBalanceAfter = await suDAONew.balanceOf(adminSigner.address);
 
             expect(suDAONewDistributorBalanceBefore).to.be.equal(sudaoToDistribute);
             expect(suDAONewDistributorBalanceAfter).to.be.equal(0);
-            expect(suDAONewDaoBalanceAfter).to.be.equal(suDAONewDaoBalanceBefore.add(sudaoToDistribute));
+            expect(suDAONewAdminBalanceAfter).to.be.equal(suDAONewAdminBalanceBefore.add(sudaoToDistribute));
         });
 
         it("Admin can withdraw suDAO new with participate", async () => {
@@ -191,17 +191,19 @@ describe("SuDAOUpgrader", () => {
             await distributor.connect(userSigner).participate(amount);
 
             const suDAONewDistributorBalanceBefore = await suDAONew.balanceOf(distributor.address);
-            const suDAONewDaoBalanceBefore = await suDAONew.balanceOf(daoSigner.address);
+            const suDAONewAdminBalanceBefore = await suDAONew.balanceOf(adminSigner.address);
 
-            await distributor.connect(daoSigner).adminWithdraw(suDAONew.address);
+            await distributor.connect(adminSigner).adminWithdraw(suDAONew.address);
 
             const suDAONewDistributorBalanceAfter = await suDAONew.balanceOf(distributor.address);
-            const suDAONewDaoBalanceAfter = await suDAONew.balanceOf(daoSigner.address);
+            const suDAONewAdminBalanceAfter = await suDAONew.balanceOf(adminSigner.address);
 
             const outAmount = amount.mul(100).mul(16).div(21);
             expect(suDAONewDistributorBalanceBefore).to.be.equal(sudaoToDistribute.sub(outAmount));
             expect(suDAONewDistributorBalanceAfter).to.be.equal(0);
-            expect(suDAONewDaoBalanceAfter).to.be.equal(suDAONewDaoBalanceBefore.add(sudaoToDistribute.sub(outAmount)));
+            expect(suDAONewAdminBalanceAfter).to.be.equal(
+                suDAONewAdminBalanceBefore.add(sudaoToDistribute.sub(outAmount))
+            );
         });
     });
 });

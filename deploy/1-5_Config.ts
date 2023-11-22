@@ -1,23 +1,11 @@
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 import { DeployFunction } from "hardhat-deploy/types";
-import { expect } from "chai";
 import { ethers } from "hardhat";
-import {
-    Bonus,
-    MockErc721Extended,
-    SuAccessControlSingleton,
-    SuDAO,
-    SuDAOv2,
-    SuDAOUpgrader,
-    VeERC20v2,
-    VeERC721Extension,
-    VotingPower,
-} from "../typechain";
-import deployProxy, { deploy, getDeploymentAddress } from "../test/utils/deploy";
-import { ADDRESS_ZERO } from "../test/utils";
+import { SuAccessControlSingleton, SuDAO, SuDAOUpgrader, SuDAOv2, VeERC20v2 } from "../typechain-types";
 
 // TODO: move all mocks deploy in separate deploy script
 const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
+    console.log("Config");
     const [deployer] = await hre.ethers.getSigners();
     console.log("Deployer network:", await ethers.provider.getNetwork());
     console.log("Deployer:", deployer.address);

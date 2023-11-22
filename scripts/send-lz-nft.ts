@@ -6,9 +6,9 @@
 import { ethers, getNamedAccounts } from "hardhat";
 
 import { getIdByNetworkName, NETWORK } from "../utils/network";
-import { MockErc721CrossChain } from "../typechain";
 import { ADDRESS_ZERO } from "../test/utils";
 import { lzChainId } from "../utils/endpoint";
+import { MockErc721CrossChain } from "../typechain-types";
 
 const utf8Encode = new TextEncoder();
 

@@ -3,7 +3,7 @@ import { expect } from "chai";
 
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { ADDRESS_ZERO } from "../utils";
-import { MockErc721Extended, SuAccessControlSingleton, VeERC721Extension } from "../../typechain";
+import { MockErc721Extended, SuAccessControlSingleton, VeERC721Extension } from "../../typechain-types";
 
 describe("VeERC721Extension", () => {
     let accounts: Record<string, SignerWithAddress>;

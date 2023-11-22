@@ -1,13 +1,14 @@
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 import { DeployFunction } from "hardhat-deploy/types";
 import { ethers } from "hardhat";
-import { getIdByNetworkName, NETWORK, SUPPORTED_NETWORKS } from "../utils/network";
+import { getIdByNetworkName, SUPPORTED_NETWORKS } from "../utils/network";
 import deployProxy from "../test/utils/deploy";
-import { SuAccessControlSingleton, SuDAO } from "../typechain";
 import { endpoint } from "../utils/endpoint";
 import { verify } from "../scripts/verifyEtherscan";
+import { SuAccessControlSingleton, SuDAO } from "../typechain-types";
 
 const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
+    console.log("SuDAO");
     const [deployer, admin] = await hre.ethers.getSigners();
     const network = await ethers.provider.getNetwork();
 

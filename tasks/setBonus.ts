@@ -3,7 +3,7 @@ import "@nomiclabs/hardhat-waffle";
 import { task } from "hardhat/config";
 
 import { BigNumber } from "ethers";
-import { Bonus, MockErc721 } from "../typechain";
+import { Bonus, MockErc721 } from "../typechain-types";
 
 /**
  * launch with the  command:

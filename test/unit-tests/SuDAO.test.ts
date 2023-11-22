@@ -1,14 +1,14 @@
-import { artifacts, ethers, web3 } from "hardhat";
+import { ethers, web3 } from "hardhat";
 import { expect } from "chai";
 import { SignerWithAddress } from "hardhat-deploy-ethers/signers";
 
 import { BigNumber } from "ethers";
-import { MockErc20, SuAccessControlSingleton, SuDAOv2 } from "../../typechain";
 import { increaseTime, latest } from "../utils/time";
 import { ADDRESS_ZERO, BN_1E18 } from "../utils";
 import deployProxy from "../utils/deploy";
 // @ts-ignore
 import { shouldBehaveLikeERC20 } from "../3rd-party/openzeppelin/token/ERC20/ERC20.behavior.js";
+import { MockErc20, SuAccessControlSingleton, SuDAOv2 } from "../../typechain-types";
 
 describe("SuDAO", () => {
     let deployer: SignerWithAddress;

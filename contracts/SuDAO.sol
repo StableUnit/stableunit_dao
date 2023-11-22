@@ -11,7 +11,7 @@ import "./periphery/contracts/access-control/SuAuthenticated.sol";
 /**
  * @title Governance token
  */
-contract SomeTokenDAO is ERC20VotesUpgradeable, SuAuthenticated, CrossChainToken {
+contract SuDAO is ERC20VotesUpgradeable, SuAuthenticated, CrossChainToken {
     using SafeERC20Upgradeable for ERC20Upgradeable;
 
     uint256 public constant MAX_SUPPLY = 21_000_000 * 1e18;
