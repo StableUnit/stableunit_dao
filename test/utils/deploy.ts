@@ -3,20 +3,29 @@ import { DeployProxyOptions } from "@openzeppelin/hardhat-upgrades/dist/utils";
 import { getContractAddress } from "ethers/lib/utils";
 import { Signer } from "ethers";
 
-export const deployProxy = async (contractName: string, args?: any[], options?: DeployProxyOptions, needLogs = true, signer?: Signer) => {
+export const deployProxy = async (
+    contractName: string,
+    args?: any[],
+    options?: DeployProxyOptions,
+    needLogs = true,
+    needDelegateCall = false,
+    signer?: Signer
+) => {
     const contractFactoryDefault = await ethers.getContractFactory(contractName);
     const contractFactoryWithSigner = await ethers.getContractFactory(contractName, signer);
-    await upgrades.deployImplementation(contractFactoryDefault, { unsafeAllow: ['delegatecall'] });
+    // TODO: check delegatecall
+    await upgrades.deployImplementation(contractFactoryDefault, { unsafeAllow: ["delegatecall"] });
+    // await upgrades.deployImplementation(
+    //     contractFactoryDefault,
+    //     needDelegateCall ? { unsafeAllow: ["delegatecall"] } : undefined
+    // );
     // unsafeAllow because of https://github.com/OpenZeppelin/openzeppelin-upgrades/issues/455
-    const proxyContract = await upgrades.deployProxy(
-      contractFactoryWithSigner,
-      args,
-      {
-          useDeployedImplementation: true,
-          unsafeAllow: ['delegatecall'],
-          ...(options ?? {}),
-      }
-    );
+    const proxyContract = await upgrades.deployProxy(contractFactoryWithSigner, args, {
+        useDeployedImplementation: true,
+        unsafeAllow: ["delegatecall"],
+        // unsafeAllow: needDelegateCall ? ["delegatecall"] : [],
+        ...(options ?? {}),
+    });
     await proxyContract.deployed();
 
     if (needLogs) {
@@ -35,7 +44,7 @@ export const deployProxy = async (contractName: string, args?: any[], options?: 
 
 export const deploy = async (contractName: string, args?: any[], needLogs = true) => {
     const contractFactory = await ethers.getContractFactory(contractName);
-    const contract = await contractFactory.deploy(...(args??[]));
+    const contract = await contractFactory.deploy(...(args ?? []));
 
     if (needLogs) {
         console.log(`${contract.address} deployed ${contractName}`);
@@ -52,7 +61,7 @@ export const deploy = async (contractName: string, args?: any[], needLogs = true
 };
 
 export async function getDeploymentAddress(deployer: string, nonceOffset = 0) {
-    let transactionCount = await ethers.provider.getTransactionCount(deployer);
+    const transactionCount = await ethers.provider.getTransactionCount(deployer);
     return getContractAddress({
         from: deployer,
         nonce: transactionCount + nonceOffset,
@@ -81,6 +90,5 @@ export const getDeploymentProxyAddressPredictor = async (deployer: string) => {
         });
     };
 };
-
 
 export default deployProxy;

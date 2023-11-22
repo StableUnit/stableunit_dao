@@ -1,21 +1,21 @@
-import {artifacts, ethers, web3} from "hardhat";
-import {expect} from 'chai'
-import {SignerWithAddress} from "hardhat-deploy-ethers/signers";
+import { artifacts, ethers, web3 } from "hardhat";
+import { expect } from "chai";
+import { SignerWithAddress } from "hardhat-deploy-ethers/signers";
 
-import {MockErc20, SuAccessControlSingleton, SuDAOv2} from "../../typechain";
-import {increaseTime, latest} from "../utils/time";
-import {ADDRESS_ZERO, BN_1E18} from "../utils";
+import { BigNumber } from "ethers";
+import { MockErc20, SuAccessControlSingleton, SuDAOv2 } from "../../typechain";
+import { increaseTime, latest } from "../utils/time";
+import { ADDRESS_ZERO, BN_1E18 } from "../utils";
 import deployProxy from "../utils/deploy";
 // @ts-ignore
-import {shouldBehaveLikeERC20} from "../3rd-party/openzeppelin/token/ERC20/ERC20.behavior.js";
-import {BigNumber} from "ethers";
+import { shouldBehaveLikeERC20 } from "../3rd-party/openzeppelin/token/ERC20/ERC20.behavior.js";
 
 describe("SuDAO", () => {
-    let deployer: SignerWithAddress,
-        dao: SignerWithAddress,
-        admin: SignerWithAddress,
-        user1: SignerWithAddress,
-        user2: SignerWithAddress;
+    let deployer: SignerWithAddress;
+    let dao: SignerWithAddress;
+    let admin: SignerWithAddress;
+    let user1: SignerWithAddress;
+    let user2: SignerWithAddress;
 
     let accessControlSingleton: SuAccessControlSingleton;
     let suDAO: SuDAOv2;
@@ -28,8 +28,13 @@ describe("SuDAO", () => {
     beforeEach(async function () {
         [deployer, admin, dao, user1, user2] = await ethers.getSigners();
 
-        accessControlSingleton = await deployProxy( "SuAccessControlSingleton", [admin.address, admin.address], undefined, false) as SuAccessControlSingleton;
-        suDAO = await deployProxy("SuDAOv2", [accessControlSingleton.address], undefined, false) as SuDAOv2;
+        accessControlSingleton = (await deployProxy(
+            "SuAccessControlSingleton",
+            [admin.address, admin.address],
+            undefined,
+            false
+        )) as SuAccessControlSingleton;
+        suDAO = (await deployProxy("SuDAOv2", [accessControlSingleton.address], undefined, false)) as SuDAOv2;
         DEPLOY_TIME = await latest();
     });
 
@@ -78,7 +83,11 @@ describe("SuDAO", () => {
             const rescueAmountBn = BN_1E18.mul(2);
             await suDAO.connect(admin).mint(admin.address, rescueAmountBn);
 
-            await web3.eth.sendTransaction({from: admin.address, to: suDAO.address, value: rescueAmountBn.toString()});
+            await web3.eth.sendTransaction({
+                from: admin.address,
+                to: suDAO.address,
+                value: rescueAmountBn.toString(),
+            });
 
             const balanceBefore = BigNumber.from(await web3.eth.getBalance(admin.address));
             await suDAO.connect(admin).rescueTokens(ADDRESS_ZERO);
@@ -88,11 +97,11 @@ describe("SuDAO", () => {
             const gas = BigNumber.from(1e9).mul(100_000 * 20);
             expect(rescuedAmount).to.be.gt(rescueAmountBn.sub(gas));
             expect(rescuedAmount).to.be.lt(rescueAmountBn);
-        })
+        });
 
         it("deposit erc20 and rescue", async () => {
             const tokenFactory = await ethers.getContractFactory("MockErc20");
-            const DAI = await tokenFactory.deploy("test DAI", "tDAI", 18) as MockErc20;
+            const DAI = (await tokenFactory.deploy("test DAI", "tDAI", 18)) as MockErc20;
             const rescueAmountBn = BN_1E18.mul(7);
             await DAI.mint(suDAO.address, rescueAmountBn);
 
@@ -101,6 +110,6 @@ describe("SuDAO", () => {
             const balanceAfter = await DAI.balanceOf(admin.address);
 
             expect(balanceAfter.sub(balanceBefore)).to.be.equal(rescueAmountBn);
-        })
+        });
     });
 });

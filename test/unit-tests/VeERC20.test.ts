@@ -1,20 +1,20 @@
-import {ethers, web3} from "hardhat";
-import {expect} from 'chai'
-import {BigNumber} from "ethers";
-import {SignerWithAddress} from "hardhat-deploy-ethers/signers";
+import { ethers, web3 } from "hardhat";
+import { expect } from "chai";
+import { BigNumber } from "ethers";
+import { SignerWithAddress } from "hardhat-deploy-ethers/signers";
 
-import {MockErc20, SuAccessControlSingleton, SuDAOv2, VeERC20v2} from "../../typechain";
-import {increaseTime, latest} from "../utils/time";
-import {ADDRESS_ZERO, BN_1E18} from "../utils";
+import { MockErc20, SuAccessControlSingleton, SuDAOv2, VeERC20v2 } from "../../typechain";
+import { increaseTime, latest } from "../utils/time";
+import { ADDRESS_ZERO, BN_1E18 } from "../utils";
 import deployProxy from "../utils/deploy";
 
 describe("VeERC20", () => {
-    let deployer: SignerWithAddress,
-        dao: SignerWithAddress,
-        admin: SignerWithAddress,
-        user1: SignerWithAddress,
-        user2: SignerWithAddress,
-        user3: SignerWithAddress;
+    let deployer: SignerWithAddress;
+    let dao: SignerWithAddress;
+    let admin: SignerWithAddress;
+    let user1: SignerWithAddress;
+    let user2: SignerWithAddress;
+    let user3: SignerWithAddress;
 
     let accessControlSingleton: SuAccessControlSingleton;
     let suDAO: SuDAOv2;
@@ -33,28 +33,40 @@ describe("VeERC20", () => {
         await suDAO.connect(admin).mint(admin.address, _amountToLock);
         await suDAO.connect(admin).approve(veERC20.address, _amountToLock);
         await veERC20.connect(admin).lockUnderVesting(toUser.address, _amountToLock);
-    }
+    };
 
     const checkAvailableToClaim = async (expected: BigNumber | number) => {
         const availableToClaim = await veERC20.availableToClaim(user2.address);
         expect(availableToClaim).to.be.equal(expected);
-    }
+    };
 
     beforeEach(async function () {
         [deployer, admin, dao, user1, user2, user3] = await ethers.getSigners();
 
-        accessControlSingleton = await deployProxy( "SuAccessControlSingleton", [admin.address, admin.address], undefined, false) as SuAccessControlSingleton;
-        suDAO = await deployProxy("SuDAOv2", [accessControlSingleton.address], undefined, false) as SuDAOv2;
+        accessControlSingleton = (await deployProxy(
+            "SuAccessControlSingleton",
+            [admin.address, admin.address],
+            undefined,
+            false
+        )) as SuAccessControlSingleton;
+        suDAO = (await deployProxy("SuDAOv2", [accessControlSingleton.address], undefined, false)) as SuDAOv2;
         deployTimestamp = await latest();
-        veERC20 = await deployProxy("VeERC20v2", [accessControlSingleton.address, suDAO.address, deployTimestamp + tgeSeconds], undefined, false) as VeERC20v2;
+        veERC20 = (await deployProxy(
+            "VeERC20v2",
+            [accessControlSingleton.address, suDAO.address, deployTimestamp + tgeSeconds],
+            undefined,
+            false
+        )) as VeERC20v2;
 
-        await veERC20.connect(admin).updateTimestamps(
-          deployTimestamp + tgeSeconds,
-          cliffSeconds,
-          vestingSeconds,
-          tgeUnlockRatio1e18,
-          vestingFrequencySeconds
-        );
+        await veERC20
+            .connect(admin)
+            .updateTimestamps(
+                deployTimestamp + tgeSeconds,
+                cliffSeconds,
+                vestingSeconds,
+                tgeUnlockRatio1e18,
+                vestingFrequencySeconds
+            );
     });
 
     describe("checkGlobalVars", async () => {
@@ -68,45 +80,41 @@ describe("VeERC20", () => {
 
         it("updateTimestamps: bad tgeTimestamp", async () => {
             const tx = veERC20.connect(admin).updateTimestamps(
-              deployTimestamp - 1, // in the past
-              cliffSeconds,
-              vestingSeconds,
-              tgeUnlockRatio1e18,
-              vestingFrequencySeconds
+                deployTimestamp - 1, // in the past
+                cliffSeconds,
+                vestingSeconds,
+                tgeUnlockRatio1e18,
+                vestingFrequencySeconds
             );
             await expect(tx).to.be.reverted;
         });
 
         it("updateTimestamps: bad ratio", async () => {
             const tx = veERC20.connect(admin).updateTimestamps(
-              deployTimestamp +tgeSeconds,
-              cliffSeconds,
-              vestingSeconds,
-              BN_1E18.add(1), // should be less that 1e18
-              vestingFrequencySeconds
+                deployTimestamp + tgeSeconds,
+                cliffSeconds,
+                vestingSeconds,
+                BN_1E18.add(1), // should be less that 1e18
+                vestingFrequencySeconds
             );
             await expect(tx).to.be.reverted;
         });
 
         it("updateTimestamps: bad frequency", async () => {
             const tx = veERC20.connect(admin).updateTimestamps(
-              deployTimestamp +tgeSeconds,
-              cliffSeconds,
-              500,
-              tgeUnlockRatio1e18,
-              300 // 500/300 is not int
+                deployTimestamp + tgeSeconds,
+                cliffSeconds,
+                500,
+                tgeUnlockRatio1e18,
+                300 // 500/300 is not int
             );
             await expect(tx).to.be.reverted;
         });
 
         it("updateTimestamps: good frequency", async () => {
-            const tx = veERC20.connect(admin).updateTimestamps(
-              deployTimestamp +tgeSeconds,
-              cliffSeconds,
-              900,
-              tgeUnlockRatio1e18,
-              300
-            );
+            const tx = veERC20
+                .connect(admin)
+                .updateTimestamps(deployTimestamp + tgeSeconds, cliffSeconds, 900, tgeUnlockRatio1e18, 300);
             await expect(tx).not.to.be.reverted;
         });
     });
@@ -139,7 +147,7 @@ describe("VeERC20", () => {
             // should have 0 available to claim before tge
             await checkAvailableToClaim(0);
 
-            await increaseTime(tgeTimestamp - await latest() - 1);
+            await increaseTime(tgeTimestamp - (await latest()) - 1);
             // should have 0 available to claim before tge
             await checkAvailableToClaim(0);
 
@@ -147,7 +155,7 @@ describe("VeERC20", () => {
             const restPartClaim = amountToLock.sub(firstPartClaim);
 
             // between tge and cliff => tgeUnlockRatio1e18 * N
-            await increaseTime(cliffSeconds)
+            await increaseTime(cliffSeconds);
             await checkAvailableToClaim(firstPartClaim);
 
             await increaseTime(vestingFrequencySeconds / 2);
@@ -177,17 +185,17 @@ describe("VeERC20", () => {
             await mintAndLockTokens(amountToLock);
             // should have 0 available to claim
             await expect(veERC20.connect(user2).claim()).to.be.reverted;
-        })
+        });
 
         it("claim all after vesting", async () => {
             await mintAndLockTokens(amountToLock);
 
             await increaseTime(tgeSeconds + cliffSeconds + vestingSeconds);
             const balanceBefore = await suDAO.balanceOf(user2.address);
-            await veERC20.connect(user2).claim()
+            await veERC20.connect(user2).claim();
             const balanceAfter = await suDAO.balanceOf(user2.address);
             expect(amountToLock).to.be.equal(balanceAfter.sub(balanceBefore));
-        })
+        });
 
         it("claim partially during vesting", async () => {
             await mintAndLockTokens();
@@ -208,7 +216,7 @@ describe("VeERC20", () => {
 
             const totalClaimed = await veERC20.totalClaimed(user2.address);
             expect(totalClaimed).to.be.equal(amount);
-        })
+        });
 
         it("totalClaimed", async () => {
             await mintAndLockTokens();
@@ -226,7 +234,7 @@ describe("VeERC20", () => {
 
             const totalClaimed = await veERC20.totalClaimed(user2.address);
             expect(totalClaimed).to.be.equal(claimed);
-        })
+        });
     });
 
     describe("rescue", async () => {
@@ -234,7 +242,11 @@ describe("VeERC20", () => {
             const rescueAmountBn = BN_1E18.mul(2);
             await mintAndLockTokens();
 
-            await web3.eth.sendTransaction({from: admin.address, to: veERC20.address, value: rescueAmountBn.toString()});
+            await web3.eth.sendTransaction({
+                from: admin.address,
+                to: veERC20.address,
+                value: rescueAmountBn.toString(),
+            });
 
             const balanceBefore = BigNumber.from(await web3.eth.getBalance(admin.address));
             await veERC20.connect(admin).rescue(ADDRESS_ZERO);
@@ -244,11 +256,11 @@ describe("VeERC20", () => {
             const gas = BigNumber.from(1e9).mul(100_000 * 20);
             expect(rescuedAmount).to.be.gt(rescueAmountBn.sub(gas));
             expect(rescuedAmount).to.be.lt(rescueAmountBn);
-        })
+        });
 
         it("deposit erc20 and rescue", async () => {
             const tokenFactory = await ethers.getContractFactory("MockErc20");
-            const DAI = await tokenFactory.deploy("test DAI", "tDAI", 18) as MockErc20;
+            const DAI = (await tokenFactory.deploy("test DAI", "tDAI", 18)) as MockErc20;
             const rescueAmountBn = BN_1E18.mul(7);
             await mintAndLockTokens();
             await DAI.mint(veERC20.address, rescueAmountBn);
@@ -258,7 +270,7 @@ describe("VeERC20", () => {
             const balanceAfter = await DAI.balanceOf(admin.address);
 
             expect(balanceAfter.sub(balanceBefore)).to.be.equal(rescueAmountBn);
-        })
+        });
     });
 
     describe("transfer", async () => {
@@ -390,6 +402,5 @@ describe("VeERC20", () => {
             await veERC20.connect(user2).claim();
             expect(await veERC20.getVotes(user2.address)).to.be.equal(amountToLock);
         });
-
     });
 });
