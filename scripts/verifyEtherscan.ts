@@ -1,6 +1,6 @@
 import {deployments, ethers, run} from "hardhat";
 
-const verify = async (contractName: string, contractPath?: string, constructorArguments?: any[]) => {
+export const verify = async (contractName: string, contractPath?: string, constructorArguments?: any[]) => {
   try {
     const Contract = await deployments.get(contractName);
 
@@ -30,6 +30,7 @@ async function main() {
   // await verify("VeERC20");
   // await verify("TokenDistributorV4");
   // await verify("MockErc721");
+  await verify("MockErc721CrossChain");
 }
 
 main().catch((error) => {

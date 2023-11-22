@@ -154,6 +154,7 @@ dist
 cache
 artifacts
 submodule-artifacts/goerli/solcInputs
+submodule-artifacts/mumbai/solcInputs
 submodule-artifacts/hardhat
 submodule-artifacts/localhost
 submodule-artifacts/local
