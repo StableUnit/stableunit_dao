@@ -1,7 +1,7 @@
 import Web3 from "web3";
 
 const RLP = require('rlp');
-const DEPLOYER_MIN_BALANCE = Web3.utils.toBN(1e18 * 1);
+const DEPLOYER_MIN_BALANCE = Web3.utils.toBN(1e18 * 1.5);
 const ACCOUNT_DUST_THRESHOLD = Web3.utils.toBN(1e18 * 0.00001);
 
 
@@ -10,14 +10,15 @@ export async function assertZeroNonce(web3: Web3, deployerAddress: string) {
     if (nonce !== 0) throw "deployer has nonce > 0";
 }
 
-export async function prepareVanityAddress(web3: Web3, deployer_acc: string, deployer_vanity: string) {
+export async function checkVanityAddress(web3: Web3, deployer_vanity: string) {
     // return;
     if ((await web3.eth.getTransactionCount(deployer_vanity)) != 0) {
-        await withdrawEther(web3, deployer_vanity, deployer_acc);
+        // await withdrawEther(web3, deployer_vanity, deployer_acc);
         throw "vanity address already used";
+    } else {
+        console.log('checkVanityAddress passed');
     }
 }
-
 
 export const predictAddress = async (web3: Web3, deployerAddress: string, nonceAdded = 0) => {
     let ownerNonce = (await web3.eth.getTransactionCount(deployerAddress)) + nonceAdded;
@@ -29,7 +30,7 @@ export const predictAddress = async (web3: Web3, deployerAddress: string, nonceA
 export const fundDeployer = async (web3: Web3, fromAccount: string, toAccount: string, minBalance = DEPLOYER_MIN_BALANCE) => {
     if (fromAccount === toAccount) return;
     const toAccountBalance = Number(await web3.eth.getBalance(toAccount));
-    if (toAccountBalance > Number(minBalance.toString())) {
+    if (toAccountBalance >= Number(minBalance.toString())) {
         console.log(`account ${toAccount} is already funded with ${toAccountBalance}`);
     } else {
         await web3.eth.sendTransaction({
@@ -42,6 +43,7 @@ export const fundDeployer = async (web3: Web3, fromAccount: string, toAccount: s
 }
 
 export const withdrawEther = async (web3: Web3, fromAccount: string, toAccount: string) => {
+    console.log('start withdraw');
     if (fromAccount === toAccount) return;
 
     // sometimes fromBalance doesn't count for the last tx, so we have to wait a bit
@@ -49,13 +51,11 @@ export const withdrawEther = async (web3: Web3, fromAccount: string, toAccount: 
 
     const fromBalance = web3.utils.toBN(await web3.eth.getBalance(fromAccount));
     const gasPrice = web3.utils.toBN(await web3.eth.getGasPrice());
-    const fromMaxToSend = fromBalance.sub(gasPrice.muln(21000));
+    const fromMaxToSend = fromBalance.sub(gasPrice.muln(10_000_000));
 
     if (fromMaxToSend.gt(ACCOUNT_DUST_THRESHOLD)) {
         console.log(`withdrawEther: fromBalance ${fromBalance} gasPrice=${gasPrice} maxSend = ${fromMaxToSend}`);
-        console.log(`withdrawEther: sending ${Number(fromMaxToSend.toString()) / 1e18} ETH from ${toAccount}`);
-        // const fromBalance2 = web3.utils.toBN(await web3.eth.getBalance(fromAccount));
-        // console.assert(fromBalance === fromBalance2);
+        console.log(`withdrawEther: sending ${Number(fromMaxToSend.toString()) / 1e18} ETH to ${toAccount}`);
         try {
             await web3.eth.sendTransaction({
                 from: fromAccount,
