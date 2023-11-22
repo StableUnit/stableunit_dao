@@ -1,10 +1,22 @@
 import { ethers, upgrades, deployments } from "hardhat";
 import { DeployProxyOptions } from "@openzeppelin/hardhat-upgrades/dist/utils";
-import {getContractAddress} from "ethers/lib/utils";
+import { getContractAddress } from "ethers/lib/utils";
+import { Signer } from "ethers";
 
-export const deployProxy = async (contractName: string, args?: any[], options?: DeployProxyOptions, needLogs = true) => {
-    const contractFactory = await ethers.getContractFactory(contractName);
-    const proxyContract = await upgrades.deployProxy(contractFactory, args, options);
+export const deployProxy = async (contractName: string, args?: any[], options?: DeployProxyOptions, needLogs = true, signer?: Signer) => {
+    const contractFactoryDefault = await ethers.getContractFactory(contractName);
+    const contractFactoryWithSigner = await ethers.getContractFactory(contractName, signer);
+    await upgrades.deployImplementation(contractFactoryDefault, { unsafeAllow: ['delegatecall'] });
+    // unsafeAllow because of https://github.com/OpenZeppelin/openzeppelin-upgrades/issues/455
+    const proxyContract = await upgrades.deployProxy(
+      contractFactoryWithSigner,
+      args,
+      {
+          useDeployedImplementation: true,
+          unsafeAllow: ['delegatecall'],
+          ...(options ?? {}),
+      }
+    );
     await proxyContract.deployed();
 
     if (needLogs) {
