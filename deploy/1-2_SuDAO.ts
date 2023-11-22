@@ -12,7 +12,6 @@ const defaultOptions = {
 
 // TODO: move all mocks deploy in separate deploy script
 const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
-    console.log("SuDAO");
     const [deployer] = await hre.ethers.getSigners();
     const network = await ethers.provider.getNetwork();
 

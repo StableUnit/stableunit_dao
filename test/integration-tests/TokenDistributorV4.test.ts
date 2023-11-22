@@ -3,7 +3,7 @@ import { ContractTransaction } from "ethers";
 import { expect } from "chai";
 
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
-import { BN_1E12, BN_1E18, BN_1E6 } from "../utils";
+import { BN_1E12, BN_1E18, BN_1E6, deployProxy } from "../utils";
 import { latest, waitNBlocks } from "../utils/time";
 import {
     MockErc20,
@@ -11,7 +11,7 @@ import {
     SuAccessControlSingleton,
     SuDAO,
     TokenDistributorV4,
-    VeERC20,
+    VeERC20v2,
 } from "../../typechain-types";
 
 type DataType = {
@@ -37,7 +37,7 @@ describe("TokenDistributorV4", () => {
     let mockUSDT: MockErc20;
     let mockNft: MockErc721;
     let suDAO: SuDAO;
-    let veERC20: VeERC20;
+    let veERC20: VeERC20v2;
     let accessControlSingleton: SuAccessControlSingleton;
     const data: DataType = {
         startTimestamp: 0,
@@ -66,18 +66,21 @@ describe("TokenDistributorV4", () => {
         const { deployer, dao, admin, randomAccount, userAccount, alice } = await getNamedAccounts();
 
         deployerSigner = await ethers.getSigner(deployer);
-        daoSigner = await ethers.getSigner(dao); // TODO: owner? DAO is a contract, not EOA
+        daoSigner = await ethers.getSigner(dao);
         adminSigner = await ethers.getSigner(admin);
         userSigner = await ethers.getSigner(userAccount);
         aliceSigner = await ethers.getSigner(alice);
         randomSigner = await ethers.getSigner(randomAccount);
 
-        await deployments.fixture(["Deployer"]);
+        await deployments.fixture(["Deployer", "TransferOwnership"]);
+
+        await deployProxy("MockErc721", ["MockErc721", "MCK721"]);
+
         accessControlSingleton = (await ethers.getContract("SuAccessControlSingleton")) as SuAccessControlSingleton;
         distributor = (await ethers.getContract("TokenDistributorV4")) as TokenDistributorV4;
         mockNft = (await ethers.getContract("MockErc721")) as MockErc721;
         suDAO = (await ethers.getContract("SuDAO")) as SuDAO;
-        veERC20 = (await ethers.getContract("VeERC20")) as VeERC20;
+        veERC20 = (await ethers.getContract("VeERC20v2")) as VeERC20v2;
         const mockErc20Factory = await ethers.getContractFactory("MockErc20");
         mockUSDT = (await mockErc20Factory.deploy("test tether", "USDT", 6)) as MockErc20;
 
@@ -125,7 +128,7 @@ describe("TokenDistributorV4", () => {
 
             await expect(
                 distributor
-                    .connect(deployerSigner)
+                    .connect(adminSigner)
                     .setDistributionVesting(
                         data.fullVestingSeconds,
                         data.cliffSeconds,
@@ -136,7 +139,7 @@ describe("TokenDistributorV4", () => {
 
             await expect(
                 distributor
-                    .connect(deployerSigner)
+                    .connect(adminSigner)
                     .setDistributionInfo(
                         data.startTimestamp + data.startLengthSeconds,
                         data.startTimestamp + data.startLengthSeconds + data.lengthSeconds,
@@ -149,11 +152,11 @@ describe("TokenDistributorV4", () => {
                     )
             ).to.be.reverted;
 
-            await expect(distributor.connect(deployerSigner).setNftAccess(mockNft.address, false)).to.be.reverted;
-            await expect(distributor.connect(deployerSigner).setNftAccess(mockNft.address, true)).to.be.reverted;
+            await expect(distributor.connect(adminSigner).setNftAccess(mockNft.address, false)).to.be.reverted;
+            await expect(distributor.connect(adminSigner).setNftAccess(mockNft.address, true)).to.be.reverted;
 
             await expect(
-                distributor.connect(deployerSigner).setBondingCurve([
+                distributor.connect(adminSigner).setBondingCurve([
                     BN_1E18.mul(11).div(10), // 1.1 * 1e18
                     BN_1E12.mul(10).div(10), // 10 * 1e11
                 ])
@@ -314,7 +317,7 @@ describe("TokenDistributorV4", () => {
             await expect(distributor.connect(userSigner).takeDonationBack()).to.be.reverted;
             // console.log("donations back shouldn't work when didn't return tokens first");
 
-            await veERC20.connect(userSigner).burnAll();
+            await veERC20.connect(userSigner).burn(await veERC20.balanceOf(userSigner.address));
 
             veSuDAOBalance = await veERC20.balanceOf(userSigner.address);
             expect(veSuDAOBalance).to.be.equal(0);
