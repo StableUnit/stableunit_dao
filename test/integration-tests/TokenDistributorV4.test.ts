@@ -80,9 +80,10 @@ describe("TokenDistributorV4", () => {
 
     const beforeAllFuncNoSuDAOMint = async (distributeData: DataType) => {
         await initialize();
-        distributeData.startTimestamp = data.startTimestamp || (await latest());
-        distributeData.donationToken = mockUSDT.address;
-        await run("setDistributor", distributeData);
+        const newData = { ...distributeData };
+        newData.startTimestamp = data.startTimestamp || (await latest());
+        newData.donationToken = mockUSDT.address;
+        await run("setDistributor", newData);
     };
 
     const beforeAllFunc = async () => {

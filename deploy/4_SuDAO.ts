@@ -1,11 +1,11 @@
-import {HardhatRuntimeEnvironment} from "hardhat/types";
-import {DeployFunction} from "hardhat-deploy/types";
-import {ethers} from "hardhat";
-import {getIdByNetworkName, NETWORK, SUPPORTED_NETWORKS} from "../utils/network";
+import { HardhatRuntimeEnvironment } from "hardhat/types";
+import { DeployFunction } from "hardhat-deploy/types";
+import { ethers } from "hardhat";
+import { getIdByNetworkName, NETWORK, SUPPORTED_NETWORKS } from "../utils/network";
 import deployProxy from "../test/utils/deploy";
-import {SuAccessControlSingleton, SuDAO} from "../typechain";
-import {endpoint} from "../utils/endpoint";
-import {verify} from "../scripts/verifyEtherscan";
+import { SuAccessControlSingleton, SuDAO } from "../typechain";
+import { endpoint } from "../utils/endpoint";
+import { verify } from "../scripts/verifyEtherscan";
 
 const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
     const [deployer, admin] = await hre.ethers.getSigners();
@@ -13,10 +13,15 @@ const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
 
     console.log(`deployer: ${deployer.address}, chain: ${network.name}`);
 
-    let accessControlSingleton = (await ethers.getContractOrNull("SuAccessControlSingleton")) as SuAccessControlSingleton;
+    let accessControlSingleton = (await ethers.getContractOrNull(
+        "SuAccessControlSingleton"
+    )) as SuAccessControlSingleton;
     if (!accessControlSingleton) {
-        console.log('SuAccessControlSingleton not found, deploying...');
-        accessControlSingleton = await deployProxy("SuAccessControlSingleton", [deployer.address, admin.address]) as SuAccessControlSingleton;
+        console.log("SuAccessControlSingleton not found, deploying...");
+        accessControlSingleton = (await deployProxy("SuAccessControlSingleton", [
+            deployer.address,
+            admin.address,
+        ])) as SuAccessControlSingleton;
     }
 
     let lzEndpoint;
@@ -26,11 +31,11 @@ const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
         }
     });
     if (!lzEndpoint) {
-        console.error('Bad network for lzEndpoint');
+        console.error("Bad network for lzEndpoint");
     }
     console.log(`lzEndpoint: ${lzEndpoint}`);
     const args = [accessControlSingleton.address, lzEndpoint];
-    const suDAO = await deployProxy("SomeTokenDAO", args) as SuDAO;
+    const suDAO = (await deployProxy("SomeTokenDAO", args)) as SuDAO;
     console.log(`✅ SuDAO deployed on chain ${network.name} with address ${suDAO.address}`);
 
     await verify("SomeTokenDAO");

@@ -26,7 +26,7 @@ dotenv.config({ path: envPath });
 
 const {
     INFURA_API_KEY,
-    ALCHEMY_API_KEY,
+    ALCHEMY_API_KEY_MAINNET,
     PRIVATE_KEY_TESTNET_DEPLOYER,
     PRIVATE_KEY_TESTNET_ADMIN,
     PRIVATE_KEY_TESTNET_VANITY_1,
@@ -91,7 +91,7 @@ const config: HardhatUserConfig = {
             blockGasLimit: 0x1fffffffffffff,
             allowUnlimitedContractSize: true,
             forking: {
-                url: `https://eth-mainnet.alchemyapi.io/v2/${ALCHEMY_API_KEY}`,
+                url: `https://eth-mainnet.g.alchemy.com/v2/${ALCHEMY_API_KEY_MAINNET}`,
                 blockNumber: 14518074,
             },
             // // uses for supporting the legacy version of solidity-coverage

@@ -18,7 +18,7 @@ export async function checkVanityAddress(web3: Web3, deployerVanity: string) {
         // eslint-disable-next-line no-throw-literal
         throw "vanity address already used";
     } else {
-        console.log('checkVanityAddress passed');
+        console.log("checkVanityAddress passed");
     }
 }
 
@@ -26,9 +26,9 @@ export const predictAddress = async (web3: Web3, deployerAddress: string, nonceA
     const ownerNonce = (await web3.eth.getTransactionCount(deployerAddress)) + nonceAdded;
     // @ts-ignore
     return `0x${web3.utils
-      .sha3(RLP.encode([deployerAddress, ownerNonce]))
-      .slice(12)
-      .substring(14)}`;
+        .sha3(RLP.encode([deployerAddress, ownerNonce]))
+        .slice(12)
+        .substring(14)}`;
 };
 
 export const fundDeployer = async (
@@ -52,7 +52,7 @@ export const fundDeployer = async (
 };
 
 export const withdrawEther = async (web3: Web3, fromAccount: string, toAccount: string) => {
-    console.log('start withdraw');
+    console.log("start withdraw");
     if (fromAccount === toAccount) return;
 
     // sometimes fromBalance doesn't count for the last tx, so we have to wait a bit

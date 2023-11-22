@@ -9,9 +9,9 @@ const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
     const accessControlSingleton = (await ethers.getContract("SuAccessControlSingleton")) as SuAccessControlSingleton;
 
     await accessControlSingleton.grantRole(await accessControlSingleton.DEFAULT_ADMIN_ROLE(), dao);
-    console.log('Role granted');
+    console.log("Role granted");
     await accessControlSingleton.revokeRole(await accessControlSingleton.DEFAULT_ADMIN_ROLE(), deployer);
-    console.log('Role revoked');
+    console.log("Role revoked");
     await upgrades.admin.transferProxyAdminOwnership(dao);
 };
 export default func;

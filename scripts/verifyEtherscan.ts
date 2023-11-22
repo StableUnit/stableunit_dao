@@ -1,4 +1,4 @@
-import {deployments, ethers, run} from "hardhat";
+import { deployments, ethers, run } from "hardhat";
 
 export const verify = async (contractName: string, contractPath?: string, constructorArguments?: any[]) => {
     try {
@@ -9,7 +9,7 @@ export const verify = async (contractName: string, contractPath?: string, constr
         await run("verify:verify", {
             address: Contract.address,
             contract: contractPath,
-            constructorArguments
+            constructorArguments,
         });
 
         console.log(`✅ ${contractName} verified`);

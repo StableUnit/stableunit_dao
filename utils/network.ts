@@ -27,7 +27,14 @@ export const NETWORK: Record<NetworkType, NetworkType> = {
     unsupported: "unsupported",
 };
 
-export const SUPPORTED_NETWORKS = [NETWORK.goerli, NETWORK.mumbai, NETWORK.eth, NETWORK.polygon, NETWORK.arbitrum, NETWORK.arbitrumGoerli];
+export const SUPPORTED_NETWORKS = [
+    NETWORK.goerli,
+    NETWORK.mumbai,
+    NETWORK.eth,
+    NETWORK.polygon,
+    NETWORK.arbitrum,
+    NETWORK.arbitrumGoerli,
+];
 
 export const getNetworkNameById: (chainId?: number) => NetworkType = (chainId) => {
     switch (chainId) {

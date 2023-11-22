@@ -1,17 +1,10 @@
-import {deployments, ethers, getNamedAccounts} from "hardhat";
-import {ContractTransaction} from "ethers";
-import {expect} from "chai";
+import { deployments, ethers, getNamedAccounts } from "hardhat";
+import { ContractTransaction } from "ethers";
+import { expect } from "chai";
 
-import {
-    MockErc721,
-    SuAccessControlSingleton,
-    SuDAO,
-    SuDAOUpgrader,
-    SuDAOv2,
-    VeERC20v2
-} from "../../typechain";
-import {ADDRESS_ZERO, BN_1E18} from "../utils";
-import {SignerWithAddress} from "@nomiclabs/hardhat-ethers/signers";
+import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
+import { MockErc721, SuAccessControlSingleton, SuDAO, SuDAOUpgrader, SuDAOv2, VeERC20v2 } from "../../typechain";
+import { ADDRESS_ZERO, BN_1E18 } from "../utils";
 
 describe("SuDAOUpgrader", () => {
     let tx: ContractTransaction | Promise<ContractTransaction>;
@@ -32,9 +25,7 @@ describe("SuDAOUpgrader", () => {
     const sudaoToDistribute = BN_1E18.mul(1_000_000);
 
     const beforeAllFunc = async () => {
-        const {
-            deployer, dao, admin, randomAccount, userAccount, alice
-        } = await getNamedAccounts();
+        const { deployer, dao, admin, randomAccount, userAccount, alice } = await getNamedAccounts();
 
         deployerSigner = await ethers.getSigner(deployer);
         daoSigner = await ethers.getSigner(dao);
@@ -45,11 +36,11 @@ describe("SuDAOUpgrader", () => {
 
         await deployments.fixture(["Deployer"]);
 
-        accessControlSingleton = await ethers.getContract("SuAccessControlSingleton") as SuAccessControlSingleton;
-        distributor = await ethers.getContract("SuDAOUpgrader") as SuDAOUpgrader;
-        suDAOOld = await ethers.getContract("SuDAO") as SuDAO;
-        suDAONew = await ethers.getContract("SuDAOv2") as SuDAOv2;
-        veERC20 = await ethers.getContract("VeERC20v2") as VeERC20v2;
+        accessControlSingleton = (await ethers.getContract("SuAccessControlSingleton")) as SuAccessControlSingleton;
+        distributor = (await ethers.getContract("SuDAOUpgrader")) as SuDAOUpgrader;
+        suDAOOld = (await ethers.getContract("SuDAO")) as SuDAO;
+        suDAONew = (await ethers.getContract("SuDAOv2")) as SuDAOv2;
+        veERC20 = (await ethers.getContract("VeERC20v2")) as VeERC20v2;
 
         // distributor should be able to call lockUnderVesting
         await accessControlSingleton.connect(daoSigner).grantRole(await distributor.ADMIN_ROLE(), distributor.address);
@@ -147,7 +138,6 @@ describe("SuDAOUpgrader", () => {
             expect(veSuDAODistributorBalanceAfter).to.be.equal(0);
             expect(veSuDAOUserBalanceAfter).to.be.equal(outAmount);
         });
-
     });
 
     describe.only("adminWithdraw", function () {

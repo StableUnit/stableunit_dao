@@ -38,7 +38,7 @@ describe("VeERC20", () => {
     const checkAvailableToClaim = async (expected: BigNumber | number) => {
         const availableToClaim = await veERC20.availableToClaim(user2.address);
         expect(availableToClaim).to.be.equal(expected);
-    }
+    };
 
     beforeEach(async function () {
         [deployer, admin, dao, user1, user2, user3] = await ethers.getSigners();
@@ -58,13 +58,15 @@ describe("VeERC20", () => {
             false
         )) as VeERC20v2;
 
-        await veERC20.connect(admin).updateTimestamps(
-          deployTimestamp + tgeSeconds,
-          cliffSeconds,
-          vestingSeconds,
-          tgeUnlockRatio1e18,
-          vestingFrequencySeconds
-        );
+        await veERC20
+            .connect(admin)
+            .updateTimestamps(
+                deployTimestamp + tgeSeconds,
+                cliffSeconds,
+                vestingSeconds,
+                tgeUnlockRatio1e18,
+                vestingFrequencySeconds
+            );
     });
 
     describe("checkGlobalVars", async () => {
@@ -78,45 +80,41 @@ describe("VeERC20", () => {
 
         it("updateTimestamps: bad tgeTimestamp", async () => {
             const tx = veERC20.connect(admin).updateTimestamps(
-              deployTimestamp - 1, // in the past
-              cliffSeconds,
-              vestingSeconds,
-              tgeUnlockRatio1e18,
-              vestingFrequencySeconds
+                deployTimestamp - 1, // in the past
+                cliffSeconds,
+                vestingSeconds,
+                tgeUnlockRatio1e18,
+                vestingFrequencySeconds
             );
             await expect(tx).to.be.reverted;
         });
 
         it("updateTimestamps: bad ratio", async () => {
             const tx = veERC20.connect(admin).updateTimestamps(
-              deployTimestamp +tgeSeconds,
-              cliffSeconds,
-              vestingSeconds,
-              BN_1E18.add(1), // should be less that 1e18
-              vestingFrequencySeconds
+                deployTimestamp + tgeSeconds,
+                cliffSeconds,
+                vestingSeconds,
+                BN_1E18.add(1), // should be less that 1e18
+                vestingFrequencySeconds
             );
             await expect(tx).to.be.reverted;
         });
 
         it("updateTimestamps: bad frequency", async () => {
             const tx = veERC20.connect(admin).updateTimestamps(
-              deployTimestamp +tgeSeconds,
-              cliffSeconds,
-              500,
-              tgeUnlockRatio1e18,
-              300 // 500/300 is not int
+                deployTimestamp + tgeSeconds,
+                cliffSeconds,
+                500,
+                tgeUnlockRatio1e18,
+                300 // 500/300 is not int
             );
             await expect(tx).to.be.reverted;
         });
 
         it("updateTimestamps: good frequency", async () => {
-            const tx = veERC20.connect(admin).updateTimestamps(
-              deployTimestamp +tgeSeconds,
-              cliffSeconds,
-              900,
-              tgeUnlockRatio1e18,
-              300
-            );
+            const tx = veERC20
+                .connect(admin)
+                .updateTimestamps(deployTimestamp + tgeSeconds, cliffSeconds, 900, tgeUnlockRatio1e18, 300);
             await expect(tx).not.to.be.reverted;
         });
     });
@@ -149,7 +147,7 @@ describe("VeERC20", () => {
             // should have 0 available to claim before tge
             await checkAvailableToClaim(0);
 
-            await increaseTime(tgeTimestamp - await latest() - 1);
+            await increaseTime(tgeTimestamp - (await latest()) - 1);
             // should have 0 available to claim before tge
             await checkAvailableToClaim(0);
 
@@ -157,7 +155,7 @@ describe("VeERC20", () => {
             const restPartClaim = amountToLock.sub(firstPartClaim);
 
             // between tge and cliff => tgeUnlockRatio1e18 * N
-            await increaseTime(cliffSeconds)
+            await increaseTime(cliffSeconds);
             await checkAvailableToClaim(firstPartClaim);
 
             await increaseTime(vestingFrequencySeconds / 2);
@@ -194,10 +192,10 @@ describe("VeERC20", () => {
 
             await increaseTime(tgeSeconds + cliffSeconds + vestingSeconds);
             const balanceBefore = await suDAO.balanceOf(user2.address);
-            await veERC20.connect(user2).claim()
+            await veERC20.connect(user2).claim();
             const balanceAfter = await suDAO.balanceOf(user2.address);
             expect(amountToLock).to.be.equal(balanceAfter.sub(balanceBefore));
-        })
+        });
 
         it("claim partially during vesting", async () => {
             await mintAndLockTokens();
@@ -218,7 +216,7 @@ describe("VeERC20", () => {
 
             const totalClaimed = await veERC20.totalClaimed(user2.address);
             expect(totalClaimed).to.be.equal(amount);
-        })
+        });
 
         it("totalClaimed", async () => {
             await mintAndLockTokens();
@@ -247,7 +245,7 @@ describe("VeERC20", () => {
             await web3.eth.sendTransaction({
                 from: admin.address,
                 to: veERC20.address,
-                value: rescueAmountBn.toString()
+                value: rescueAmountBn.toString(),
             });
 
             const balanceBefore = BigNumber.from(await web3.eth.getBalance(admin.address));
@@ -272,7 +270,7 @@ describe("VeERC20", () => {
             const balanceAfter = await DAI.balanceOf(admin.address);
 
             expect(balanceAfter.sub(balanceBefore)).to.be.equal(rescueAmountBn);
-        })
+        });
     });
 
     describe("transfer", async () => {

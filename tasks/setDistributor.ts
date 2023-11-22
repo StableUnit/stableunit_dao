@@ -2,7 +2,7 @@ import "@nomiclabs/hardhat-web3";
 import "@nomiclabs/hardhat-waffle";
 import { task } from "hardhat/config";
 
-import { MockErc721, SuAccessControlSingleton, SuDAO, TokenDistributorV4 } from "../typechain";
+import { MockErc721, TokenDistributorV4 } from "../typechain";
 
 /**
  * launch with the  command:
@@ -17,7 +17,6 @@ task("setDistributor", "set all parameters from the script").setAction(async (ta
     const BN_1E12 = hre.ethers.BigNumber.from(10).pow(12);
     const distributor = (await hre.ethers.getContract("TokenDistributorV4")) as TokenDistributorV4;
     const mockErc721 = (await hre.ethers.getContract("MockErc721")) as MockErc721;
-    const suDAO = (await hre.ethers.getContract("SuDAO")) as SuDAO;
     // const accessControlSingleton = await hre.ethers.getContract("SuAccessControlSingleton") as SuAccessControlSingleton;
     // console.log(`setDistributor.TokenDistributorV4@${ (await hre.ethers.provider.getNetwork()).name } = `, distributor.address);
     // console.log(`setDistributor.mockErc721@${ (await hre.ethers.provider.getNetwork()).name } = `, mockErc721.address);
