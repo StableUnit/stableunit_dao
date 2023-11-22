@@ -1,0 +1,6 @@
+[submodule "submodule-artifacts"]
+	path = submodule-artifacts
+	url = git@github.com:StableUnit/submodule-contract-artifacts.git
+[submodule "contracts/periphery"]
+	path = contracts/periphery
+	url = https://github.com/StableUnit/periphery.git

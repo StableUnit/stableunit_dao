@@ -1,8 +1,9 @@
-.idea
-.vscode
+.idea/
+/.vscode/
 
 node_modules
 typechain
+typechain-types
 
 
 # Created by https://www.toptal.com/developers/gitignore/api/node,solidity
@@ -153,11 +154,7 @@ dist
 #Hardhat files
 cache
 artifacts
-submodule-artifacts/goerli/solcInputs
-submodule-artifacts/mumbai/solcInputs
-submodule-artifacts/hardhat
-submodule-artifacts/localhost
-submodule-artifacts/local
+submodule-artifacts
 .gitsecret/keys/random_seed
 !*.secret
 

@@ -1,8 +1,8 @@
-# Ignore artifacts:
-build
+node_modules
 artifacts
 cache
-.openzeppelin
-submodule-artifacts
-coverage
-typechain
+coverage*
+gasReporterOutput.json
+artifacts
+cache
+contracts/periphery

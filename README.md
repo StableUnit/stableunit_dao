@@ -1,294 +1,235 @@
-# StableUnit_v2
+# StableUnit Prove of the Concept v2
 
-[![standard-readme compliant](https://img.shields.io/badge/readme%20style-standard-brightgreen.svg?style=flat-square)](https://github.com/RichardLitt/standard-readme)
-[![built-with openzeppelin](https://img.shields.io/badge/built%20with-OpenZeppelin-3677FF)](https://docs.openzeppelin.com/)
+## Modules Description
 
-## Overview
-StableUnit - over-collateralized multi-currency stablecoin that yields interest directly to users wallets.
-Censorship resistance is achieved by DAO ownership.
+There are 8 main modules:
 
-The end goal is to expand DAO for the maximum number of people
-and implement an open-source monetary system that owned by everyone on the planet
-and shares benefit equally for everyone.
-Collective ownership would prevent centralized abuse such as overprinting and solves UBI.
-[More details](https://www.notion.so/System-details-29fa471948df4353a960e96ca292a830)
+### 1) Lending Module
+This module has two sub-mobules: vault and manager.
 
-DAO is owned and governed by NFT and SuDAO token holders,
-to represent both reputation-based and capital-based sources of influence.
-This repository contains wip implementation of the system.
+Vault stores user's collateral deposits
 
-[Full documentation](https://www.notion.so/StableUnit-DAO-d49f036e13b1417eac48f5b93c9c20fc)
+The manager gives ability to borrow/withdraw/repay/deposit. It's trustless and admin doesn't have any acess to user's funds.
 
-# Proposal 
-My proposal for stableunit community to form onchain org to creating something cool together
-init DAO
----
-1. create two wallets on bsc and ethereum with the same address
-2. ask for $5-10 donations
-3. deploy multisig bsc
-4. share github with ready to use migration script with
-  4.1 deploy suDAO token and transfer ownership to multisig
-  4.2 deploy vesting contract
-  4.3 put under 1y vesting 0.1% of total supply of suDAO tokens and airdrops it to all donators equally
-5. setup snapshot + safeSnap for vested suDAO tokens and add it to multisig
-**now we have DAO from the project supporters which is able to deploy any contact on BSC and control the faite of the project**
+### 2) Liquidation Module
+Module, responsible for liquidation bad CDPs.
 
+If CDP is able to be liquidated, so [liquidation bot](https://github.com/StableUnit/liquidation-bot) use this module to liquidate position and get some profit
 
-Oversimplified plan
----
-1. we develop contracts which exchange 7% of suDAO for special NFT
-2. create a proposal for DAO to issue a 3 types of NFT tokens:
-  
-    type A for $1000
+To work with vault we have all support functions in Manager and bot don't have any access to user's funds.
 
-    type B for $10,000
+### 3) Oracle Module
+We use ChainLink and UniSwap to get correct token price.
 
-    type C for $100,000
-  
-    contract for redeem fNFTs for suDAO over time
+### 4) Reward Module
+Module to get profit from lending, liquidations, laasModule and forex.
 
-    contract which pays to developers in 5 milestones, and DAO can vote NO is dev didn’t reach milestones.
-3. dao-multisig sells these NFTs on OPEN
-4. build the best stablecoin possible
-5. share ownership for every person in the world
+All profit distributes between StablePro users.
 
-# StableUnitDao structure
-    snapshot.org for offchain voting on all chains
-        controls StableUnitDao-multisig - safe gnosis 
-        SafeSnap - oracle to deliver snapshot offchain voting onchains
-    StableUnitDao-NFTs
-        ogNFT 
-        aNFT  
-        cNFT  
-        kolNFT
-    SuDAO.sol - erc20 with voteDelegate
-    Distributors
-        TokenDistributor_v3.sol - code for friends only, to distribute first suDAO and get initital capital
-            tokens get distributed via timelockVault
-        TimelockVault.sol - locks suDAO under vesting
+### 5) StablePro Module
+Our main token with ability to get profit every block without any user actions. It can be USDPro, EURPro and so on.
 
+### 6) Access Module
+Simple module that check access for function calls. Other modules should inherit to be authenticated and has all access modifiers
 
+### 7) LAAS Module
+Here we use external lending protocol to have profit from collaterals.
 
+After that we distribute all profit between StablePro users using Reward Module.
 
-# Deployment
+### 8) Guard Module
+To have a stable price of StablePro = 1 Fiat Currency (USD, EUR and so on) we must have protection against a big drop in demand, too large price drops and other black swans in the market.
 
-## Compile
+In this module we have such guard mechanisms.
+
+### Diagram of StableUnit protocol:
+
+![StableUnit.png](StableUnit.png)
+
+## Tech
+
+### repo structure
+The `master` branch has the latest working version.
+
+Branches such as `workable_repo` have work in progress for the current SCRUM task with corresponding name.
+
+git `submodule-artifacts` is being used to store contract artifacts deployed in each network
+and can be import in other repos such as front-ends, liquidation scripts, or documentation.
+
+### Quick Start
+
+#### First, clone repository to your local machine:
+
 ```
-npm install  --legacy-peer-deps
-npm audit fix
-npx hardhat typechain
-npx hardhat compile
+git clone git@github.com:StableUnit/stableunit-poc-v2.git
+cd stableunit-poc-v2
+git submodule update --init --recursive
 ```
 
-## Test
-We have 3 types of test: unit, integration and deployments.
-For clear testing you should delete `.openzeppelin/unknown-31337.json`.
+#### Then, install dependencies
 
-You can run tests by this:
+```
+yarn
+```
+
+We are using dev environment based on hardhat framework.
+
+#### compile contracts
+
+```
+hardhat typechain
+hardhat compile
+```
+
+#### lint contracts (we use solhint)
+
+```
+npm run solhint
+```
+
+### Testing
+#### [IMPORTANT] All tests runs on mainnet fork (check ./hardhat.config.ts), so chainlink and univ3 oracles gets real prices, that are used in lending module, liquidation and so on.
+#### We need that to be sure, that our code works with real prices and can be easily deployed to mainnet.
+#### But for exchange module to be able to change prices fast and easy we use goerli.
+
+#### [IMPORTANT] Before running tests, create your INCH_API_KEY here: https://portal.1inch.dev/applications
+
+Description of types of tests read in **test/TESTS_ARCHITECTURE.md**
+
+#### execute tests
+
+```
+npm run test
+```
+
+or you can do it by parts:
+
+- **unit** tests
+
 ```
 npm run test:unit
+```
+
+- **integration** tests
+
+```
 npm run test:integration
+```
+
+- **deployment** tests
+
+```
 npm run test:deployment
 ```
 
-To see contracts coverage running all tests run this:
+To run **live** tests (tests that need blockchain in real time) you should run on one terminal
 ```
-npm run coverage
+npm run node:live
 ```
-
-## Deploy contracts
-if you add new/remove migrations-ts script - please delete all files from js folder so migrations-ts would be recompiled.
+and on another
 ```
-npm run migrate -- --network rinkeby
+npm run test:live
 ```
 
-## Verify
+### Update test mocks
+For some tests we call 1INCH API to get data for the swaps in ArbitrageHelpers. For example we call it, when we need to exchange LP-tokens.
+
+1INCH API return real-time responses, but we use constant blockNumber in hardhat.config.ts to fork mainnet for tests.
+
+To resolve that we store this responses from API in utils/mockedResponses.json.
+As default, we use this mocks in each test. But if you need to update the blockNumber and tests => you need to update constants in contracts/periphery/test/constants.ts and utils/1inch.ts:
+- MOCK_BLOCK_NUMBER - number of new block you want to fork from
+- NEED_TO_UPDATE
+   - true, if you need to call 1inch API and store it for the block №{MOCK_BLOCK_NUMBER}
+   - false, if you need to use 1inch API mocks in the block №{MOCK_BLOCK_NUMBER}
+
+So, the most common case will to update mocks - just update MOCK_BLOCK_NUMBER and set NEED_TO_UPDATE to true and run
 ```
-npm run verify
+npm run test:integration
 ```
-or
+Before merge, don't forget to set NEED_TO_UPDATE back to false.
+
+## Testnet deployment
+
+#### configure .env file
+
+- For internal deployment: use `git secret reveal`.
+
+- For extremal deployment: it's necessary to specify private keys of deployment wallets, APIs etc.
+
+Please follow instructions and format specified in  `.env.example` file
+
+#### TLDR
 ```
-truffle run verify GnosisSafeProxy --network rinkeby
-truffle run verify StableUnitDAOaNFT --network rinkeby
-truffle run verify SuDAO --network rinkeby
-truffle run verify VestingToken --network rinkeby 
-truffle run verify TokenDistributor_v3s1 --network rinkeby --debug
-truffle run verify StableUnitDAOogNFT --network rinkeby
-
-truffle run verify NftMock --network rinkeby
-truffle run verify TokenMock --network rinkeby
-```
-
-# StableUnit DAO NFTs
-
-Features three options for NFT DAO:
-- Og-NFT, original community of 99+ participants
-- A-NFT, advisors
-- C-NFT, community tokens. Allow inviting new members
-
-## Voting power memo
-
-Voting power in StableUnit DAO is split between StableUnit NFT and suDAO tokens.
-
-StableUnit dao has 2 token vote system: NFT and suDAO
-
-We have 3 NFT tokens:
-- Og-NFT - genesis community
-- A-NFT - advisors
-- C-NFT - future community members
-
-```
-1. Og-NFT in total would have f_og(t) suDAO voting power from 100% to 30% at the end of the year
-2. A-NFT in total would have f_a(t) suDAO voting power 1/10 from all og-NFT
-3. C-NFT in total would have f_c(t) from 0 to 50% (I,.e, same as og-NFT eventually)
-```
-SuDAO in minted every block like bitcoin-like function and goes to treasury, split into 4 buckets:
-1. Capital providers & patrons 15%
-2. Development 25 %(+4 year vesting)
-3. Farming and other incentives 30%
-4. DAO Treasury 30%
-
-Og-NFT got invited by core team. 
-Each next invitee has diminishing voting power such that a sum of all NFT powers is finite, like bitcoin mint.
-
-C-NFT token get the same system, can be any amount of members, but each new one gets little less voting power
-
-
-## Development
-
-### Check contract
-
-```bash
-npx hardhat test
+npm run deploy:goerli
+npm run verify:goerli
 ```
 
-### Deploy to the network
-
-```bash
-npx hardhat run scripts/deploy-nft.ts --network NETWORK_NAME
-```
-
-For networks other than Ethereum, provide BSC/POLYGONSCAN API KEY like this:
-```bash
-ETHERSCAN_API_KEY=your-bsc/polygonscan-api-key npx hardhat run scripts/deploy-nft.ts --network NETWORK_NAME
-```
-
-This will deploy contract to the network, verify on Xscan, pause the contract for transferring tokens. **Save the deployed address**
-
-### Mint NFTs to the list of recipients
-
-Place the list of addresses into `airdrop1.csv` files, 20 in each.
-
-Run airdrop like this:
-
-```bash
-npx hardhat airdrop --address 0xDEPLOYED_ADDRESS --filename ./airdrop.csv --network NETWORK_NAME
-```
-
-### Grant admin access to your account
-
-```bash
-npx hardhat grant-role --address 0xDEPLOYED_ADDRESS --network NETWORK_NAME \
-    --role ADMIN \
-    --account 0xyouraddress
-```
-
-Optionally, grant yourself minter and pauser access:
-
-```bash
-npx hardhat grant-role --address 0xDEPLOYED_ADDRESS --network NETWORK_NAME \
-    --role MINTER \
-    --account 0xyouraddress
-```
-
-```bash
-npx hardhat grant-role --address 0xDEPLOYED_ADDRESS --network NETWORK_NAME \
-    --role PAUSER \
-    --account 0xyouraddress
-```
-
-
-### Revoke access from deployer account
-
-```bash
-npx hardhat renounce-role --address 0xDEPLOYED_ADDRESS --network NETWORK_NAME
-```
-
-## Hardhat Guide
-
-This project demonstrates a basic Hardhat use case. 
-It comes with a sample contract, a test for that contract, 
-a sample script that deploys that contract, and an example of a task implementation, 
-which simply lists the available accounts.
-
-Try running some following tasks:
-```shell
-npm install
-npx hardhat accounts
-npx hardhat compile
-npx hardhat test
-```
-
-Deploy & verify (verification might fail)
-```shell
-npx hardhat run scripts/deploy-nft.ts --network mumbai
-```
-
-### Verify
-
-```bash
-npx hardhat verify --network mumbai 0x000000006cD799E2cC7A3Fe68ef0D8bfD7f8f477
-```
-
-### airdrop NFTs
-```bash
-npx hardhat airdrop --network mumbai --address 0x000000006cD799E2cC7A3Fe68ef0D8bfD7f8f477 --filename ./airdrop.csv
-```
-
-### transfer ownership to another address
-```bash
-npx hardhat transfer-owner --network mumbai --address 0x000000006cD799E2cC7A3Fe68ef0D8bfD7f8f477 --owner 0xF2A961aF157426953e392F6468B0162F86B2aCBC
+#### deploy main contracts to external network
 
 ```
-
-### renounce the deployer as an owner
-```bash
- npx hardhat renounce-role --network mumbai --address 0x000000006cD799E2cC7A3Fe68ef0D8bfD7f8f477
+npx hardhat deploy --tags DeployContracts --network goerli
 ```
 
-### Deploy instructions
-1. Generate typechain by `hardhat typechain` (you may need to comment 21-23 lines in hardhat.config.js and after generation uncomment them)
-2. deployer run `npm run deploy:goerli` (has only PRIVATE_KEY_TESTNET_DEPLOYER)
-3. admin run `npx hardhat setDistributor --verbose --network goerli` (he has also PRIVATE_KEY_TESTNET_ADMIN)
-4. admin run `npx hardhat setBonus --verbose --network goerli`
-5. admin run `npm run verify:goerli`
-6. dao (multisig) run `suDAO.mint(tokenDistributor.address, 1450000000000000000000000)`
-7. dao (multisig) run `accessControlSingleton.grantRole(await tokenDistributor.ADMIN_ROLE(), tokenDistributor.address)` from gnosis-safe multisig.
-   1. ADMIN_ROLE is `0xa49807205ce4d355092ef5a8a18f56e8913cf4a201fbe287825b095693c21775`
-   2. tokenDistributor.address you can find in `submodule-artifacts/goerli/TokenDistributorV4.json`
+#### deploy mock collateral assets to test network
 
-### Upgrade instructions
-1. Choose what you need in `scripts/propose-upgrade.ts` in `main` function. 
-2. Run `npm run upgrade-proposal:goerli`
-   1. If you have `deployment at 0x... address is not registered` error, you have incorrect .openzeppelin/goerli.json. So you need to run forceImport (10 line in propose-upgrade.ts)
-3. Go to the url in the log (it's url of created proposal that can see that ProxyAdmin owner is gnosis-safe multisig)
-4. In the proposal - addresses, that are in the gnosis-safe multisig, can approve this proposal
-5. After that you can execute it.
-6. If proposal is executed you can verify contract via `npm run verify:goerli`
+```
+npx hardhat deploy --tags Mock --network goerli
+```
 
-### CrossChain NFT ([gitbook](https://layerzero.gitbook.io/docs/))
+Note, these contracts will be reused unless they had any changes in the code.
 
-We use Layer-Zero UniversalONFT721 in the base. So for make NFT cross-chain sendable you should:
-1. Deploy to chain1 with `npm run deploy-nft:goerli`
-2. Deploy to chain2 with `npm run deploy-nft:mumbai` (it could fail in verification step, you can ignore that)
-3. Prepare NFT in chain1 with `hardhat run ./scripts/prepare-lz-nft.ts --network mumbai`
-4. Prepare NFT in chain2 with `hardhat run ./scripts/prepare-lz-nft.ts --network goerli`
-5. For testing that all works - run script that sends token with id 100 from deployer in mumbai to admin in goerli with `hardhat run ./scripts/send-lz-nft.ts --network mumbai`
+After mock tokens are deployed, the script also will configure oracle and collaterals manager to support them.
 
+Also, you can also run config scripts and do it all in one command:
+```
+npm run deploy:goerli
+```
 
-We use Layer-Zero LzAppUpgradeable in the base. So for make ERC-20 cross-chain sendable you should:
-1. Deploy to chain1 with `npm run deploy-suDAO:goerli`
-2. Deploy to chain2 with `npm run deploy-suDAO:mumbai` (it could fail in verification step, you can ignore that)
-3. Prepare NFT in chain1 with `npm run prepare-suDAO:mumbai`
-4. Prepare NFT in chain2 with `npm run prepare-suDAO:goerli`
-5. For testing that all works call bridge function and pass eth as fee for that operation.
+#### upgrade contracts
+Upgrade main contracts with changes in goerli testnet:
+```
+npm run upgrade:goerli
+```
+#### verify source code on etherscan
+
+We are using hardhat-etherscan package to verify source code on etherscan.
+
+Be sure that ETHERSCAN_API_KEY is set up .env file
+
+Then execute command to verify deployed contracts
+
+It will take addresses and arguments from the artifacts
+
+```
+npm run verify:goerli
+```
+
+If you want to verify Exchange Module contracts, then run
+
+```
+npm run verify-exchange:goerli
+```
+
+#### commit deployment artifacts
+
+Deployment artifacts are saved into "submodule-artifacts" directory, which is also initialized as git submodule.
+To use it in other git repositories such as client, be sure you push the latest changes to the repo.
+
+```
+cd submodule-artifacts
+git commit -m "deployed" && git push
+```
+
+#### code before git-commit code will be automatically verified
+
+```
+  "pre-commit": [
+    "clean-cache",
+    "lint-staged",
+    "lint:fix",
+    "solhint",
+    "test:integration",
+    "test:unit"
+  ],
+```
