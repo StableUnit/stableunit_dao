@@ -1,15 +1,4 @@
 // SPDX-License-Identifier: MIT
-/*
-      /$$$$$$            /$$$$$$$   /$$$$$$   /$$$$$$
-     /$$__  $$          | $$__  $$ /$$__  $$ /$$__  $$
-    | $$  \__/ /$$   /$$| $$  \ $$| $$  \ $$| $$  \ $$
-    |  $$$$$$ | $$  | $$| $$  | $$| $$$$$$$$| $$  | $$
-     \____  $$| $$  | $$| $$  | $$| $$__  $$| $$  | $$
-     /$$  \ $$| $$  | $$| $$  | $$| $$  | $$| $$  | $$
-    |  $$$$$$/|  $$$$$$/| $$$$$$$/| $$  | $$|  $$$$$$/
-     \______/  \______/ |_______/ |__/  |__/ \______/
-
-*/
 pragma solidity ^0.8.7;
 
 import "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20Upgradeable.sol";
@@ -17,18 +6,21 @@ import "@openzeppelin/contracts-upgradeable/token/ERC20/extensions/ERC20VotesUpg
 import "@openzeppelin/contracts-upgradeable/token/ERC20/extensions/ERC20BurnableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/utils/SafeERC20Upgradeable.sol";
 import "./access-control/SuAccessControlAuthenticated.sol";
+import "./cross-chain/CrossChainToken.sol";
 
 /**
- * @title Governance token for StableUnit Decentralized Autonomous Organisation
+ * @title Governance token
  */
-contract SuDAO is ERC20VotesUpgradeable, ERC20BurnableUpgradeable, SuAccessControlAuthenticated {
+contract SomeTokenDAO is ERC20VotesUpgradeable, SuAccessControlAuthenticated, CrossChainToken {
     using SafeERC20Upgradeable for ERC20Upgradeable;
 
     uint256 public constant MAX_SUPPLY = 21_000_000 * 1e18;
 
-    function initialize(address _accessControlSingleton) initializer public {
+    // Check _lzEndpoint in cross-chain/CrossChainToken.sol comments
+    function initialize(address _accessControlSingleton, address _lzEndpoint) initializer public {
         __SuAuthenticated_init(_accessControlSingleton);
-        __ERC20_init("StableUnit DAO", "SuDAO");
+        // TODO: rename
+        __CrossChainToken_init("SomeToken DAO", "SomeTokenDAO", _lzEndpoint);
     }
 
     function mint(address account, uint256 amount) external onlyRole(DAO_ROLE) {

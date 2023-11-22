@@ -5,9 +5,10 @@
 // Runtime Environment's members available in the global scope.
 import { ethers, getNamedAccounts} from "hardhat";
 
-import {getIdByNetworkName, getLZIdByNetworkName, NETWORK} from "../utils/network";
+import {getIdByNetworkName, NETWORK} from "../utils/network";
 import {MockErc721CrossChain} from "../typechain";
 import {ADDRESS_ZERO} from "../test/utils";
+import {lzChainId} from "../utils/endpoint";
 
 const utf8Encode = new TextEncoder();
 
@@ -37,12 +38,12 @@ async function main() {
 
   switch (network.chainId) {
     case getIdByNetworkName(NETWORK.goerli): {
-      dstChainId = getLZIdByNetworkName(NETWORK.mumbai);
+      dstChainId = lzChainId[NETWORK.mumbai];
       tokenIdToSend = 0;
       break;
     }
     case getIdByNetworkName(NETWORK.mumbai): {
-      dstChainId = getLZIdByNetworkName(NETWORK.goerli);
+      dstChainId = lzChainId[NETWORK.goerli];
       tokenIdToSend = 100;
       break;
     }

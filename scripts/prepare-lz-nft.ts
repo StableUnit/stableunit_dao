@@ -5,10 +5,11 @@
 // Runtime Environment's members available in the global scope.
 import { ethers, getNamedAccounts} from "hardhat";
 
-import {getIdByNetworkName, getLZIdByNetworkName, NETWORK} from "../utils/network";
+import {getIdByNetworkName, NETWORK} from "../utils/network";
 import {MockErc721CrossChain} from "../typechain";
 import CROSS_CHAIN_MUMBAI from "../submodule-artifacts/mumbai/MockErc721CrossChain.json";
 import CROSS_CHAIN_GOERLI from "../submodule-artifacts/goerli/MockErc721CrossChain.json";
+import {lzChainId} from "../utils/endpoint";
 
 /** Here we have a script that make all preparations, set all needed data for transfer
  * MockErc721CrossChain between two chains and two users (transfer is in send-lz-nft.ts).
@@ -33,13 +34,13 @@ async function main() {
 
   switch (network.chainId) {
     case getIdByNetworkName(NETWORK.goerli): {
-      dstChainId = getLZIdByNetworkName(NETWORK.mumbai);
+      dstChainId = lzChainId[NETWORK.mumbai];
       localContractAddress = CROSS_CHAIN_GOERLI.address;
       dstContractAddress = CROSS_CHAIN_MUMBAI.address;
       break;
     }
     case getIdByNetworkName(NETWORK.mumbai): {
-      dstChainId = getLZIdByNetworkName(NETWORK.goerli);
+      dstChainId = lzChainId[NETWORK.goerli];
       localContractAddress = CROSS_CHAIN_MUMBAI.address;
       dstContractAddress = CROSS_CHAIN_GOERLI.address;
       break;
