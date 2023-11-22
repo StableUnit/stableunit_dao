@@ -27,27 +27,27 @@ contract SuDAOUpgrader is SuAccessControlAuthenticated, ISuDAOUpgrader {
 
     IveERC20v2 public VE_ERC_20;
     IERC20Upgradeable public SU_DAO;
-    IERC20Upgradeable public SU_DAO_OLD;
+    IERC20Upgradeable public SU_DAO_LEGACY;
 
     function initialize(
         address _accessControlSingleton,
-        address _suDAOOld,
-        address _suDAONew,
+        address _suDaoOld,
+        address _suDaoNew,
         address _veErc20
     ) initializer public {
         __SuAuthenticated_init(_accessControlSingleton);
-        SU_DAO_OLD = IERC20Upgradeable(_suDAOOld);
-        SU_DAO = IERC20Upgradeable(_suDAONew);
+        SU_DAO_LEGACY = IERC20Upgradeable(_suDaoOld);
+        SU_DAO = IERC20Upgradeable(_suDaoNew);
         VE_ERC_20 = IveERC20v2(_veErc20);
 
-        IERC20Upgradeable(_suDAONew).approve(_veErc20, type(uint256).max);
+        IERC20Upgradeable(_suDaoNew).approve(_veErc20, type(uint256).max);
     }
 
     function participate(uint256 donationAmount) payable external {
         uint256 rewardAmount = donationAmount * 100 * 16 / 21;
 
         // get tokens from user
-        SU_DAO_OLD.safeTransferFrom(msg.sender, address(this), donationAmount);
+        SU_DAO_LEGACY.safeTransferFrom(msg.sender, address(this), donationAmount);
         // give reward to the user
         if (SU_DAO.balanceOf(address(this)) < rewardAmount) revert NoContractRewardLeft();
         VE_ERC_20.lockUnderVesting(msg.sender, rewardAmount);

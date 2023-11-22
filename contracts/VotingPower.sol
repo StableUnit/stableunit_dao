@@ -21,6 +21,7 @@ import "./interfaces/IVotingPower.sol";
 /*
  * @title ERC20-like and Votes-like contract that aggregates voting power of all tokens in SuDAO on particular chain.
  * Can't be transferred and approved.
+ * TODO: How it works?
 */
 contract VotingPower is SuAccessControlAuthenticated, IVotingPower {
     using EnumerableSet for EnumerableSet.AddressSet;
@@ -29,6 +30,7 @@ contract VotingPower is SuAccessControlAuthenticated, IVotingPower {
     uint256 public constant MAX_LEN = 50;
     // Max weight of each token in VotingPower
     uint256 public constant MAX_WEIGHT = 1e18;
+    // TODO: What is it? Is it MAX voting power?
     uint256 public constant TOTAL_VOTING_POWER = 42_000_000 * 1e18;
 
     string private _name;

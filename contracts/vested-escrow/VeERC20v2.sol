@@ -86,7 +86,7 @@ contract VeERC20v2 is SuVoteToken, ERC20Upgradeable, IveERC20v2 {
         if (newVestingSeconds == 0) revert BadVestingTimestamps();
         if (
             newVestingSeconds == 0 ||
-            newVestingSeconds / newVestingFrequencySeconds * newVestingFrequencySeconds != newVestingSeconds
+            (newVestingSeconds / newVestingFrequencySeconds * newVestingFrequencySeconds) != newVestingSeconds
         ) revert BadVestingTimestamps();
 
         tgeTimestamp = newTgeTimestamp;
@@ -194,6 +194,10 @@ contract VeERC20v2 is SuVoteToken, ERC20Upgradeable, IveERC20v2 {
         isTransferable[account] = _isTransferable;
     }
 
+    // TODO: Should we enable transfers? Need for staking in for liquidation, or briding for governance?
+    // possible update: owner/admin should maintains whitelist of addresses,
+    // if at least one of sender,recipient are in this list - allow to transfer.
+    // But we should think it though. Perhaps update updatability really solves it though.
     function transfer(address to, uint256 amount) public virtual override returns (bool) {
         if (isTransferable[msg.sender] || isTransferable[to]) {
             super._transfer(msg.sender, to, amount);
