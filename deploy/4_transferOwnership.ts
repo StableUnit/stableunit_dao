@@ -12,11 +12,9 @@ const func: DeployFunction = async () => {
 
     await accessControlSingleton.grantRole(DAO_ROLE, dao);
     await accessControlSingleton.grantRole(ADMIN_ROLE, admin);
-    console.log("Role granted");
 
     await accessControlSingleton.revokeRole(ADMIN_ROLE, deployer);
     await accessControlSingleton.revokeRole(DAO_ROLE, deployer);
-    console.log("Role revoked");
     await upgrades.admin.transferProxyAdminOwnership(dao);
 };
 export default func;

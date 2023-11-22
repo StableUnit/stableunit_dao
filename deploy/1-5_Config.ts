@@ -5,11 +5,6 @@ import { SuAccessControlSingleton, SuDAO, SuDAOUpgrader, SuDAOv2, VeERC20v2 } fr
 
 // TODO: move all mocks deploy in separate deploy script
 const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
-    console.log("Config");
-    const [deployer] = await hre.ethers.getSigners();
-    console.log("Deployer network:", await ethers.provider.getNetwork());
-    console.log("Deployer:", deployer.address);
-
     const accessControlSingleton = (await ethers.getContract("SuAccessControlSingleton")) as SuAccessControlSingleton;
     const suDAOOld = (await ethers.getContract("SuDAO")) as SuDAO;
     const suDAONew = (await ethers.getContract("SuDAOv2")) as SuDAOv2;

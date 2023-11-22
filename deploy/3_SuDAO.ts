@@ -8,7 +8,6 @@ import { verify } from "../scripts/verifyEtherscan";
 import { SuAccessControlSingleton, SuDAO } from "../typechain-types";
 
 const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
-    console.log("SuDAO");
     const [deployer, admin] = await hre.ethers.getSigners();
     const network = await ethers.provider.getNetwork();
 

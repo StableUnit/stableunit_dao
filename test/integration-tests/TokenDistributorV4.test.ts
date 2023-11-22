@@ -9,9 +9,9 @@ import {
     MockErc20,
     MockErc721,
     SuAccessControlSingleton,
-    SuDAO,
+    SuDAOv2,
     TokenDistributorV4,
-    VeERC20v2,
+    VeERC20,
 } from "../../typechain-types";
 
 type DataType = {
@@ -36,8 +36,8 @@ describe("TokenDistributorV4", () => {
     let distributor: TokenDistributorV4;
     let mockUSDT: MockErc20;
     let mockNft: MockErc721;
-    let suDAO: SuDAO;
-    let veERC20: VeERC20v2;
+    let suDAO: SuDAOv2;
+    let veERC20: VeERC20;
     let accessControlSingleton: SuAccessControlSingleton;
     const data: DataType = {
         startTimestamp: 0,
@@ -79,8 +79,8 @@ describe("TokenDistributorV4", () => {
         accessControlSingleton = (await ethers.getContract("SuAccessControlSingleton")) as SuAccessControlSingleton;
         distributor = (await ethers.getContract("TokenDistributorV4")) as TokenDistributorV4;
         mockNft = (await ethers.getContract("MockErc721")) as MockErc721;
-        suDAO = (await ethers.getContract("SuDAO")) as SuDAO;
-        veERC20 = (await ethers.getContract("VeERC20v2")) as VeERC20v2;
+        suDAO = (await ethers.getContract("SuDAOv2")) as SuDAOv2;
+        veERC20 = (await ethers.getContract("VeERC20")) as VeERC20;
         const mockErc20Factory = await ethers.getContractFactory("MockErc20");
         mockUSDT = (await mockErc20Factory.deploy("test tether", "USDT", 6)) as MockErc20;
 
@@ -93,6 +93,9 @@ describe("TokenDistributorV4", () => {
         const newData = { ...distributeData };
         newData.startTimestamp = data.startTimestamp || (await latest());
         newData.donationToken = mockUSDT.address;
+
+        data.startTimestamp = newData.startTimestamp;
+        data.donationToken = newData.donationToken;
         await run("setDistributor", newData);
     };
 
@@ -128,7 +131,7 @@ describe("TokenDistributorV4", () => {
 
             await expect(
                 distributor
-                    .connect(adminSigner)
+                    .connect(deployerSigner)
                     .setDistributionVesting(
                         data.fullVestingSeconds,
                         data.cliffSeconds,
@@ -139,7 +142,7 @@ describe("TokenDistributorV4", () => {
 
             await expect(
                 distributor
-                    .connect(adminSigner)
+                    .connect(deployerSigner)
                     .setDistributionInfo(
                         data.startTimestamp + data.startLengthSeconds,
                         data.startTimestamp + data.startLengthSeconds + data.lengthSeconds,
@@ -152,11 +155,11 @@ describe("TokenDistributorV4", () => {
                     )
             ).to.be.reverted;
 
-            await expect(distributor.connect(adminSigner).setNftAccess(mockNft.address, false)).to.be.reverted;
-            await expect(distributor.connect(adminSigner).setNftAccess(mockNft.address, true)).to.be.reverted;
+            await expect(distributor.connect(deployerSigner).setNftAccess(mockNft.address, false)).to.be.reverted;
+            await expect(distributor.connect(deployerSigner).setNftAccess(mockNft.address, true)).to.be.reverted;
 
             await expect(
-                distributor.connect(adminSigner).setBondingCurve([
+                distributor.connect(deployerSigner).setBondingCurve([
                     BN_1E18.mul(11).div(10), // 1.1 * 1e18
                     BN_1E12.mul(10).div(10), // 10 * 1e11
                 ])

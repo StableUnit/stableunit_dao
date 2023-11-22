@@ -16,13 +16,8 @@ const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
 
     // await checkVanityAddress(web3, vanity2.address);
     // await fundDeployer(web3, deployer.address, vanity2.address);
-    const veERC20 = (await deployProxy(
-        "VeERC20v2",
-        [accessControlSingleton.address, suDAONew.address, tgeTimestamp],
-        undefined,
-        true,
-        vanity2
-    )) as VeERC20v2;
+    await deployProxy("VeERC20v2", [accessControlSingleton.address, suDAONew.address, tgeTimestamp]);
+    await deployProxy("VeERC20", [accessControlSingleton.address, suDAONew.address, tgeTimestamp]);
     // await withdrawEther(web3, vanity2.address, deployer.address);
 
     // await upgrades.admin.transferProxyAdminOwnership(deployer.address);
