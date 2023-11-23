@@ -2,7 +2,7 @@ import { ethers } from "hardhat";
 import { expect } from "chai";
 import { SignerWithAddress } from "hardhat-deploy-ethers/signers";
 import deployProxy from "../utils/deploy";
-import { SuAccessControlSingleton } from "../../contracts/periphery/typechain-types";
+import { SuAccessControlSingleton } from "../../typechain-types";
 
 describe("SuAccessControlSingleton", function () {
     let accounts: Record<string, SignerWithAddress>;

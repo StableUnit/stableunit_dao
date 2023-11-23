@@ -281,3 +281,14 @@ We use Layer-Zero LzAppUpgradeable in the base. So for make ERC-20 cross-chain s
 3. Prepare NFT in chain1 with `npm run prepare-suDAO:mumbai`
 4. Prepare NFT in chain2 with `npm run prepare-suDAO:goerli`
 5. For testing that all works call bridge function and pass eth as fee for that operation.
+
+
+## Coverage
+
+To run coverage:
+1) Remove typechain-types folder in contracts/periphery folder
+2) Run ``` hardhat coverage ```
+
+For 23/11/2023 coverage is:
+
+![Coverage.png](Coverage.png)

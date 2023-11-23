@@ -8,4 +8,5 @@ module.exports = {
         'interfaces',
         'periphery',
     ],
+    configureYulOptimizer: true,
 };

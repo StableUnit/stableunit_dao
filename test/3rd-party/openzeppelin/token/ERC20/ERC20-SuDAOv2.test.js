@@ -7,10 +7,10 @@ const {
   shouldBehaveLikeERC20Transfer,
   shouldBehaveLikeERC20Approve,
 } = require('./ERC20.behavior');
-const {deployProxy, BN_1E18} = require("../../../../utils");
+const {deployProxy} = require("../../../../utils");
 const { contract, ethers} = require("hardhat");
-const {latest} = require("../../../../utils/time");
 const {shouldBehaveLikeERC20Burnable} = require("./extensions/ERC20BurnableUpgradeable.behavior");
+const { SuDAOv2 } = require("../../../../../typechain-types");
 
 // const ERC20 = artifacts.require('$ERC20');
 // const ERC20Decimals = artifacts.require('$ERC20DecimalsMock');
@@ -24,10 +24,10 @@ contract('ERC20', function (accounts) {
   // const symbol = 'MTKN';
 
   const stableUnitInitialize = async () => {
-    [admin] = await ethers.getSigners();
+    const [admin] = await ethers.getSigners();
 
-    const accessControlSingleton = await deployProxy( "SuAccessControlSingleton", [admin.address, admin.address], undefined, false);
-    const suDAO = await deployProxy("SuDAOv2", [accessControlSingleton.address], undefined, false);
+    const accessControlSingleton = await deployProxy( "SuAccessControlSingleton", [admin.address], undefined, false);
+    const suDAO = (await (await ethers.getContractFactory("SuDAOv2")).deploy(accessControlSingleton.address));
 
     await suDAO.connect(admin).mint(admin.address, initialSupply.toString());
     return suDAO.address;
