@@ -2,8 +2,7 @@
 .vscode
 
 node_modules
-typechain
-typechain-types
+typechain-types/factories
 contracts/periphery
 
 

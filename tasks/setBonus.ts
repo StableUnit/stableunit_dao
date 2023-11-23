@@ -1,9 +1,8 @@
 import "@nomiclabs/hardhat-web3";
 import "@nomiclabs/hardhat-waffle";
 import { task } from "hardhat/config";
-
 import { BigNumber } from "ethers";
-import { Bonus, MockErc721 } from "../typechain-types";
+import { Bonus } from "../typechain-types";
 
 /**
  * launch with the  command:
@@ -15,7 +14,7 @@ task("setBonus", "set all parameters from the script").setAction(async (taskArgs
     const [deployer, admin] = await hre.ethers.getSigners();
 
     const bonus = (await hre.ethers.getContract("Bonus")) as Bonus;
-    const mockErc721 = (await hre.ethers.getContract("MockErc721")) as MockErc721;
+    const mockErc721 = await hre.ethers.getContract("MockErc721");
 
     console.log(`bonus@${(await hre.ethers.provider.getNetwork()).name} = `, bonus.address);
     console.log(`mockErc721@${(await hre.ethers.provider.getNetwork()).name} = `, mockErc721.address);

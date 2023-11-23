@@ -77,13 +77,7 @@ Oversimplified plan
 npm install --legacy-peer-deps
 git submodule init
 git submodule update --init --recursive
-```
-After that comment 17-19 lines in hardhat.config.js (tasks) an run 
-```
 npx hardhat typechain
-```
-Uncomment this lines and run
-```
 npx hardhat compile
 ```
 
