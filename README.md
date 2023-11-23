@@ -74,9 +74,16 @@ Oversimplified plan
 
 ## Compile
 ```
-npm install  --legacy-peer-deps
-npm audit fix
+npm install --legacy-peer-deps
+git submodule init
+git submodule update --init --recursive
+```
+After that comment 17-19 lines in hardhat.config.js (tasks) an run 
+```
 npx hardhat typechain
+```
+Uncomment this lines and run
+```
 npx hardhat compile
 ```
 
@@ -99,24 +106,12 @@ npm run coverage
 ## Deploy contracts
 if you add new/remove migrations-ts script - please delete all files from js folder so migrations-ts would be recompiled.
 ```
-npm run migrate -- --network rinkeby
+npm run deploy:goerli
 ```
 
 ## Verify
 ```
-npm run verify
-```
-or
-```
-truffle run verify GnosisSafeProxy --network rinkeby
-truffle run verify StableUnitDAOaNFT --network rinkeby
-truffle run verify SuDAO --network rinkeby
-truffle run verify VestingToken --network rinkeby 
-truffle run verify TokenDistributor_v3s1 --network rinkeby --debug
-truffle run verify StableUnitDAOogNFT --network rinkeby
-
-truffle run verify NftMock --network rinkeby
-truffle run verify TokenMock --network rinkeby
+npm run verify:goerli
 ```
 
 # StableUnit DAO NFTs
