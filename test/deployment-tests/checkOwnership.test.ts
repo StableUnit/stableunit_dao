@@ -7,7 +7,7 @@ describe("checkOwnership", () => {
     let accessControlSingleton: SuAccessControlSingleton;
 
     beforeEach(async () => {
-        await deployments.fixture(["Deployer"]);
+        await deployments.fixture(["Deployer", "TransferOwnership"]);
         accessControlSingleton = (await ethers.getContract("SuAccessControlSingleton")) as SuAccessControlSingleton;
         defaultAdminRole = await accessControlSingleton.DEFAULT_ADMIN_ROLE();
     });

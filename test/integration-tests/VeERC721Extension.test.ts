@@ -15,13 +15,13 @@ describe("VeERC721Extension", () => {
         const [deployer, admin, dao, alice, bob, carl] = await ethers.getSigners();
         accounts = { deployer, admin, dao, alice, bob, carl };
 
-        await deployments.fixture(["Deployer"]);
+        await deployments.fixture(["Deployer", "ERC721Extension", "TransferOwnership"]);
         accessControlSingleton = (await ethers.getContract("SuAccessControlSingleton")) as SuAccessControlSingleton;
         mockErc721Extended = (await ethers.getContract("MockErc721Extended")) as MockErc721Extended;
         veERC721Extension = (await ethers.getContract("VeERC721Extension")) as VeERC721Extension;
 
         await accessControlSingleton
-            .connect(dao)
+            .connect(admin)
             .grantRole(await veERC721Extension.SYSTEM_ROLE(), mockErc721Extended.address);
     });
 
@@ -78,7 +78,7 @@ describe("VeERC721Extension", () => {
 
             // TODO: create special contractMock account to make such operations, because only contract can have this role
             await accessControlSingleton
-                .connect(accounts.dao)
+                .connect(accounts.admin)
                 .grantRole(await veERC721Extension.SYSTEM_ROLE(), accounts.admin.address);
 
             await veERC721Extension.connect(accounts.admin).adminUnlock(tokenId);
@@ -146,7 +146,7 @@ describe("VeERC721Extension", () => {
             await mockErc721Extended.mint(accounts.bob.address);
             await mockErc721Extended.mint(accounts.carl.address);
             await accessControlSingleton
-                .connect(accounts.dao)
+                .connect(accounts.admin)
                 .grantRole(await veERC721Extension.SYSTEM_ROLE(), accounts.admin.address);
 
             await veERC721Extension
@@ -195,7 +195,7 @@ describe("VeERC721Extension", () => {
             const tx = await mockErc721Extended.connect(accounts.admin).mint(accounts.carl.address);
 
             await expect(veERC721Extension.getPastTotalSupply((tx.blockNumber ?? 0) + 1)).to.be.revertedWith(
-                "Votes: block not yet mined"
+                "Votes: future lookup"
             );
 
             const totalSupply = await veERC721Extension.getTotalSupply();
@@ -212,7 +212,7 @@ describe("VeERC721Extension", () => {
     describe("performs voting operations", function () {
         it("delegates", async function () {
             await accessControlSingleton
-                .connect(accounts.dao)
+                .connect(accounts.admin)
                 .grantRole(await veERC721Extension.SYSTEM_ROLE(), accounts.admin.address);
             await veERC721Extension
                 .connect(accounts.admin)

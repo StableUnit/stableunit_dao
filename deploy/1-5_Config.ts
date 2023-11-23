@@ -1,7 +1,10 @@
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 import { DeployFunction } from "hardhat-deploy/types";
 import { ethers } from "hardhat";
+import { expect } from "chai";
 import { SuAccessControlSingleton, SuDAO, SuDAOUpgrader, SuDAOv2, VeERC20v2 } from "../typechain-types";
+import { deploy, getDeploymentAddress } from "../test/utils";
+import deployProxy from "../test/utils/deploy";
 
 // TODO: move all mocks deploy in separate deploy script
 const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {

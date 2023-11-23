@@ -221,8 +221,7 @@ describe("Bonus", () => {
             await expect(tx).to.be.reverted;
         });
 
-        // TODO: check why it not works after access-control update
-        it.skip("user can get max lvl", async () => {
+        it("user can get max lvl", async () => {
             // bob is admin, alice is communityAdmin, carl is user
             const userXP = 1_810_034_208;
             const lvl = 75;

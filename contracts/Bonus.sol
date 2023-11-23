@@ -101,14 +101,16 @@ contract Bonus is IBonus, SuAuthenticated {
         levelMap[72] = 1256968851;
         levelMap[73] = 1508362195;
         levelMap[74] = 1810034207;
-        levelMap[75] = 1810034207;
     }
 
     function getLevelByXP(uint256 xp) public view returns (uint16) {
-        for (uint16 i = 1; i <= 75; ++i) {
+        for (uint16 i = 1; i <= 74; ++i) {
             if (xp < levelMap[i]) {
                 return i;
             }
+        }
+        if (xp > levelMap[74]) {
+            return 75;
         }
         return 1;
     }

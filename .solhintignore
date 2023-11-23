@@ -1,4 +1,5 @@
 node_modules
+contracts/3rd-party
 contracts/mocks
 contracts/vendor
 contracts/periphery

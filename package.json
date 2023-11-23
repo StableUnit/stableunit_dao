@@ -9,6 +9,7 @@
     "generate-types": "npx hardhat typechain",
     "typecheck": "tsc --noEmit",
     "compile": "hardhat compile",
+    "test": "npm run test:unit && npm run test:deployment && npm run test:integration",
     "test:unit": "hardhat test test/unit-tests/*.test.ts",
     "test:integration": "hardhat test test/integration-tests/*.test.ts",
     "test:deployment": "hardhat test test/deployment-tests/*.test.ts",
@@ -28,8 +29,16 @@
     "grant-og-legacy": "npx hardhat ogDistribution --address 0xfffffffff615bee8d0c7d329ebe0d444ab46ee5a --filename ./misc/ogNftAirdrop.txt --verbose",
     "solhint": "solhint 'contracts/**/*.sol'",
     "lint": "eslint --ext .ts .",
-    "lint:fix": "eslint --fix --ext .ts ."
+    "lint:fix": "eslint --fix --ext .ts .",
+    "lint-staged": "lint-staged",
+    "clean-cache": "rm -rf ./artifacts  && rm -rf ./cache"
   },
+  "pre-commit": [
+    "clean-cache",
+    "compile",
+    "lint:fix",
+    "test"
+  ],
   "dependencies": {
     "@balancer-labs/v2-interfaces": "^0.4.0",
     "@balancer-labs/v2-pool-utils": "^4.1.1",
@@ -86,6 +95,12 @@
     "eslint-config-prettier": "^8.3.0",
     "eslint-plugin-import": "^2.23.4",
     "eslint-plugin-prettier": "^3.4.0",
+    "lint-staged": "^13.2.3",
+    "pre-commit": "^1.2.2",
     "prettier": "^2.3.0"
+  },
+  "lint-staged": {
+    "!contracts/periphery/**/*.ts?(x)": [],
+    "**/*.ts?(x)": "tsc -p tsconfig.json --noEmit --skipLibCheck"
   }
 }
