@@ -8,3 +8,4 @@ cache
 submodule-artifacts
 typechain
 contracts/periphery
+test/3rd-party
