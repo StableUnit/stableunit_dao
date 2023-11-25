@@ -1,6 +1,7 @@
 export type NetworkType =
     | "eth"
     | "goerli"
+    | "sepolia"
     | "mumbai"
     | "arbitrum"
     | "arbitrumGoerli"
@@ -15,6 +16,7 @@ export type NetworkType =
 export const NETWORK: Record<NetworkType, NetworkType> = {
     eth: "eth",
     goerli: "goerli",
+    sepolia: "sepolia",
     mumbai: "mumbai",
     polygon: "polygon",
     arbitrum: "arbitrum",
@@ -42,6 +44,8 @@ export const getNetworkNameById: (chainId?: number) => NetworkType = (chainId) =
             return NETWORK.eth;
         case 5:
             return NETWORK.goerli;
+        case 11155111:
+            return NETWORK.sepolia;
         case 56:
             return NETWORK.bsc;
         case 137:
@@ -72,6 +76,8 @@ export const getIdByNetworkName: (name: NetworkType) => number = (name) => {
             return 1;
         case NETWORK.goerli:
             return 5;
+        case NETWORK.sepolia:
+            return 11155111;
         case NETWORK.bsc:
             return 56;
         case NETWORK.polygon:

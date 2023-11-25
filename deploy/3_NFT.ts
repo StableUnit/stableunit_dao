@@ -7,6 +7,7 @@ const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
     const TOKENS = {
         [NETWORK.goerli]: { range: [0, 99] },
         [NETWORK.mumbai]: { range: [100, 199] },
+        [NETWORK.sepolia]: { range: [200, 299] },
         [NETWORK.unsupported]: { range: [0, 99] },
     };
 
@@ -21,7 +22,7 @@ const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
         `✅ NFT deployed on chain ${network.name} with range ${token.range[0]}-${token.range[1]} with address ${tx.address}`
     );
 
-    await run("verify:verify", { address: tx.address, constructorArguments: args });
+    // await run("verify:verify", { address: tx.address, constructorArguments: args });
     console.log("✅ NFT verified");
 };
 export default func;

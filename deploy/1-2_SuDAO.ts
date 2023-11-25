@@ -16,10 +16,10 @@ const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
     const network = await ethers.provider.getNetwork();
 
     const accessControlSingleton = (await ethers.getContract("SuAccessControlSingleton")) as SuAccessControlSingleton;
-    const suDAOOld =
-        network.name === "unknown"
-            ? ((await deployProxy("SuDAO", [accessControlSingleton.address, ADDRESS_ZERO])) as SuDAO)
-            : ((await ethers.getContract("SuDAO")) as SuDAO);
+    // const suDAOOld =
+    //     network.name === "unknown"
+    //         ? ((await deployProxy("SuDAO", [accessControlSingleton.address, ADDRESS_ZERO])) as SuDAO)
+    //         : ((await ethers.getContract("SuDAO")) as SuDAO);
 
     // await checkVanityAddress(web3, vanity1.address);
     // await fundDeployer(web3, deployer.address, vanity1.address);

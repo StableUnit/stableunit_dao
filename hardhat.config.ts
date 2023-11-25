@@ -69,6 +69,7 @@ const config: HardhatUserConfig = {
         nft: {
             default: 9,
             goerli: "0xbfD2135BFfbb0B5378b56643c2Df8a87552Bfa23",
+            sepolia: "0xae92d5aD7583AD66E49A0c67BAd18F6ba52dDDc1",
             mumbai: "0xf69186dfBa60DdB133E91E9A4B5673624293d8F8",
             "bnb-testnet": "0x6Fcb97553D41516Cb228ac03FdC8B9a0a9df04A1",
             polygon: "0x3c2269811836af69497E5F486A85D7316753cf62",
@@ -105,6 +106,10 @@ const config: HardhatUserConfig = {
             // timeout: 100000,
             // blockGasLimit: 7_000_000,
             // gas: 7_000_000,
+        },
+        sepolia: {
+            url: `https://sepolia.infura.io/v3/${INFURA_API_KEY}`,
+            accounts: accountsTestnet,
         },
         mumbai: {
             url: `https://polygon-mumbai.infura.io/v3/${INFURA_API_KEY}`,
