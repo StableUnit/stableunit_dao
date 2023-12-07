@@ -1,0 +1,3 @@
+[submodule "contracts/periphery"]
+	path = contracts/periphery
+	url = https://github.com/StableUnit/periphery.git

@@ -12,9 +12,9 @@ pragma solidity ^0.8.9;
 */
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "./interfaces/IBonus.sol";
-import "./access-control/SuAccessControlAuthenticated.sol";
+import "./periphery/contracts/access-control/SuAuthenticated.sol";
 
-contract Bonus is IBonus, SuAccessControlAuthenticated {
+contract Bonus is IBonus, SuAuthenticated {
     mapping(address => NFTInfo) public nftInfo;
     mapping(address => UserInfo) public userInfo;
 
@@ -24,7 +24,7 @@ contract Bonus is IBonus, SuAccessControlAuthenticated {
     mapping(uint16 => uint256) public levelMap;
 
     function initialize(address _accessControlSingleton, address defaultAdmin) public initializer {
-        __SuAuthenticated_init(_accessControlSingleton);
+        __suAuthenticatedInit(_accessControlSingleton);
         adminInfo[defaultAdmin].isAdmin = true;
 
         levelMap[1] = 1000;
@@ -101,14 +101,16 @@ contract Bonus is IBonus, SuAccessControlAuthenticated {
         levelMap[72] = 1256968851;
         levelMap[73] = 1508362195;
         levelMap[74] = 1810034207;
-        levelMap[75] = 1810034207;
     }
 
     function getLevelByXP(uint256 xp) public view returns (uint16) {
-        for (uint16 i = 1; i <= 75; ++i) {
+        for (uint16 i = 1; i <= 74; ++i) {
             if (xp < levelMap[i]) {
                 return i;
             }
+        }
+        if (xp > levelMap[74]) {
+            return 75;
         }
         return 1;
     }

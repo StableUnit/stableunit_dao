@@ -1,13 +1,13 @@
 import { deployments, ethers, getNamedAccounts } from "hardhat";
 import { expect } from "chai";
-import { SuAccessControlSingleton } from "../../typechain";
+import { SuAccessControlSingleton } from "../../typechain-types";
 
 describe("checkOwnership", () => {
     let defaultAdminRole: string;
     let accessControlSingleton: SuAccessControlSingleton;
 
     beforeEach(async () => {
-        await deployments.fixture(["Deployer"]);
+        await deployments.fixture(["Deployer", "TransferOwnership"]);
         accessControlSingleton = (await ethers.getContract("SuAccessControlSingleton")) as SuAccessControlSingleton;
         defaultAdminRole = await accessControlSingleton.DEFAULT_ADMIN_ROLE();
     });

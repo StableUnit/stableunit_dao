@@ -14,7 +14,6 @@ pragma solidity ^0.8.12;
 import "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20Upgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/extensions/ERC20BurnableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/utils/SafeERC20Upgradeable.sol";
-import "../access-control/SuAccessControlAuthenticated.sol";
 import "../interfaces/IveERC20.sol";
 import "../interfaces/ISuVoteToken.sol";
 import "./SuVoteToken.sol";
@@ -67,7 +66,7 @@ contract VeERC20 is SuVoteToken, ERC20BurnableUpgradeable, IveERC20 {
     /**
     * @notice owner of the contract can set up TGE date within set limits.
     */
-    function updateTgeTimestamp(uint32 newTgeTimestamp) external onlyRole(ADMIN_ROLE) {
+    function updateTgeTimestamp(uint32 newTgeTimestamp) external onlyAdmin {
         if (newTgeTimestamp < uint32(block.timestamp)) revert TGEInPastError();
         if (newTgeTimestamp > TGE_MAX_TIMESTAMP) revert TGEBeyondLimitError();
         tgeTimestamp = newTgeTimestamp;
@@ -217,7 +216,7 @@ contract VeERC20 is SuVoteToken, ERC20BurnableUpgradeable, IveERC20 {
      * @notice User can donate tokens under vesting to DAO or other admin contract as us treasury.
      */
     function donateTokens(address toDAO) external {
-        require(hasRole(DAO_ROLE, toDAO) == true, "invalid DAO address");
+        require(ACCESS_CONTROL_SINGLETON.hasRole(DAO_ROLE, toDAO) == true, "invalid DAO address");
         uint256 balance = super.balanceOf(msg.sender);
         require(balance > 0, "nothing to donate");
         vestingInfo[msg.sender].amountAlreadyWithdrawn = vestingInfo[msg.sender].amountAlreadyWithdrawn + uint64(balance);

@@ -237,7 +237,7 @@ function shouldBehaveLikeVotes () {
       it('reverts if block number >= current block', async function () {
         await expectRevert(
             this.votes.getPastTotalSupply(5e10),
-            'block not yet mined',
+            'future lookup',
         );
       });
 
@@ -309,7 +309,7 @@ function shouldBehaveLikeVotes () {
         it('reverts if block number >= current block', async function () {
           await expectRevert(
               this.votes.getPastVotes(this.account2, 5e10),
-              'block not yet mined',
+              'future lookup',
           );
         });
 

@@ -2,14 +2,14 @@
 
 pragma solidity ^0.8.9;
 
-import "../access-control/SuAccessControlAuthenticated.sol";
 import "@openzeppelin/contracts-upgradeable/governance/utils/VotesUpgradeable.sol";
 import "../interfaces/ISuVoteToken.sol";
+import "../periphery/contracts/access-control/SuAuthenticated.sol";
 
-abstract contract SuVoteToken is SuAccessControlAuthenticated, VotesUpgradeable, ISuVoteToken {
+abstract contract SuVoteToken is SuAuthenticated, VotesUpgradeable, ISuVoteToken {
     function __SuVoteToken__init(address _accessControlSingleton, string memory _name) public initializer
     {
-        __SuAuthenticated_init(_accessControlSingleton);
+        __suAuthenticatedInit(_accessControlSingleton);
         __EIP712_init(_name, "1");
     }
 
@@ -37,7 +37,7 @@ abstract contract SuVoteToken is SuAccessControlAuthenticated, VotesUpgradeable,
 
     function supportsInterface(bytes4 interfaceId)
     public
-    override (SuAccessControlAuthenticated, IERC165Upgradeable)
+    override (SuAuthenticated, IERC165Upgradeable)
     virtual
     view
     returns (bool) {

@@ -6,4 +6,6 @@ artifacts
 cache
 .openzeppelin
 submodule-artifacts
-typechain
+typechain-types
+contracts/periphery
+test/3rd-party

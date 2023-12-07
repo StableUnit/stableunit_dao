@@ -3,8 +3,8 @@ import { ethers } from "hardhat";
 import { ContractTransaction } from "ethers";
 import { expect } from "chai";
 import deployProxy from "../utils/deploy";
-import { Bonus, MockErc721, SuAccessControlSingleton } from "../../typechain";
 import { ADDRESS_ZERO, BN_1E18, BN_1E6 } from "../utils";
+import { Bonus, MockErc721, SuAccessControlSingleton } from "../../typechain-types";
 
 describe("Bonus", () => {
     let accounts: Record<string, SignerWithAddress>;
@@ -18,7 +18,7 @@ describe("Bonus", () => {
 
         const accessControlSingleton = (await deployProxy(
             "SuAccessControlSingleton",
-            [dao.address, ADDRESS_ZERO],
+            [dao.address],
             undefined,
             false
         )) as SuAccessControlSingleton;

@@ -6,10 +6,10 @@
 import { ethers, getNamedAccounts } from "hardhat";
 
 import { getIdByNetworkName, NETWORK } from "../utils/network";
-import { MockErc721CrossChain } from "../typechain";
 import CROSS_CHAIN_MUMBAI from "../submodule-artifacts/mumbai/MockErc721CrossChain.json";
 import CROSS_CHAIN_GOERLI from "../submodule-artifacts/goerli/MockErc721CrossChain.json";
 import { lzChainId } from "../utils/endpoint";
+import { MockErc721CrossChain } from "../typechain-types";
 
 /** Here we have a script that make all preparations, set all needed data for transfer
  * MockErc721CrossChain between two chains and two users (transfer is in send-lz-nft.ts).

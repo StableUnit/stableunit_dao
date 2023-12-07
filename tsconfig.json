@@ -16,6 +16,7 @@
     "noFallthroughCasesInSwitch": true,
     "isolatedModules": true,
     "noEmit": true,
-    "baseUrl": "./src"
+    "baseUrl": "./src",
   },
+  "exclude": ["./node_modules", "./dist", "./cache", "./typechain-types", "./contracts/periphery"],
 }

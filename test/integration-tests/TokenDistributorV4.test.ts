@@ -3,9 +3,16 @@ import { ContractTransaction } from "ethers";
 import { expect } from "chai";
 
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
-import { MockErc20, MockErc721, SuAccessControlSingleton, SuDAO, TokenDistributorV4, VeERC20 } from "../../typechain";
-import { BN_1E12, BN_1E18, BN_1E6 } from "../utils";
+import { BN_1E12, BN_1E18, BN_1E6, deployProxy } from "../utils";
 import { latest, waitNBlocks } from "../utils/time";
+import {
+    MockErc20,
+    MockErc721,
+    SuAccessControlSingleton,
+    SuDAOv2,
+    TokenDistributorV4,
+    VeERC20,
+} from "../../typechain-types";
 
 type DataType = {
     startTimestamp: number;
@@ -29,7 +36,7 @@ describe("TokenDistributorV4", () => {
     let distributor: TokenDistributorV4;
     let mockUSDT: MockErc20;
     let mockNft: MockErc721;
-    let suDAO: SuDAO;
+    let suDAO: SuDAOv2;
     let veERC20: VeERC20;
     let accessControlSingleton: SuAccessControlSingleton;
     const data: DataType = {
@@ -59,17 +66,20 @@ describe("TokenDistributorV4", () => {
         const { deployer, dao, admin, randomAccount, userAccount, alice } = await getNamedAccounts();
 
         deployerSigner = await ethers.getSigner(deployer);
-        daoSigner = await ethers.getSigner(dao); // TODO: owner? DAO is a contract, not EOA
+        daoSigner = await ethers.getSigner(dao);
         adminSigner = await ethers.getSigner(admin);
         userSigner = await ethers.getSigner(userAccount);
         aliceSigner = await ethers.getSigner(alice);
         randomSigner = await ethers.getSigner(randomAccount);
 
-        await deployments.fixture(["Deployer"]);
+        await deployments.fixture(["Deployer", "TransferOwnership"]);
+
+        await deployProxy("MockErc721", ["MockErc721", "MCK721"]);
+
         accessControlSingleton = (await ethers.getContract("SuAccessControlSingleton")) as SuAccessControlSingleton;
         distributor = (await ethers.getContract("TokenDistributorV4")) as TokenDistributorV4;
         mockNft = (await ethers.getContract("MockErc721")) as MockErc721;
-        suDAO = (await ethers.getContract("SuDAO")) as SuDAO;
+        suDAO = (await ethers.getContract("SuDAOv2")) as SuDAOv2;
         veERC20 = (await ethers.getContract("VeERC20")) as VeERC20;
         const mockErc20Factory = await ethers.getContractFactory("MockErc20");
         mockUSDT = (await mockErc20Factory.deploy("test tether", "USDT", 6)) as MockErc20;
@@ -83,6 +93,9 @@ describe("TokenDistributorV4", () => {
         const newData = { ...distributeData };
         newData.startTimestamp = data.startTimestamp || (await latest());
         newData.donationToken = mockUSDT.address;
+
+        data.startTimestamp = newData.startTimestamp;
+        data.donationToken = newData.donationToken;
         await run("setDistributor", newData);
     };
 
@@ -307,7 +320,7 @@ describe("TokenDistributorV4", () => {
             await expect(distributor.connect(userSigner).takeDonationBack()).to.be.reverted;
             // console.log("donations back shouldn't work when didn't return tokens first");
 
-            await veERC20.connect(userSigner).burnAll();
+            await veERC20.connect(userSigner).burn(await veERC20.balanceOf(userSigner.address));
 
             veSuDAOBalance = await veERC20.balanceOf(userSigner.address);
             expect(veSuDAOBalance).to.be.equal(0);

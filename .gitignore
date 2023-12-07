@@ -2,7 +2,8 @@
 .vscode
 
 node_modules
-typechain
+typechain-types/factories
+contracts/periphery
 
 
 # Created by https://www.toptal.com/developers/gitignore/api/node,solidity

@@ -74,8 +74,9 @@ Oversimplified plan
 
 ## Compile
 ```
-npm install  --legacy-peer-deps
-npm audit fix
+npm install --legacy-peer-deps
+git submodule init
+git submodule update --init --recursive
 npx hardhat typechain
 npx hardhat compile
 ```
@@ -99,24 +100,12 @@ npm run coverage
 ## Deploy contracts
 if you add new/remove migrations-ts script - please delete all files from js folder so migrations-ts would be recompiled.
 ```
-npm run migrate -- --network rinkeby
+npm run deploy:goerli
 ```
 
 ## Verify
 ```
-npm run verify
-```
-or
-```
-truffle run verify GnosisSafeProxy --network rinkeby
-truffle run verify StableUnitDAOaNFT --network rinkeby
-truffle run verify SuDAO --network rinkeby
-truffle run verify VestingToken --network rinkeby 
-truffle run verify TokenDistributor_v3s1 --network rinkeby --debug
-truffle run verify StableUnitDAOogNFT --network rinkeby
-
-truffle run verify NftMock --network rinkeby
-truffle run verify TokenMock --network rinkeby
+npm run verify:goerli
 ```
 
 # StableUnit DAO NFTs
@@ -292,3 +281,14 @@ We use Layer-Zero LzAppUpgradeable in the base. So for make ERC-20 cross-chain s
 3. Prepare NFT in chain1 with `npm run prepare-suDAO:mumbai`
 4. Prepare NFT in chain2 with `npm run prepare-suDAO:goerli`
 5. For testing that all works call bridge function and pass eth as fee for that operation.
+
+
+## Coverage
+
+To run coverage:
+1) Remove typechain-types folder in contracts/periphery folder
+2) Run ``` hardhat coverage ```
+
+For 23/11/2023 coverage is:
+
+![Coverage.png](Coverage.png)

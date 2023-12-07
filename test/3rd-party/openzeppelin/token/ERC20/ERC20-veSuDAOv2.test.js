@@ -24,7 +24,7 @@ contract('ERC20', function (accounts) {
   // const symbol = 'MTKN';
 
   const stableUnitInitialize = async () => {
-    [admin] = await ethers.getSigners();
+    const [admin] = await ethers.getSigners();
 
     const tgeSeconds = 50;
     const cliffSeconds = 100;
@@ -32,8 +32,8 @@ contract('ERC20', function (accounts) {
     const tgeUnlockRatio1e18 = BN_1E18.mul(10).div(100);
     const vestingFrequencySeconds = 100;
 
-    const accessControlSingleton = await deployProxy( "SuAccessControlSingleton", [admin.address, admin.address], undefined, false);
-    const suDAO = await deployProxy("SuDAOv2", [accessControlSingleton.address], undefined, false);
+    const accessControlSingleton = await deployProxy( "SuAccessControlSingleton", [admin.address], undefined, false);
+    const suDAO = (await (await ethers.getContractFactory("SuDAOv2")).deploy(accessControlSingleton.address));
     const deployTimestamp = await latest();
     const ve =  await deployProxy("VeERC20v2", [accessControlSingleton.address, suDAO.address, deployTimestamp + tgeSeconds], undefined, false);
 
