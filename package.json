@@ -15,6 +15,7 @@
     "test:deployment": "hardhat test test/deployment-tests/*.test.ts",
     "coverage": "npx hardhat coverage",
     "deploy": "hardhat deploy",
+    "deploy:sepolia": "hardhat deploy --tags SuDAOTest --network sepolia",
     "deploy-nft:goerli": "hardhat deploy --tags NFT --network goerli",
     "deploy-nft:mumbai": "hardhat deploy --tags NFT --network mumbai",
     "deploy-suDAO:goerli": "hardhat deploy --tags SuDAO --network goerli",
