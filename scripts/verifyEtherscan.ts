@@ -1,4 +1,5 @@
-import { deployments, ethers, run } from "hardhat";
+import {deployments, ethers, getNamedAccounts, run} from "hardhat";
+import {getNetworkNameById, NETWORK} from "../utils/network";
 
 export const verify = async (contractName: string, contractPath?: string, constructorArguments?: any[]) => {
     try {
@@ -19,18 +20,29 @@ export const verify = async (contractName: string, contractPath?: string, constr
 };
 
 async function main() {
-    const suAccessControlSingleton = await ethers.getContract("SuAccessControlSingleton");
+    const { nft } = await getNamedAccounts();
+    const TOKENS = {
+        [NETWORK.goerli]: { range: [0, 99] },
+        [NETWORK.mumbai]: { range: [100, 199] },
+        [NETWORK.sepolia]: { range: [200, 299] },
+        [NETWORK.polygon]: { range: [300, 399] },
+        [NETWORK.unsupported]: { range: [0, 99] },
+    };
+    const network = await ethers.provider.getNetwork();
+    const token = TOKENS[getNetworkNameById(network.chainId)];
 
-    await verify("SuDAOv2", undefined, [suAccessControlSingleton.address]);
-    await verify("VeERC20v2");
-    await verify("SuDAOUpgrader");
-    await verify("SuAccessControlSingleton");
+    // const suAccessControlSingleton = await ethers.getContract("SuAccessControlSingleton");
+
+    // await verify("SuDAOv2", undefined, [suAccessControlSingleton.address]);
+    // await verify("VeERC20v2");
+    // await verify("SuDAOUpgrader");
+    // await verify("SuAccessControlSingleton");
     // await verify("SuDAO");
     // await verify("Bonus");
     // await verify("VeERC20");
     // await verify("TokenDistributorV4");
     // await verify("MockErc721");
-    await verify("MockErc721CrossChain");
+    await verify("MockErc721CrossChainV2", undefined, [nft, token.range[0], token.range[1]]);
 }
 
 main().catch((error) => {

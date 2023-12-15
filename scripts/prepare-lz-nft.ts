@@ -6,8 +6,8 @@
 import { ethers, getNamedAccounts } from "hardhat";
 
 import { getIdByNetworkName, NETWORK } from "../utils/network";
-import CROSS_CHAIN_MUMBAI from "../submodule-artifacts/mumbai/MockErc721CrossChain.json";
-import CROSS_CHAIN_GOERLI from "../submodule-artifacts/goerli/MockErc721CrossChain.json";
+import CROSS_CHAIN_MUMBAI from "../submodule-artifacts/mumbai/MockErc721CrossChainV2.json";
+import CROSS_CHAIN_GOERLI from "../submodule-artifacts/goerli/MockErc721CrossChainV2.json";
 import { lzChainId } from "../utils/endpoint";
 import { MockErc721CrossChain } from "../typechain-types";
 
@@ -23,9 +23,9 @@ async function main() {
     const network = await ethers.provider.getNetwork();
     console.log("Current network = ", network.name);
 
-    const mockErc721CrossChain = (await ethers.getContract("MockErc721CrossChain")) as MockErc721CrossChain;
-    tx = await mockErc721CrossChain.connect(deployerSigner).mint();
-    await tx.wait();
+    const mockErc721CrossChain = (await ethers.getContract("MockErc721CrossChainV2")) as MockErc721CrossChain;
+    // tx = await mockErc721CrossChain.connect(deployerSigner).mint();
+    // await tx.wait();
     console.log("✅ Mint for deployer success");
 
     let dstChainId: number;
@@ -61,13 +61,13 @@ async function main() {
     await tx.wait();
     console.log("✅ setTrustedRemoteAddress success");
 
-    tx = await mockErc721CrossChain.setUseCustomAdapterParams(true);
-    await tx.wait();
-    console.log("✅ setUseCustomAdapterParams success");
+    // tx = await mockErc721CrossChain.setUseCustomAdapterParams(true);
+    // await tx.wait();
+    // console.log("✅ setUseCustomAdapterParams success");
 
     tx = await mockErc721CrossChain.setMinDstGas(dstChainId, 1, 500000);
     await tx.wait();
-    console.log("✅ setUseCustomAdapterParams success");
+    console.log("✅ setMinDstGas success");
 }
 
 // We recommend this pattern to be able to use async/await everywhere

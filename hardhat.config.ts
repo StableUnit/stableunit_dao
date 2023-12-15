@@ -72,7 +72,7 @@ const config: HardhatUserConfig = {
             sepolia: "0xae92d5aD7583AD66E49A0c67BAd18F6ba52dDDc1",
             mumbai: "0xf69186dfBa60DdB133E91E9A4B5673624293d8F8",
             "bnb-testnet": "0x6Fcb97553D41516Cb228ac03FdC8B9a0a9df04A1",
-            polygon: "0x3c2269811836af69497E5F486A85D7316753cf62",
+            matic: "0x3c2269811836af69497E5F486A85D7316753cf62",
             bnb: "0x3c2269811836af69497E5F486A85D7316753cf62",
             mainnet: "0x66A71Dcef29A0fFBDBE3c6a460a3B5BC225Cd675",
         },
@@ -115,13 +115,10 @@ const config: HardhatUserConfig = {
             url: `https://polygon-mumbai.infura.io/v3/${INFURA_API_KEY}`,
             accounts: accountsTestnet,
         },
-        // matic: {
-        //   url: process.env.MATIC_URL || "",
-        //   blockGasLimit: 7_000_000,
-        //   gas: 7_000_000,
-        //   accounts:
-        //     process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY, vanityPrivateKey] : [],
-        // },
+        matic: {
+            url: `https://polygon-mainnet.infura.io/v3/${INFURA_API_KEY}`,
+            accounts: accountsTestnet,
+        },
     },
     gasReporter: {
         enabled: process.env.REPORT_GAS !== undefined,
