@@ -2,7 +2,7 @@
 pragma solidity ^0.8.7;
 
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
-import "../3rd-party/layer-zero-labs/token/onft/extension/UniversalONFT721.sol";
+import "../3rd-party/layer-zero-labs/token/onft/ONFT721.sol";
 
 /**
     Ethereum
@@ -30,17 +30,21 @@ import "../3rd-party/layer-zero-labs/token/onft/extension/UniversalONFT721.sol";
     endpoint: 0xf69186dfBa60DdB133E91E9A4B5673624293d8F8
 */
 
-contract MockErc721CrossChainV2 is UniversalONFT721 {
+contract MockErc721CrossChainV2 is ONFT721 {
     string baseURI;
     mapping(address => bool) public hasMinted;
     uint256 private TIME_LIMIT;
+    uint public nextMintId;
+    uint public maxMintId;
     address private backendSigner; // The address corresponding to the private key used by your backend
 
     constructor(address _layerZeroEndpoint, uint _startMintId, uint _endMintId)
-    UniversalONFT721("StableUnit MockErc721CrossChain", "MockErc721CrossChain", 1, _layerZeroEndpoint, _startMintId, _endMintId) {
+    ONFT721("StableUnit MockErc721CrossChain", "MockErc721CrossChain", 1, _layerZeroEndpoint) {
         baseURI = "ipfs://QmeSjSinHpPnmXmspMjwiXyN6zS4E9zccariGR3jxcaWtq/";
         TIME_LIMIT = 10 minutes;
         backendSigner = msg.sender;
+        nextMintId = _startMintId;
+        maxMintId = _endMintId;
     }
 
     function changeBackendSigner(address newBackendSigner) external onlyOwner {

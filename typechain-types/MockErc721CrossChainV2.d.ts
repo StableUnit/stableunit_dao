@@ -774,13 +774,9 @@ export class MockErc721CrossChainV2 extends BaseContract {
 
     minGasToTransferAndStore(overrides?: CallOverrides): Promise<[BigNumber]>;
 
-    "mint(bytes,uint256)"(
+    mint(
       signature: BytesLike,
       timestamp: BigNumberish,
-      overrides?: PayableOverrides & { from?: string | Promise<string> }
-    ): Promise<ContractTransaction>;
-
-    "mint()"(
       overrides?: PayableOverrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
 
@@ -1096,13 +1092,9 @@ export class MockErc721CrossChainV2 extends BaseContract {
 
   minGasToTransferAndStore(overrides?: CallOverrides): Promise<BigNumber>;
 
-  "mint(bytes,uint256)"(
+  mint(
     signature: BytesLike,
     timestamp: BigNumberish,
-    overrides?: PayableOverrides & { from?: string | Promise<string> }
-  ): Promise<ContractTransaction>;
-
-  "mint()"(
     overrides?: PayableOverrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
 
@@ -1409,13 +1401,11 @@ export class MockErc721CrossChainV2 extends BaseContract {
 
     minGasToTransferAndStore(overrides?: CallOverrides): Promise<BigNumber>;
 
-    "mint(bytes,uint256)"(
+    mint(
       signature: BytesLike,
       timestamp: BigNumberish,
       overrides?: CallOverrides
     ): Promise<void>;
-
-    "mint()"(overrides?: CallOverrides): Promise<void>;
 
     name(overrides?: CallOverrides): Promise<string>;
 
@@ -2030,13 +2020,9 @@ export class MockErc721CrossChainV2 extends BaseContract {
 
     minGasToTransferAndStore(overrides?: CallOverrides): Promise<BigNumber>;
 
-    "mint(bytes,uint256)"(
+    mint(
       signature: BytesLike,
       timestamp: BigNumberish,
-      overrides?: PayableOverrides & { from?: string | Promise<string> }
-    ): Promise<BigNumber>;
-
-    "mint()"(
       overrides?: PayableOverrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
 
@@ -2354,13 +2340,9 @@ export class MockErc721CrossChainV2 extends BaseContract {
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
-    "mint(bytes,uint256)"(
+    mint(
       signature: BytesLike,
       timestamp: BigNumberish,
-      overrides?: PayableOverrides & { from?: string | Promise<string> }
-    ): Promise<PopulatedTransaction>;
-
-    "mint()"(
       overrides?: PayableOverrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
 

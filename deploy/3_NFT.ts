@@ -1,6 +1,6 @@
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 import { DeployFunction } from "hardhat-deploy/types";
-import { ethers, getNamedAccounts } from "hardhat";
+import { ethers, getNamedAccounts, run } from "hardhat";
 import { getNetworkNameById, NETWORK } from "../utils/network";
 import {MockErc721CrossChain} from "../typechain-types";
 
@@ -24,7 +24,7 @@ const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
         `✅ NFT deployed on chain ${network.name} with range ${token.range[0]}-${token.range[1]} with address ${tx.address}`
     );
 
-    // await run("verify:verify", { address: tx.address, constructorArguments: args });
+    await run("verify:verify", { address: tx.address, constructorArguments: args });
     console.log("✅ NFT verified");
 };
 export default func;
