@@ -2,8 +2,9 @@
 pragma solidity ^0.8.7;
 
 import "@openzeppelin/contracts-upgradeable/governance/utils/VotesUpgradeable.sol";
-import "../3rd-party/layer-zero-labs/contracts-upgradable/token/onft/ERC721/ONFT721Upgradeable.sol";
+import "../3rd-party/layer-zero-labs/contracts-upgradable/token/onft/ERC721/ONFT721CoreUpgradeable.sol";
 import "../periphery/contracts/access-control/SuAuthenticated.sol";
+import "@openzeppelin/contracts-upgradeable/token/ERC721/ERC721Upgradeable.sol";
 
 /**
     Ethereum
@@ -31,7 +32,7 @@ import "../periphery/contracts/access-control/SuAuthenticated.sol";
     endpoint: 0xf69186dfBa60DdB133E91E9A4B5673624293d8F8
 */
 
-contract MockErc721CrossChainV2 is SuAuthenticated, ONFT721Upgradeable, VotesUpgradeable {
+contract MockErc721CrossChainV2 is SuAuthenticated, ERC721Upgradeable, ONFT721CoreUpgradeable, VotesUpgradeable {
     string private baseURI;
     mapping(address => bool) public hasMinted;
     uint public nextMintId;
@@ -47,7 +48,10 @@ contract MockErc721CrossChainV2 is SuAuthenticated, ONFT721Upgradeable, VotesUpg
     error InvalidSignatureLength();
 
     function initialize(address _layerZeroEndpoint, uint _startMintId, uint _endMintId) initializer public {
-        __ONFT721Upgradeable_init("StableUnit MockErc721CrossChain", "MockErc721CrossChain", 1, _layerZeroEndpoint);
+        __ERC721_init_unchained("StableUnit MockErc721CrossChain", "MockErc721CrossChain");
+        __LzAppUpgradeable_init_unchained(_layerZeroEndpoint);
+        __ONFT721CoreUpgradeable_init_unchained(1);
+
         baseURI = "ipfs://QmeSjSinHpPnmXmspMjwiXyN6zS4E9zccariGR3jxcaWtq/";
         backendSigner = msg.sender;
         nextMintId = _startMintId;
@@ -146,9 +150,30 @@ contract MockErc721CrossChainV2 is SuAuthenticated, ONFT721Upgradeable, VotesUpg
         return balanceOf(account);
     }
 
+    /**
+     * @notice Copied from ONFT721Upgradeable (not inherited to decrease contract code size)
+     */
+    function _debitFrom(address _from, uint16, bytes memory, uint _tokenId) internal virtual override {
+        require(_isApprovedOrOwner(_msgSender(), _tokenId), "ONFT721: send caller is not owner nor approved");
+        require(ERC721Upgradeable.ownerOf(_tokenId) == _from, "ONFT721: send from incorrect owner");
+        _transfer(_from, address(this), _tokenId);
+    }
+
+    /**
+     * @notice Copied from ONFT721Upgradeable (not inherited to decrease contract code size)
+     */
+    function _creditTo(uint16, address _toAddress, uint _tokenId) internal virtual override {
+        require(!_exists(_tokenId) || (_exists(_tokenId) && ERC721Upgradeable.ownerOf(_tokenId) == address(this)));
+        if (!_exists(_tokenId)) {
+            _safeMint(_toAddress, _tokenId);
+        } else {
+            _transfer(address(this), _toAddress, _tokenId);
+        }
+    }
+
     function supportsInterface(bytes4 interfaceId)
     public
-    override (SuAuthenticated, ONFT721Upgradeable)
+    override (SuAuthenticated, ERC721Upgradeable, ONFT721CoreUpgradeable)
     virtual
     view
     returns (bool) {

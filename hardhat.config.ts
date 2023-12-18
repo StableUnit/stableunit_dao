@@ -12,6 +12,7 @@ import "hardhat-deploy";
 import "hardhat-deploy-ethers";
 // for 3rd-party tests like openzeppelin tests
 import "@nomiclabs/hardhat-truffle5";
+import "hardhat-contract-sizer";
 
 // To learn how to create Hardhat task, go to https://hardhat.org/guides/create-task.html
 import "./tasks/accounts.ts";
@@ -78,7 +79,7 @@ const config: HardhatUserConfig = {
         },
     },
     solidity: {
-        version: "0.8.17",
+        version: "0.8.23",
         settings: {
             optimizer: {
                 enabled: true,
@@ -102,7 +103,6 @@ const config: HardhatUserConfig = {
         goerli: {
             url: `https://goerli.infura.io/v3/${INFURA_API_KEY}`,
             accounts: accountsTestnet,
-            allowUnlimitedContractSize: true,
             // timeout: 100000,
             // blockGasLimit: 7_000_000,
             // gas: 7_000_000,
@@ -141,6 +141,12 @@ const config: HardhatUserConfig = {
     defender: {
         apiKey: process.env.DEFENDER_TEAM_API_KEY ?? "",
         apiSecret: process.env.DEFENDER_TEAM_API_SECRET_KEY ?? "",
+    },
+    contractSizer: {
+        alphaSort: true,
+        runOnCompile: true,
+        disambiguatePaths: false,
+        only: [':MockErc721CrossChainV2']
     },
 };
 

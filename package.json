@@ -47,8 +47,8 @@
     "@nomiclabs/hardhat-truffle5": "^2.0.5",
     "@nomiclabs/hardhat-waffle": "^2.0.1",
     "@nomiclabs/hardhat-web3": "^2.0.0",
-    "@openzeppelin/contracts": "^4.9.5",
-    "@openzeppelin/contracts-upgradeable": "^4.9.5",
+    "@openzeppelin/contracts": "4.9.3",
+    "@openzeppelin/contracts-upgradeable": "4.9.3",
     "@openzeppelin/hardhat-defender": "^1.8.1",
     "@openzeppelin/hardhat-upgrades": "^1.28.0",
     "@openzeppelin/test-helpers": "^0.5.16",
@@ -97,6 +97,7 @@
     "eslint-plugin-import": "^2.23.4",
     "eslint-plugin-jsx-a11y": "^6.8.0",
     "eslint-plugin-prettier": "^3.4.0",
+    "hardhat-contract-sizer": "^2.10.0",
     "lint-staged": "^13.2.3",
     "pre-commit": "^1.2.2",
     "prettier": "^2.3.0"

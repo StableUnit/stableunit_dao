@@ -3,6 +3,7 @@ import { DeployFunction } from "hardhat-deploy/types";
 import { ethers, getNamedAccounts, run } from "hardhat";
 import { getNetworkNameById, NETWORK } from "../utils/network";
 import {MockErc721CrossChain} from "../typechain-types";
+import {deployProxy} from "../test/utils";
 
 const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
     const TOKENS = {
@@ -13,13 +14,12 @@ const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
         [NETWORK.unsupported]: { range: [0, 99] },
     };
 
-    const { nft, deployer } = await getNamedAccounts();
+    const { nft } = await getNamedAccounts();
     const network = await ethers.provider.getNetwork();
     const token = TOKENS[getNetworkNameById(network.chainId)];
 
-    const deployOptions = { from: deployer, log: true, waitConfirmations: 1 };
     const args = [nft, token.range[0], token.range[1]];
-    const tx = await hre.deployments.deploy("MockErc721CrossChainV2", { ...deployOptions, args });
+    const tx = await deployProxy("MockErc721CrossChainV2", args);
     console.log(
         `✅ NFT deployed on chain ${network.name} with range ${token.range[0]}-${token.range[1]} with address ${tx.address}`
     );
