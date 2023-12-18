@@ -9,6 +9,10 @@ import "@openzeppelin/contracts-upgradeable/token/ERC721/ERC721Upgradeable.sol";
 // NOTE: this ONFT contract has no public minting logic.
 // must implement your own minting logic in child classes
 contract ONFT721Upgradeable is Initializable, ONFT721CoreUpgradeable, ERC721Upgradeable, IONFT721Upgradeable {
+    // Here we added errors to save deploy gas
+    error ONFTNotOwnerOrApproved();
+    error ONFTSendFromIncorrectOwner();
+
     function __ONFT721Upgradeable_init(string memory _name, string memory _symbol, uint256 _minGasToTransfer, address _lzEndpoint) internal onlyInitializing {
         __ERC721_init_unchained(_name, _symbol);
         __Ownable_init_unchained();
@@ -23,8 +27,9 @@ contract ONFT721Upgradeable is Initializable, ONFT721CoreUpgradeable, ERC721Upgr
     }
 
     function _debitFrom(address _from, uint16, bytes memory, uint _tokenId) internal virtual override {
-        require(_isApprovedOrOwner(_msgSender(), _tokenId), "ONFT721: send caller is not owner nor approved");
-        require(ERC721Upgradeable.ownerOf(_tokenId) == _from, "ONFT721: send from incorrect owner");
+        // Here remove require to save deploy gas
+        if (!_isApprovedOrOwner(_msgSender(), _tokenId)) revert ONFTNotOwnerOrApproved();
+        if (ERC721Upgradeable.ownerOf(_tokenId) != _from) revert ONFTSendFromIncorrectOwner();
         _transfer(_from, address(this), _tokenId);
     }
 

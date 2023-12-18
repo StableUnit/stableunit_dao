@@ -12,6 +12,9 @@ import "../../util/ExcessivelySafeCall.sol";
  */
 abstract contract NonblockingLzAppUpgradeable is Initializable, LzAppUpgradeable {
     using ExcessivelySafeCall for address;
+    error NonblockingLzAppCallerMustBeLzApp();
+    error NonblockingLzAppNoStoredMessage();
+    error NonblockingLzAppInvalidPayload();
 
     function __NonblockingLzAppUpgradeable_init(address _endpoint) internal onlyInitializing {
         __Ownable_init_unchained();
@@ -41,7 +44,7 @@ abstract contract NonblockingLzAppUpgradeable is Initializable, LzAppUpgradeable
 
     function nonblockingLzReceive(uint16 _srcChainId, bytes calldata _srcAddress, uint64 _nonce, bytes calldata _payload) public virtual {
         // only internal transaction
-        require(_msgSender() == address(this), "NonblockingLzApp: caller must be LzApp");
+        if (_msgSender() != address(this)) revert NonblockingLzAppCallerMustBeLzApp();
         _nonblockingLzReceive(_srcChainId, _srcAddress, _nonce, _payload);
     }
 
@@ -51,8 +54,8 @@ abstract contract NonblockingLzAppUpgradeable is Initializable, LzAppUpgradeable
     function retryMessage(uint16 _srcChainId, bytes calldata _srcAddress, uint64 _nonce, bytes calldata _payload) public payable virtual {
         // assert there is message to retry
         bytes32 payloadHash = failedMessages[_srcChainId][_srcAddress][_nonce];
-        require(payloadHash != bytes32(0), "NonblockingLzApp: no stored message");
-        require(keccak256(_payload) == payloadHash, "NonblockingLzApp: invalid payload");
+        if (payloadHash == bytes32(0)) revert NonblockingLzAppNoStoredMessage();
+        if (keccak256(_payload) != payloadHash) revert NonblockingLzAppInvalidPayload();
         // clear the stored message
         failedMessages[_srcChainId][_srcAddress][_nonce] = bytes32(0);
         // execute the message. revert if it fails again

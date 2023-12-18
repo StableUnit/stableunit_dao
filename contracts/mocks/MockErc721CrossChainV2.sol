@@ -1,10 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.7;
 
-import "@openzeppelin/contracts-upgradeable/governance/utils/VotesUpgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/token/ERC721/ERC721Upgradeable.sol";
-import "../3rd-party/layer-zero-labs/contracts-upgradable/token/onft/ERC721/ONFT721CoreUpgradeable.sol";
-// import "../periphery/contracts/access-control/SuAuthenticated.sol";
+import "@openzeppelin/contracts-upgradeable/token/ERC721/extensions/ERC721VotesUpgradeable.sol";
+import "../3rd-party/layer-zero-labs/contracts-upgradable/token/onft/ERC721/ONFT721Upgradeable.sol";
+import "../periphery/contracts/access-control/SuAuthenticated.sol";
 import "./SignatureVerification.sol";
 
 /**
@@ -33,9 +32,9 @@ import "./SignatureVerification.sol";
     endpoint: 0xf69186dfBa60DdB133E91E9A4B5673624293d8F8
 */
 
-contract MockErc721CrossChainV2 is ERC721Upgradeable, ONFT721CoreUpgradeable, VotesUpgradeable {
-    string private baseURI;
+contract MockErc721CrossChainV2 is SuAuthenticated, ONFT721Upgradeable, ERC721VotesUpgradeable {
     mapping(address => bool) public hasMinted;
+    string private baseURI;
     uint public nextMintId;
     uint public maxMintId;
     address private backendSigner; // The address corresponding to the private key used by your backend
@@ -45,10 +44,9 @@ contract MockErc721CrossChainV2 is ERC721Upgradeable, ONFT721CoreUpgradeable, Vo
     error MaxMintLimit();
     error InvalidSignature();
 
-    function initialize(address _layerZeroEndpoint, uint _startMintId, uint _endMintId) initializer public {
-        __ERC721_init_unchained("StableUnit MockErc721CrossChain", "MockErc721CrossChain");
-        __LzAppUpgradeable_init_unchained(_layerZeroEndpoint);
-        __ONFT721CoreUpgradeable_init_unchained(1);
+    function initialize(address _accessControlSingleton, address _layerZeroEndpoint, uint _startMintId, uint _endMintId) initializer public {
+        __ONFT721Upgradeable_init("StableUnit MockErc721CrossChain", "MockErc721CrossChain", 1, _layerZeroEndpoint);
+        __suAuthenticatedInit(_accessControlSingleton);
 
         baseURI = "ipfs://QmeSjSinHpPnmXmspMjwiXyN6zS4E9zccariGR3jxcaWtq/";
         backendSigner = msg.sender;
@@ -68,11 +66,11 @@ contract MockErc721CrossChainV2 is ERC721Upgradeable, ONFT721CoreUpgradeable, Vo
     /**
      * @dev Delegates votes from the account to `delegatee`.
      */
-    function delegateOnBehalf(address account, address delegatee) public virtual onlyOwner {
+    function delegateOnBehalf(address account, address delegatee) public virtual onlyRole(SYSTEM_ROLE) {
         _delegate(account, delegatee);
     }
 
-    function changeBackendSigner(address newBackendSigner) external onlyOwner {
+    function changeBackendSigner(address newBackendSigner) external onlyAdmin {
         backendSigner = newBackendSigner;
     }
 
@@ -98,60 +96,25 @@ contract MockErc721CrossChainV2 is ERC721Upgradeable, ONFT721CoreUpgradeable, Vo
         baseURI = uri;
     }
 
-    /**
-     * @notice Copied from ERC721VotesUpgradeable (not inherited to decrease contract code size)
-     * @dev See {ERC721-_afterTokenTransfer}. Adjusts votes when tokens are transferred.
-     *
-     * Emits a {IVotes-DelegateVotesChanged} event.
-     */
-    function _afterTokenTransfer(address from, address to, uint256 tokenId, uint256 batchSize) internal override {
-        _transferVotingUnits(from, to, batchSize);
-        super._afterTokenTransfer(from, to, tokenId, batchSize);
-    }
-
-    /**
-     * @dev Returns the balance of `account`.
-     *
-     * WARNING: Overriding this function will likely result in incorrect vote tracking.
-     */
-    function _getVotingUnits(address account) internal view virtual override returns (uint256) {
-        return balanceOf(account);
-    }
-
-    /**
-     * @notice Copied from ONFT721Upgradeable (not inherited to decrease contract code size)
-     */
-    function _debitFrom(address _from, uint16, bytes memory, uint _tokenId) internal virtual override {
-        // require(_isApprovedOrOwner(_msgSender(), _tokenId), "ONFT721: send caller is not owner nor approved");
-        // require(ERC721Upgradeable.ownerOf(_tokenId) == _from, "ONFT721: send from incorrect owner");
-        _transfer(_from, address(this), _tokenId);
-    }
-
-    /**
-     * @notice Copied from ONFT721Upgradeable (not inherited to decrease contract code size)
-     */
-    function _creditTo(uint16, address _toAddress, uint _tokenId) internal virtual override {
-        require(!_exists(_tokenId) || (_exists(_tokenId) && ERC721Upgradeable.ownerOf(_tokenId) == address(this)));
-        if (!_exists(_tokenId)) {
-            _safeMint(_toAddress, _tokenId);
-        } else {
-            _transfer(address(this), _toAddress, _tokenId);
-        }
+    function _afterTokenTransfer(address from, address to, uint256 tokenId, uint256 batchSize)
+    internal
+    override(ERC721Upgradeable, ERC721VotesUpgradeable) {
+        ERC721VotesUpgradeable._afterTokenTransfer(from, to, tokenId, batchSize);
     }
 
     function supportsInterface(bytes4 interfaceId)
     public
-    override (ERC721Upgradeable, ONFT721CoreUpgradeable)
+    override (ERC721Upgradeable, ONFT721Upgradeable, SuAuthenticated)
     virtual
     view
     returns (bool) {
         return interfaceId == type(IVotesUpgradeable).interfaceId || super.supportsInterface(interfaceId);
     }
-//
-//    /**
-//     * @dev This empty reserved space is put in place to allow future versions to add new
-//     * variables without shifting down storage in the inheritance chain.
-//     * See https://docs.openzeppelin.com/contracts/4.x/upgradeable#storage_gaps
-//     */
-//    uint256[50] private __gap;
+
+    /**
+     * @dev This empty reserved space is put in place to allow future versions to add new
+     * variables without shifting down storage in the inheritance chain.
+     * See https://docs.openzeppelin.com/contracts/4.x/upgradeable#storage_gaps
+     */
+    uint256[50] private __gap;
 }

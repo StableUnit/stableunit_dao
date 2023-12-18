@@ -8,6 +8,13 @@ import "@openzeppelin/contracts-upgradeable/utils/introspection/ERC165Upgradeabl
 
 abstract contract ONFT721CoreUpgradeable is Initializable, NonblockingLzAppUpgradeable, ERC165Upgradeable, IONFT721CoreUpgradeable {
     uint16 public constant FUNCTION_TYPE_SEND = 1;
+    error NonPositiveMinGasToTransferAndStore();
+    error TokenIdsIsEmpty();
+    error ONFTBatchSizeLimit();
+    error ONFTNotEnoughGas();
+    error ONFTNoCreditsStored();
+    error NonPositiveDstChainIdToBatchLimit();
+    error NonPositiveDstChainIdToTransferGas();
 
     struct StoredCredit {
         uint16 srcChainId;
@@ -28,7 +35,7 @@ abstract contract ONFT721CoreUpgradeable is Initializable, NonblockingLzAppUpgra
     }
 
     function __ONFT721CoreUpgradeable_init_unchained(uint256 _minGasToTransferAndStore) internal onlyInitializing {
-        require(_minGasToTransferAndStore > 0, "ONFT721: minGasToTransferAndStore must be > 0");
+        if (_minGasToTransferAndStore == 0) revert NonPositiveMinGasToTransferAndStore();
         minGasToTransferAndStore = _minGasToTransferAndStore;
     }
 
@@ -55,8 +62,8 @@ abstract contract ONFT721CoreUpgradeable is Initializable, NonblockingLzAppUpgra
 
     function _send(address _from, uint16 _dstChainId, bytes memory _toAddress, uint[] memory _tokenIds, address payable _refundAddress, address _zroPaymentAddress, bytes memory _adapterParams) internal virtual {
         // allow 1 by default
-        require(_tokenIds.length > 0, "LzApp: tokenIds[] is empty");
-        require(_tokenIds.length == 1 || _tokenIds.length <= dstChainIdToBatchLimit[_dstChainId], "ONFT721: batch size exceeds dst batch limit");
+        if (_tokenIds.length == 0) revert TokenIdsIsEmpty();
+        if (!(_tokenIds.length == 1 || _tokenIds.length <= dstChainIdToBatchLimit[_dstChainId])) revert ONFTBatchSizeLimit();
 
         for (uint i = 0; i < _tokenIds.length; i++) {
             _debitFrom(_from, _dstChainId, _toAddress, _tokenIds[i]);
@@ -97,12 +104,12 @@ abstract contract ONFT721CoreUpgradeable is Initializable, NonblockingLzAppUpgra
     // Public function for anyone to clear and deliver the remaining batch sent tokenIds
     function clearCredits(bytes memory _payload) external {
         bytes32 hashedPayload = keccak256(_payload);
-        require(storedCredits[hashedPayload].creditsRemain, "ONFT721: no credits stored");
+        if (!storedCredits[hashedPayload].creditsRemain) revert ONFTNoCreditsStored();
 
         (, uint[] memory tokenIds) = abi.decode(_payload, (bytes, uint[]));
 
         uint nextIndex = _creditTill(storedCredits[hashedPayload].srcChainId, storedCredits[hashedPayload].toAddress, storedCredits[hashedPayload].index, tokenIds);
-        require(nextIndex > storedCredits[hashedPayload].index, "ONFT721: not enough gas to process credit transfer");
+        if (nextIndex <= storedCredits[hashedPayload].index) revert ONFTNotEnoughGas();
 
         if (nextIndex == tokenIds.length) {
             // cleared the credits, delete the element
@@ -132,19 +139,19 @@ abstract contract ONFT721CoreUpgradeable is Initializable, NonblockingLzAppUpgra
     }
 
     function setMinGasToTransferAndStore(uint256 _minGasToTransferAndStore) external onlyOwner {
-        require(_minGasToTransferAndStore > 0, "ONFT721: minGasToTransferAndStore must be > 0");
+        if (_minGasToTransferAndStore == 0) revert NonPositiveMinGasToTransferAndStore();
         minGasToTransferAndStore = _minGasToTransferAndStore;
     }
 
     // ensures enough gas in adapter params to handle batch transfer gas amounts on the dst
     function setDstChainIdToTransferGas(uint16 _dstChainId, uint256 _dstChainIdToTransferGas) external onlyOwner {
-        require(_dstChainIdToTransferGas > 0, "ONFT721: dstChainIdToTransferGas must be > 0");
+        if (_dstChainIdToTransferGas == 0) revert NonPositiveDstChainIdToTransferGas();
         dstChainIdToTransferGas[_dstChainId] = _dstChainIdToTransferGas;
     }
 
     // limit on src the amount of tokens to batch send
     function setDstChainIdToBatchLimit(uint16 _dstChainId, uint256 _dstChainIdToBatchLimit) external onlyOwner {
-        require(_dstChainIdToBatchLimit > 0, "ONFT721: dstChainIdToBatchLimit must be > 0");
+        if (_dstChainIdToBatchLimit == 0) revert NonPositiveDstChainIdToBatchLimit();
         dstChainIdToBatchLimit[_dstChainId] = _dstChainIdToBatchLimit;
     }
 
