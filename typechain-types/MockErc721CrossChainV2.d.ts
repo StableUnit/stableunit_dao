@@ -22,22 +22,43 @@ import type { TypedEventFilter, TypedEvent, TypedListener } from "./common";
 
 interface MockErc721CrossChainV2Interface extends ethers.utils.Interface {
   functions: {
+    "ACCESS_CONTROL_SINGLETON()": FunctionFragment;
+    "ADMIN_ROLE()": FunctionFragment;
+    "ALERTER_ROLE()": FunctionFragment;
+    "CLOCK_MODE()": FunctionFragment;
+    "DAO_ROLE()": FunctionFragment;
     "DEFAULT_PAYLOAD_SIZE_LIMIT()": FunctionFragment;
+    "DOMAIN_SEPARATOR()": FunctionFragment;
     "FUNCTION_TYPE_SEND()": FunctionFragment;
+    "LIQUIDATION_ACCESS_ROLE()": FunctionFragment;
+    "MINT_ACCESS_ROLE()": FunctionFragment;
+    "REWARD_ACCESS_ROLE()": FunctionFragment;
+    "SYSTEM_ROLE()": FunctionFragment;
+    "VAULT_ACCESS_ROLE()": FunctionFragment;
     "approve(address,uint256)": FunctionFragment;
     "balanceOf(address)": FunctionFragment;
     "changeBackendSigner(address)": FunctionFragment;
     "clearCredits(bytes)": FunctionFragment;
+    "clock()": FunctionFragment;
+    "delegate(address)": FunctionFragment;
+    "delegateBySig(address,uint256,uint256,uint8,bytes32,bytes32)": FunctionFragment;
+    "delegateOnBehalf(address,address)": FunctionFragment;
+    "delegates(address)": FunctionFragment;
     "dstChainIdToBatchLimit(uint16)": FunctionFragment;
     "dstChainIdToTransferGas(uint16)": FunctionFragment;
+    "eip712Domain()": FunctionFragment;
     "estimateSendBatchFee(uint16,bytes,uint256[],bool,bytes)": FunctionFragment;
     "estimateSendFee(uint16,bytes,uint256,bool,bytes)": FunctionFragment;
     "failedMessages(uint16,bytes,uint64)": FunctionFragment;
     "forceResumeReceive(uint16,bytes)": FunctionFragment;
     "getApproved(uint256)": FunctionFragment;
     "getConfig(uint16,uint16,address,uint256)": FunctionFragment;
+    "getPastTotalSupply(uint256)": FunctionFragment;
+    "getPastVotes(address,uint256)": FunctionFragment;
     "getTrustedRemoteAddress(uint16)": FunctionFragment;
+    "getVotes(address)": FunctionFragment;
     "hasMinted(address)": FunctionFragment;
+    "initialize(address,uint256,uint256)": FunctionFragment;
     "isApprovedForAll(address,address)": FunctionFragment;
     "isTrustedRemote(uint16,bytes)": FunctionFragment;
     "lzEndpoint()": FunctionFragment;
@@ -49,6 +70,7 @@ interface MockErc721CrossChainV2Interface extends ethers.utils.Interface {
     "name()": FunctionFragment;
     "nextMintId()": FunctionFragment;
     "nonblockingLzReceive(uint16,bytes,uint64,bytes)": FunctionFragment;
+    "nonces(address)": FunctionFragment;
     "owner()": FunctionFragment;
     "ownerOf(uint256)": FunctionFragment;
     "payloadSizeLimitLookup(uint16)": FunctionFragment;
@@ -81,11 +103,52 @@ interface MockErc721CrossChainV2Interface extends ethers.utils.Interface {
   };
 
   encodeFunctionData(
+    functionFragment: "ACCESS_CONTROL_SINGLETON",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "ADMIN_ROLE",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "ALERTER_ROLE",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "CLOCK_MODE",
+    values?: undefined
+  ): string;
+  encodeFunctionData(functionFragment: "DAO_ROLE", values?: undefined): string;
+  encodeFunctionData(
     functionFragment: "DEFAULT_PAYLOAD_SIZE_LIMIT",
     values?: undefined
   ): string;
   encodeFunctionData(
+    functionFragment: "DOMAIN_SEPARATOR",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
     functionFragment: "FUNCTION_TYPE_SEND",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "LIQUIDATION_ACCESS_ROLE",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "MINT_ACCESS_ROLE",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "REWARD_ACCESS_ROLE",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "SYSTEM_ROLE",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "VAULT_ACCESS_ROLE",
     values?: undefined
   ): string;
   encodeFunctionData(
@@ -101,6 +164,24 @@ interface MockErc721CrossChainV2Interface extends ethers.utils.Interface {
     functionFragment: "clearCredits",
     values: [BytesLike]
   ): string;
+  encodeFunctionData(functionFragment: "clock", values?: undefined): string;
+  encodeFunctionData(functionFragment: "delegate", values: [string]): string;
+  encodeFunctionData(
+    functionFragment: "delegateBySig",
+    values: [
+      string,
+      BigNumberish,
+      BigNumberish,
+      BigNumberish,
+      BytesLike,
+      BytesLike
+    ]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "delegateOnBehalf",
+    values: [string, string]
+  ): string;
+  encodeFunctionData(functionFragment: "delegates", values: [string]): string;
   encodeFunctionData(
     functionFragment: "dstChainIdToBatchLimit",
     values: [BigNumberish]
@@ -108,6 +189,10 @@ interface MockErc721CrossChainV2Interface extends ethers.utils.Interface {
   encodeFunctionData(
     functionFragment: "dstChainIdToTransferGas",
     values: [BigNumberish]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "eip712Domain",
+    values?: undefined
   ): string;
   encodeFunctionData(
     functionFragment: "estimateSendBatchFee",
@@ -134,10 +219,23 @@ interface MockErc721CrossChainV2Interface extends ethers.utils.Interface {
     values: [BigNumberish, BigNumberish, string, BigNumberish]
   ): string;
   encodeFunctionData(
+    functionFragment: "getPastTotalSupply",
+    values: [BigNumberish]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "getPastVotes",
+    values: [string, BigNumberish]
+  ): string;
+  encodeFunctionData(
     functionFragment: "getTrustedRemoteAddress",
     values: [BigNumberish]
   ): string;
+  encodeFunctionData(functionFragment: "getVotes", values: [string]): string;
   encodeFunctionData(functionFragment: "hasMinted", values: [string]): string;
+  encodeFunctionData(
+    functionFragment: "initialize",
+    values: [string, BigNumberish, BigNumberish]
+  ): string;
   encodeFunctionData(
     functionFragment: "isApprovedForAll",
     values: [string, string]
@@ -176,6 +274,7 @@ interface MockErc721CrossChainV2Interface extends ethers.utils.Interface {
     functionFragment: "nonblockingLzReceive",
     values: [BigNumberish, BytesLike, BigNumberish, BytesLike]
   ): string;
+  encodeFunctionData(functionFragment: "nonces", values: [string]): string;
   encodeFunctionData(functionFragment: "owner", values?: undefined): string;
   encodeFunctionData(
     functionFragment: "ownerOf",
@@ -295,11 +394,46 @@ interface MockErc721CrossChainV2Interface extends ethers.utils.Interface {
   ): string;
 
   decodeFunctionResult(
+    functionFragment: "ACCESS_CONTROL_SINGLETON",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(functionFragment: "ADMIN_ROLE", data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: "ALERTER_ROLE",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(functionFragment: "CLOCK_MODE", data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: "DAO_ROLE", data: BytesLike): Result;
+  decodeFunctionResult(
     functionFragment: "DEFAULT_PAYLOAD_SIZE_LIMIT",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
+    functionFragment: "DOMAIN_SEPARATOR",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
     functionFragment: "FUNCTION_TYPE_SEND",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "LIQUIDATION_ACCESS_ROLE",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "MINT_ACCESS_ROLE",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "REWARD_ACCESS_ROLE",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "SYSTEM_ROLE",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "VAULT_ACCESS_ROLE",
     data: BytesLike
   ): Result;
   decodeFunctionResult(functionFragment: "approve", data: BytesLike): Result;
@@ -312,12 +446,27 @@ interface MockErc721CrossChainV2Interface extends ethers.utils.Interface {
     functionFragment: "clearCredits",
     data: BytesLike
   ): Result;
+  decodeFunctionResult(functionFragment: "clock", data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: "delegate", data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: "delegateBySig",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "delegateOnBehalf",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(functionFragment: "delegates", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "dstChainIdToBatchLimit",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
     functionFragment: "dstChainIdToTransferGas",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "eip712Domain",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -342,10 +491,20 @@ interface MockErc721CrossChainV2Interface extends ethers.utils.Interface {
   ): Result;
   decodeFunctionResult(functionFragment: "getConfig", data: BytesLike): Result;
   decodeFunctionResult(
+    functionFragment: "getPastTotalSupply",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "getPastVotes",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
     functionFragment: "getTrustedRemoteAddress",
     data: BytesLike
   ): Result;
+  decodeFunctionResult(functionFragment: "getVotes", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "hasMinted", data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: "initialize", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "isApprovedForAll",
     data: BytesLike
@@ -372,6 +531,7 @@ interface MockErc721CrossChainV2Interface extends ethers.utils.Interface {
     functionFragment: "nonblockingLzReceive",
     data: BytesLike
   ): Result;
+  decodeFunctionResult(functionFragment: "nonces", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "owner", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "ownerOf", data: BytesLike): Result;
   decodeFunctionResult(
@@ -470,15 +630,16 @@ interface MockErc721CrossChainV2Interface extends ethers.utils.Interface {
     "ApprovalForAll(address,address,bool)": EventFragment;
     "CreditCleared(bytes32)": EventFragment;
     "CreditStored(bytes32,bytes)": EventFragment;
+    "DelegateChanged(address,address,address)": EventFragment;
+    "DelegateVotesChanged(address,uint256,uint256)": EventFragment;
+    "EIP712DomainChanged()": EventFragment;
+    "Initialized(uint8)": EventFragment;
     "MessageFailed(uint16,bytes,uint64,bytes,bytes)": EventFragment;
     "OwnershipTransferred(address,address)": EventFragment;
     "ReceiveFromChain(uint16,bytes,address,uint256[])": EventFragment;
     "RetryMessageSuccess(uint16,bytes,uint64,bytes32)": EventFragment;
     "SendToChain(uint16,address,bytes,uint256[])": EventFragment;
-    "SetDstChainIdToBatchLimit(uint16,uint256)": EventFragment;
-    "SetDstChainIdToTransferGas(uint16,uint256)": EventFragment;
     "SetMinDstGas(uint16,uint16,uint256)": EventFragment;
-    "SetMinGasToTransferAndStore(uint256)": EventFragment;
     "SetPrecrime(address)": EventFragment;
     "SetTrustedRemote(uint16,bytes)": EventFragment;
     "SetTrustedRemoteAddress(uint16,bytes)": EventFragment;
@@ -489,17 +650,16 @@ interface MockErc721CrossChainV2Interface extends ethers.utils.Interface {
   getEvent(nameOrSignatureOrTopic: "ApprovalForAll"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "CreditCleared"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "CreditStored"): EventFragment;
+  getEvent(nameOrSignatureOrTopic: "DelegateChanged"): EventFragment;
+  getEvent(nameOrSignatureOrTopic: "DelegateVotesChanged"): EventFragment;
+  getEvent(nameOrSignatureOrTopic: "EIP712DomainChanged"): EventFragment;
+  getEvent(nameOrSignatureOrTopic: "Initialized"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "MessageFailed"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "OwnershipTransferred"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "ReceiveFromChain"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "RetryMessageSuccess"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "SendToChain"): EventFragment;
-  getEvent(nameOrSignatureOrTopic: "SetDstChainIdToBatchLimit"): EventFragment;
-  getEvent(nameOrSignatureOrTopic: "SetDstChainIdToTransferGas"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "SetMinDstGas"): EventFragment;
-  getEvent(
-    nameOrSignatureOrTopic: "SetMinGasToTransferAndStore"
-  ): EventFragment;
   getEvent(nameOrSignatureOrTopic: "SetPrecrime"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "SetTrustedRemote"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "SetTrustedRemoteAddress"): EventFragment;
@@ -529,6 +689,26 @@ export type CreditClearedEvent = TypedEvent<
 export type CreditStoredEvent = TypedEvent<
   [string, string] & { _hashedPayload: string; _payload: string }
 >;
+
+export type DelegateChangedEvent = TypedEvent<
+  [string, string, string] & {
+    delegator: string;
+    fromDelegate: string;
+    toDelegate: string;
+  }
+>;
+
+export type DelegateVotesChangedEvent = TypedEvent<
+  [string, BigNumber, BigNumber] & {
+    delegate: string;
+    previousBalance: BigNumber;
+    newBalance: BigNumber;
+  }
+>;
+
+export type EIP712DomainChangedEvent = TypedEvent<[] & {}>;
+
+export type InitializedEvent = TypedEvent<[number] & { version: number }>;
 
 export type MessageFailedEvent = TypedEvent<
   [number, string, BigNumber, string, string] & {
@@ -571,30 +751,12 @@ export type SendToChainEvent = TypedEvent<
   }
 >;
 
-export type SetDstChainIdToBatchLimitEvent = TypedEvent<
-  [number, BigNumber] & {
-    _dstChainId: number;
-    _dstChainIdToBatchLimit: BigNumber;
-  }
->;
-
-export type SetDstChainIdToTransferGasEvent = TypedEvent<
-  [number, BigNumber] & {
-    _dstChainId: number;
-    _dstChainIdToTransferGas: BigNumber;
-  }
->;
-
 export type SetMinDstGasEvent = TypedEvent<
   [number, number, BigNumber] & {
     _dstChainId: number;
     _type: number;
     _minDstGas: BigNumber;
   }
->;
-
-export type SetMinGasToTransferAndStoreEvent = TypedEvent<
-  [BigNumber] & { _minGasToTransferAndStore: BigNumber }
 >;
 
 export type SetPrecrimeEvent = TypedEvent<[string] & { precrime: string }>;
@@ -655,9 +817,31 @@ export class MockErc721CrossChainV2 extends BaseContract {
   interface: MockErc721CrossChainV2Interface;
 
   functions: {
+    ACCESS_CONTROL_SINGLETON(overrides?: CallOverrides): Promise<[string]>;
+
+    ADMIN_ROLE(overrides?: CallOverrides): Promise<[string]>;
+
+    ALERTER_ROLE(overrides?: CallOverrides): Promise<[string]>;
+
+    CLOCK_MODE(overrides?: CallOverrides): Promise<[string]>;
+
+    DAO_ROLE(overrides?: CallOverrides): Promise<[string]>;
+
     DEFAULT_PAYLOAD_SIZE_LIMIT(overrides?: CallOverrides): Promise<[BigNumber]>;
 
+    DOMAIN_SEPARATOR(overrides?: CallOverrides): Promise<[string]>;
+
     FUNCTION_TYPE_SEND(overrides?: CallOverrides): Promise<[number]>;
+
+    LIQUIDATION_ACCESS_ROLE(overrides?: CallOverrides): Promise<[string]>;
+
+    MINT_ACCESS_ROLE(overrides?: CallOverrides): Promise<[string]>;
+
+    REWARD_ACCESS_ROLE(overrides?: CallOverrides): Promise<[string]>;
+
+    SYSTEM_ROLE(overrides?: CallOverrides): Promise<[string]>;
+
+    VAULT_ACCESS_ROLE(overrides?: CallOverrides): Promise<[string]>;
 
     approve(
       to: string,
@@ -677,6 +861,31 @@ export class MockErc721CrossChainV2 extends BaseContract {
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
 
+    clock(overrides?: CallOverrides): Promise<[number]>;
+
+    delegate(
+      arg0: string,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<ContractTransaction>;
+
+    delegateBySig(
+      delegatee: string,
+      nonce: BigNumberish,
+      expiry: BigNumberish,
+      v: BigNumberish,
+      r: BytesLike,
+      s: BytesLike,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<ContractTransaction>;
+
+    delegateOnBehalf(
+      account: string,
+      delegatee: string,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<ContractTransaction>;
+
+    delegates(account: string, overrides?: CallOverrides): Promise<[string]>;
+
     dstChainIdToBatchLimit(
       arg0: BigNumberish,
       overrides?: CallOverrides
@@ -686,6 +895,20 @@ export class MockErc721CrossChainV2 extends BaseContract {
       arg0: BigNumberish,
       overrides?: CallOverrides
     ): Promise<[BigNumber]>;
+
+    eip712Domain(
+      overrides?: CallOverrides
+    ): Promise<
+      [string, string, string, BigNumber, string, string, BigNumber[]] & {
+        fields: string;
+        name: string;
+        version: string;
+        chainId: BigNumber;
+        verifyingContract: string;
+        salt: string;
+        extensions: BigNumber[];
+      }
+    >;
 
     estimateSendBatchFee(
       _dstChainId: BigNumberish,
@@ -735,12 +958,32 @@ export class MockErc721CrossChainV2 extends BaseContract {
       overrides?: CallOverrides
     ): Promise<[string]>;
 
+    getPastTotalSupply(
+      timepoint: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<[BigNumber]>;
+
+    getPastVotes(
+      account: string,
+      timepoint: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<[BigNumber]>;
+
     getTrustedRemoteAddress(
       _remoteChainId: BigNumberish,
       overrides?: CallOverrides
     ): Promise<[string]>;
 
+    getVotes(account: string, overrides?: CallOverrides): Promise<[BigNumber]>;
+
     hasMinted(arg0: string, overrides?: CallOverrides): Promise<[boolean]>;
+
+    initialize(
+      _layerZeroEndpoint: string,
+      _startMintId: BigNumberish,
+      _endMintId: BigNumberish,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<ContractTransaction>;
 
     isApprovedForAll(
       owner: string,
@@ -791,6 +1034,8 @@ export class MockErc721CrossChainV2 extends BaseContract {
       _payload: BytesLike,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
+
+    nonces(owner: string, overrides?: CallOverrides): Promise<[BigNumber]>;
 
     owner(overrides?: CallOverrides): Promise<[string]>;
 
@@ -920,7 +1165,7 @@ export class MockErc721CrossChainV2 extends BaseContract {
     ): Promise<ContractTransaction>;
 
     setTrustedRemote(
-      _remoteChainId: BigNumberish,
+      _srcChainId: BigNumberish,
       _path: BytesLike,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
@@ -973,9 +1218,31 @@ export class MockErc721CrossChainV2 extends BaseContract {
     ): Promise<[string]>;
   };
 
+  ACCESS_CONTROL_SINGLETON(overrides?: CallOverrides): Promise<string>;
+
+  ADMIN_ROLE(overrides?: CallOverrides): Promise<string>;
+
+  ALERTER_ROLE(overrides?: CallOverrides): Promise<string>;
+
+  CLOCK_MODE(overrides?: CallOverrides): Promise<string>;
+
+  DAO_ROLE(overrides?: CallOverrides): Promise<string>;
+
   DEFAULT_PAYLOAD_SIZE_LIMIT(overrides?: CallOverrides): Promise<BigNumber>;
 
+  DOMAIN_SEPARATOR(overrides?: CallOverrides): Promise<string>;
+
   FUNCTION_TYPE_SEND(overrides?: CallOverrides): Promise<number>;
+
+  LIQUIDATION_ACCESS_ROLE(overrides?: CallOverrides): Promise<string>;
+
+  MINT_ACCESS_ROLE(overrides?: CallOverrides): Promise<string>;
+
+  REWARD_ACCESS_ROLE(overrides?: CallOverrides): Promise<string>;
+
+  SYSTEM_ROLE(overrides?: CallOverrides): Promise<string>;
+
+  VAULT_ACCESS_ROLE(overrides?: CallOverrides): Promise<string>;
 
   approve(
     to: string,
@@ -995,6 +1262,31 @@ export class MockErc721CrossChainV2 extends BaseContract {
     overrides?: Overrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
 
+  clock(overrides?: CallOverrides): Promise<number>;
+
+  delegate(
+    arg0: string,
+    overrides?: Overrides & { from?: string | Promise<string> }
+  ): Promise<ContractTransaction>;
+
+  delegateBySig(
+    delegatee: string,
+    nonce: BigNumberish,
+    expiry: BigNumberish,
+    v: BigNumberish,
+    r: BytesLike,
+    s: BytesLike,
+    overrides?: Overrides & { from?: string | Promise<string> }
+  ): Promise<ContractTransaction>;
+
+  delegateOnBehalf(
+    account: string,
+    delegatee: string,
+    overrides?: Overrides & { from?: string | Promise<string> }
+  ): Promise<ContractTransaction>;
+
+  delegates(account: string, overrides?: CallOverrides): Promise<string>;
+
   dstChainIdToBatchLimit(
     arg0: BigNumberish,
     overrides?: CallOverrides
@@ -1004,6 +1296,20 @@ export class MockErc721CrossChainV2 extends BaseContract {
     arg0: BigNumberish,
     overrides?: CallOverrides
   ): Promise<BigNumber>;
+
+  eip712Domain(
+    overrides?: CallOverrides
+  ): Promise<
+    [string, string, string, BigNumber, string, string, BigNumber[]] & {
+      fields: string;
+      name: string;
+      version: string;
+      chainId: BigNumber;
+      verifyingContract: string;
+      salt: string;
+      extensions: BigNumber[];
+    }
+  >;
 
   estimateSendBatchFee(
     _dstChainId: BigNumberish,
@@ -1053,12 +1359,32 @@ export class MockErc721CrossChainV2 extends BaseContract {
     overrides?: CallOverrides
   ): Promise<string>;
 
+  getPastTotalSupply(
+    timepoint: BigNumberish,
+    overrides?: CallOverrides
+  ): Promise<BigNumber>;
+
+  getPastVotes(
+    account: string,
+    timepoint: BigNumberish,
+    overrides?: CallOverrides
+  ): Promise<BigNumber>;
+
   getTrustedRemoteAddress(
     _remoteChainId: BigNumberish,
     overrides?: CallOverrides
   ): Promise<string>;
 
+  getVotes(account: string, overrides?: CallOverrides): Promise<BigNumber>;
+
   hasMinted(arg0: string, overrides?: CallOverrides): Promise<boolean>;
+
+  initialize(
+    _layerZeroEndpoint: string,
+    _startMintId: BigNumberish,
+    _endMintId: BigNumberish,
+    overrides?: Overrides & { from?: string | Promise<string> }
+  ): Promise<ContractTransaction>;
 
   isApprovedForAll(
     owner: string,
@@ -1109,6 +1435,8 @@ export class MockErc721CrossChainV2 extends BaseContract {
     _payload: BytesLike,
     overrides?: Overrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
+
+  nonces(owner: string, overrides?: CallOverrides): Promise<BigNumber>;
 
   owner(overrides?: CallOverrides): Promise<string>;
 
@@ -1235,7 +1563,7 @@ export class MockErc721CrossChainV2 extends BaseContract {
   ): Promise<ContractTransaction>;
 
   setTrustedRemote(
-    _remoteChainId: BigNumberish,
+    _srcChainId: BigNumberish,
     _path: BytesLike,
     overrides?: Overrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
@@ -1285,9 +1613,31 @@ export class MockErc721CrossChainV2 extends BaseContract {
   ): Promise<string>;
 
   callStatic: {
+    ACCESS_CONTROL_SINGLETON(overrides?: CallOverrides): Promise<string>;
+
+    ADMIN_ROLE(overrides?: CallOverrides): Promise<string>;
+
+    ALERTER_ROLE(overrides?: CallOverrides): Promise<string>;
+
+    CLOCK_MODE(overrides?: CallOverrides): Promise<string>;
+
+    DAO_ROLE(overrides?: CallOverrides): Promise<string>;
+
     DEFAULT_PAYLOAD_SIZE_LIMIT(overrides?: CallOverrides): Promise<BigNumber>;
 
+    DOMAIN_SEPARATOR(overrides?: CallOverrides): Promise<string>;
+
     FUNCTION_TYPE_SEND(overrides?: CallOverrides): Promise<number>;
+
+    LIQUIDATION_ACCESS_ROLE(overrides?: CallOverrides): Promise<string>;
+
+    MINT_ACCESS_ROLE(overrides?: CallOverrides): Promise<string>;
+
+    REWARD_ACCESS_ROLE(overrides?: CallOverrides): Promise<string>;
+
+    SYSTEM_ROLE(overrides?: CallOverrides): Promise<string>;
+
+    VAULT_ACCESS_ROLE(overrides?: CallOverrides): Promise<string>;
 
     approve(
       to: string,
@@ -1304,6 +1654,28 @@ export class MockErc721CrossChainV2 extends BaseContract {
 
     clearCredits(_payload: BytesLike, overrides?: CallOverrides): Promise<void>;
 
+    clock(overrides?: CallOverrides): Promise<number>;
+
+    delegate(arg0: string, overrides?: CallOverrides): Promise<void>;
+
+    delegateBySig(
+      delegatee: string,
+      nonce: BigNumberish,
+      expiry: BigNumberish,
+      v: BigNumberish,
+      r: BytesLike,
+      s: BytesLike,
+      overrides?: CallOverrides
+    ): Promise<void>;
+
+    delegateOnBehalf(
+      account: string,
+      delegatee: string,
+      overrides?: CallOverrides
+    ): Promise<void>;
+
+    delegates(account: string, overrides?: CallOverrides): Promise<string>;
+
     dstChainIdToBatchLimit(
       arg0: BigNumberish,
       overrides?: CallOverrides
@@ -1313,6 +1685,20 @@ export class MockErc721CrossChainV2 extends BaseContract {
       arg0: BigNumberish,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
+
+    eip712Domain(
+      overrides?: CallOverrides
+    ): Promise<
+      [string, string, string, BigNumber, string, string, BigNumber[]] & {
+        fields: string;
+        name: string;
+        version: string;
+        chainId: BigNumber;
+        verifyingContract: string;
+        salt: string;
+        extensions: BigNumber[];
+      }
+    >;
 
     estimateSendBatchFee(
       _dstChainId: BigNumberish,
@@ -1362,12 +1748,32 @@ export class MockErc721CrossChainV2 extends BaseContract {
       overrides?: CallOverrides
     ): Promise<string>;
 
+    getPastTotalSupply(
+      timepoint: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
+    getPastVotes(
+      account: string,
+      timepoint: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
     getTrustedRemoteAddress(
       _remoteChainId: BigNumberish,
       overrides?: CallOverrides
     ): Promise<string>;
 
+    getVotes(account: string, overrides?: CallOverrides): Promise<BigNumber>;
+
     hasMinted(arg0: string, overrides?: CallOverrides): Promise<boolean>;
+
+    initialize(
+      _layerZeroEndpoint: string,
+      _startMintId: BigNumberish,
+      _endMintId: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<void>;
 
     isApprovedForAll(
       owner: string,
@@ -1418,6 +1824,8 @@ export class MockErc721CrossChainV2 extends BaseContract {
       _payload: BytesLike,
       overrides?: CallOverrides
     ): Promise<void>;
+
+    nonces(owner: string, overrides?: CallOverrides): Promise<BigNumber>;
 
     owner(overrides?: CallOverrides): Promise<string>;
 
@@ -1536,7 +1944,7 @@ export class MockErc721CrossChainV2 extends BaseContract {
     ): Promise<void>;
 
     setTrustedRemote(
-      _remoteChainId: BigNumberish,
+      _srcChainId: BigNumberish,
       _path: BytesLike,
       overrides?: CallOverrides
     ): Promise<void>;
@@ -1646,6 +2054,54 @@ export class MockErc721CrossChainV2 extends BaseContract {
       [string, string],
       { _hashedPayload: string; _payload: string }
     >;
+
+    "DelegateChanged(address,address,address)"(
+      delegator?: string | null,
+      fromDelegate?: string | null,
+      toDelegate?: string | null
+    ): TypedEventFilter<
+      [string, string, string],
+      { delegator: string; fromDelegate: string; toDelegate: string }
+    >;
+
+    DelegateChanged(
+      delegator?: string | null,
+      fromDelegate?: string | null,
+      toDelegate?: string | null
+    ): TypedEventFilter<
+      [string, string, string],
+      { delegator: string; fromDelegate: string; toDelegate: string }
+    >;
+
+    "DelegateVotesChanged(address,uint256,uint256)"(
+      delegate?: string | null,
+      previousBalance?: null,
+      newBalance?: null
+    ): TypedEventFilter<
+      [string, BigNumber, BigNumber],
+      { delegate: string; previousBalance: BigNumber; newBalance: BigNumber }
+    >;
+
+    DelegateVotesChanged(
+      delegate?: string | null,
+      previousBalance?: null,
+      newBalance?: null
+    ): TypedEventFilter<
+      [string, BigNumber, BigNumber],
+      { delegate: string; previousBalance: BigNumber; newBalance: BigNumber }
+    >;
+
+    "EIP712DomainChanged()"(): TypedEventFilter<[], {}>;
+
+    EIP712DomainChanged(): TypedEventFilter<[], {}>;
+
+    "Initialized(uint8)"(
+      version?: null
+    ): TypedEventFilter<[number], { version: number }>;
+
+    Initialized(
+      version?: null
+    ): TypedEventFilter<[number], { version: number }>;
 
     "MessageFailed(uint16,bytes,uint64,bytes,bytes)"(
       _srcChainId?: null,
@@ -1787,38 +2243,6 @@ export class MockErc721CrossChainV2 extends BaseContract {
       }
     >;
 
-    "SetDstChainIdToBatchLimit(uint16,uint256)"(
-      _dstChainId?: null,
-      _dstChainIdToBatchLimit?: null
-    ): TypedEventFilter<
-      [number, BigNumber],
-      { _dstChainId: number; _dstChainIdToBatchLimit: BigNumber }
-    >;
-
-    SetDstChainIdToBatchLimit(
-      _dstChainId?: null,
-      _dstChainIdToBatchLimit?: null
-    ): TypedEventFilter<
-      [number, BigNumber],
-      { _dstChainId: number; _dstChainIdToBatchLimit: BigNumber }
-    >;
-
-    "SetDstChainIdToTransferGas(uint16,uint256)"(
-      _dstChainId?: null,
-      _dstChainIdToTransferGas?: null
-    ): TypedEventFilter<
-      [number, BigNumber],
-      { _dstChainId: number; _dstChainIdToTransferGas: BigNumber }
-    >;
-
-    SetDstChainIdToTransferGas(
-      _dstChainId?: null,
-      _dstChainIdToTransferGas?: null
-    ): TypedEventFilter<
-      [number, BigNumber],
-      { _dstChainId: number; _dstChainIdToTransferGas: BigNumber }
-    >;
-
     "SetMinDstGas(uint16,uint16,uint256)"(
       _dstChainId?: null,
       _type?: null,
@@ -1836,14 +2260,6 @@ export class MockErc721CrossChainV2 extends BaseContract {
       [number, number, BigNumber],
       { _dstChainId: number; _type: number; _minDstGas: BigNumber }
     >;
-
-    "SetMinGasToTransferAndStore(uint256)"(
-      _minGasToTransferAndStore?: null
-    ): TypedEventFilter<[BigNumber], { _minGasToTransferAndStore: BigNumber }>;
-
-    SetMinGasToTransferAndStore(
-      _minGasToTransferAndStore?: null
-    ): TypedEventFilter<[BigNumber], { _minGasToTransferAndStore: BigNumber }>;
 
     "SetPrecrime(address)"(
       precrime?: null
@@ -1905,9 +2321,31 @@ export class MockErc721CrossChainV2 extends BaseContract {
   };
 
   estimateGas: {
+    ACCESS_CONTROL_SINGLETON(overrides?: CallOverrides): Promise<BigNumber>;
+
+    ADMIN_ROLE(overrides?: CallOverrides): Promise<BigNumber>;
+
+    ALERTER_ROLE(overrides?: CallOverrides): Promise<BigNumber>;
+
+    CLOCK_MODE(overrides?: CallOverrides): Promise<BigNumber>;
+
+    DAO_ROLE(overrides?: CallOverrides): Promise<BigNumber>;
+
     DEFAULT_PAYLOAD_SIZE_LIMIT(overrides?: CallOverrides): Promise<BigNumber>;
 
+    DOMAIN_SEPARATOR(overrides?: CallOverrides): Promise<BigNumber>;
+
     FUNCTION_TYPE_SEND(overrides?: CallOverrides): Promise<BigNumber>;
+
+    LIQUIDATION_ACCESS_ROLE(overrides?: CallOverrides): Promise<BigNumber>;
+
+    MINT_ACCESS_ROLE(overrides?: CallOverrides): Promise<BigNumber>;
+
+    REWARD_ACCESS_ROLE(overrides?: CallOverrides): Promise<BigNumber>;
+
+    SYSTEM_ROLE(overrides?: CallOverrides): Promise<BigNumber>;
+
+    VAULT_ACCESS_ROLE(overrides?: CallOverrides): Promise<BigNumber>;
 
     approve(
       to: string,
@@ -1927,6 +2365,31 @@ export class MockErc721CrossChainV2 extends BaseContract {
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
 
+    clock(overrides?: CallOverrides): Promise<BigNumber>;
+
+    delegate(
+      arg0: string,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<BigNumber>;
+
+    delegateBySig(
+      delegatee: string,
+      nonce: BigNumberish,
+      expiry: BigNumberish,
+      v: BigNumberish,
+      r: BytesLike,
+      s: BytesLike,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<BigNumber>;
+
+    delegateOnBehalf(
+      account: string,
+      delegatee: string,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<BigNumber>;
+
+    delegates(account: string, overrides?: CallOverrides): Promise<BigNumber>;
+
     dstChainIdToBatchLimit(
       arg0: BigNumberish,
       overrides?: CallOverrides
@@ -1936,6 +2399,8 @@ export class MockErc721CrossChainV2 extends BaseContract {
       arg0: BigNumberish,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
+
+    eip712Domain(overrides?: CallOverrides): Promise<BigNumber>;
 
     estimateSendBatchFee(
       _dstChainId: BigNumberish,
@@ -1981,12 +2446,32 @@ export class MockErc721CrossChainV2 extends BaseContract {
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
+    getPastTotalSupply(
+      timepoint: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
+    getPastVotes(
+      account: string,
+      timepoint: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
     getTrustedRemoteAddress(
       _remoteChainId: BigNumberish,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
+    getVotes(account: string, overrides?: CallOverrides): Promise<BigNumber>;
+
     hasMinted(arg0: string, overrides?: CallOverrides): Promise<BigNumber>;
+
+    initialize(
+      _layerZeroEndpoint: string,
+      _startMintId: BigNumberish,
+      _endMintId: BigNumberish,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<BigNumber>;
 
     isApprovedForAll(
       owner: string,
@@ -2037,6 +2522,8 @@ export class MockErc721CrossChainV2 extends BaseContract {
       _payload: BytesLike,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
+
+    nonces(owner: string, overrides?: CallOverrides): Promise<BigNumber>;
 
     owner(overrides?: CallOverrides): Promise<BigNumber>;
 
@@ -2166,7 +2653,7 @@ export class MockErc721CrossChainV2 extends BaseContract {
     ): Promise<BigNumber>;
 
     setTrustedRemote(
-      _remoteChainId: BigNumberish,
+      _srcChainId: BigNumberish,
       _path: BytesLike,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
@@ -2213,13 +2700,41 @@ export class MockErc721CrossChainV2 extends BaseContract {
   };
 
   populateTransaction: {
+    ACCESS_CONTROL_SINGLETON(
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    ADMIN_ROLE(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+    ALERTER_ROLE(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+    CLOCK_MODE(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+    DAO_ROLE(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
     DEFAULT_PAYLOAD_SIZE_LIMIT(
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
+    DOMAIN_SEPARATOR(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
     FUNCTION_TYPE_SEND(
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
+
+    LIQUIDATION_ACCESS_ROLE(
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    MINT_ACCESS_ROLE(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+    REWARD_ACCESS_ROLE(
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    SYSTEM_ROLE(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+    VAULT_ACCESS_ROLE(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     approve(
       to: string,
@@ -2242,6 +2757,34 @@ export class MockErc721CrossChainV2 extends BaseContract {
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
 
+    clock(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+    delegate(
+      arg0: string,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<PopulatedTransaction>;
+
+    delegateBySig(
+      delegatee: string,
+      nonce: BigNumberish,
+      expiry: BigNumberish,
+      v: BigNumberish,
+      r: BytesLike,
+      s: BytesLike,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<PopulatedTransaction>;
+
+    delegateOnBehalf(
+      account: string,
+      delegatee: string,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<PopulatedTransaction>;
+
+    delegates(
+      account: string,
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
     dstChainIdToBatchLimit(
       arg0: BigNumberish,
       overrides?: CallOverrides
@@ -2251,6 +2794,8 @@ export class MockErc721CrossChainV2 extends BaseContract {
       arg0: BigNumberish,
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
+
+    eip712Domain(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     estimateSendBatchFee(
       _dstChainId: BigNumberish,
@@ -2296,14 +2841,37 @@ export class MockErc721CrossChainV2 extends BaseContract {
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
+    getPastTotalSupply(
+      timepoint: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    getPastVotes(
+      account: string,
+      timepoint: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
     getTrustedRemoteAddress(
       _remoteChainId: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    getVotes(
+      account: string,
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
     hasMinted(
       arg0: string,
       overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    initialize(
+      _layerZeroEndpoint: string,
+      _startMintId: BigNumberish,
+      _endMintId: BigNumberish,
+      overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
 
     isApprovedForAll(
@@ -2356,6 +2924,11 @@ export class MockErc721CrossChainV2 extends BaseContract {
       _nonce: BigNumberish,
       _payload: BytesLike,
       overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<PopulatedTransaction>;
+
+    nonces(
+      owner: string,
+      overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
     owner(overrides?: CallOverrides): Promise<PopulatedTransaction>;
@@ -2486,7 +3059,7 @@ export class MockErc721CrossChainV2 extends BaseContract {
     ): Promise<PopulatedTransaction>;
 
     setTrustedRemote(
-      _remoteChainId: BigNumberish,
+      _srcChainId: BigNumberish,
       _path: BytesLike,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
