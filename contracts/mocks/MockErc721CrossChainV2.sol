@@ -2,9 +2,10 @@
 pragma solidity ^0.8.7;
 
 import "@openzeppelin/contracts-upgradeable/governance/utils/VotesUpgradeable.sol";
-import "../3rd-party/layer-zero-labs/contracts-upgradable/token/onft/ERC721/ONFT721CoreUpgradeable.sol";
-import "../periphery/contracts/access-control/SuAuthenticated.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC721/ERC721Upgradeable.sol";
+import "../3rd-party/layer-zero-labs/contracts-upgradable/token/onft/ERC721/ONFT721CoreUpgradeable.sol";
+// import "../periphery/contracts/access-control/SuAuthenticated.sol";
+import "./SignatureVerification.sol";
 
 /**
     Ethereum
@@ -32,7 +33,7 @@ import "@openzeppelin/contracts-upgradeable/token/ERC721/ERC721Upgradeable.sol";
     endpoint: 0xf69186dfBa60DdB133E91E9A4B5673624293d8F8
 */
 
-contract MockErc721CrossChainV2 is SuAuthenticated, ERC721Upgradeable, ONFT721CoreUpgradeable, VotesUpgradeable {
+contract MockErc721CrossChainV2 is ERC721Upgradeable, ONFT721CoreUpgradeable, VotesUpgradeable {
     string private baseURI;
     mapping(address => bool) public hasMinted;
     uint public nextMintId;
@@ -42,10 +43,7 @@ contract MockErc721CrossChainV2 is SuAuthenticated, ERC721Upgradeable, ONFT721Co
     error UnavailableFunctionalityError();
     error AlreadyMinted();
     error MaxMintLimit();
-    error FutureSignature();
-    error OldSignature();
     error InvalidSignature();
-    error InvalidSignatureLength();
 
     function initialize(address _layerZeroEndpoint, uint _startMintId, uint _endMintId) initializer public {
         __ERC721_init_unchained("StableUnit MockErc721CrossChain", "MockErc721CrossChain");
@@ -70,56 +68,26 @@ contract MockErc721CrossChainV2 is SuAuthenticated, ERC721Upgradeable, ONFT721Co
     /**
      * @dev Delegates votes from the account to `delegatee`.
      */
-    function delegateOnBehalf(address account, address delegatee) public virtual onlyRole(SYSTEM_ROLE) {
+    function delegateOnBehalf(address account, address delegatee) public virtual onlyOwner {
         _delegate(account, delegatee);
     }
 
-    function changeBackendSigner(address newBackendSigner) external onlyAdmin {
+    function changeBackendSigner(address newBackendSigner) external onlyOwner {
         backendSigner = newBackendSigner;
     }
 
     function mint(bytes calldata signature, uint256 timestamp) external payable {
         if (hasMinted[msg.sender]) revert AlreadyMinted();
         if (nextMintId > maxMintId) revert MaxMintLimit();
-        if (block.timestamp > timestamp + 10 minutes) revert OldSignature();
-        if (block.timestamp < timestamp) revert FutureSignature();
 
-        bytes32 messageHash = keccak256(abi.encodePacked(msg.sender, timestamp, block.chainid));
-        bytes32 ethSignedMessageHash = keccak256(
-            abi.encodePacked("Signed by StableUnit", messageHash)
-        );
-
-        if(recoverSigner(ethSignedMessageHash, signature) != backendSigner) revert InvalidSignature();
+        address recoveredSigner = SignatureVerification.recoverSigner(msg.sender, timestamp, signature);
+        if(recoveredSigner != backendSigner) revert InvalidSignature();
 
         uint newId = nextMintId;
         nextMintId++;
 
         _safeMint(msg.sender, newId);
         hasMinted[msg.sender] = true;
-    }
-
-    function recoverSigner(bytes32 _ethSignedMessageHash, bytes memory _signature) internal pure returns (address) {
-        (bytes32 r, bytes32 s, uint8 v) = splitSignature(_signature);
-        return ecrecover(_ethSignedMessageHash, v, r, s);
-    }
-
-    function splitSignature(bytes memory sig) internal pure returns (bytes32 r, bytes32 s, uint8 v)
-    {
-        if (sig.length != 65) revert InvalidSignatureLength();
-
-        assembly {
-            // signature is always 65 bytes
-            // r = first 32 bytes of signature
-            // s = second 32 bytes of signature
-            // v = final byte (first byte of the third 32 bytes)
-            // add(sig, 32) is pointer to r
-            // mload(p) loads next 32 bytes starting at the memory address p into memory
-            r := mload(add(sig, 32))
-            s := mload(add(sig, 64))
-            v := byte(0, mload(add(sig, 96)))
-        }
-
-        return (r, s, v);
     }
 
     function _baseURI() internal view override returns (string memory) {
@@ -154,8 +122,8 @@ contract MockErc721CrossChainV2 is SuAuthenticated, ERC721Upgradeable, ONFT721Co
      * @notice Copied from ONFT721Upgradeable (not inherited to decrease contract code size)
      */
     function _debitFrom(address _from, uint16, bytes memory, uint _tokenId) internal virtual override {
-        require(_isApprovedOrOwner(_msgSender(), _tokenId), "ONFT721: send caller is not owner nor approved");
-        require(ERC721Upgradeable.ownerOf(_tokenId) == _from, "ONFT721: send from incorrect owner");
+        // require(_isApprovedOrOwner(_msgSender(), _tokenId), "ONFT721: send caller is not owner nor approved");
+        // require(ERC721Upgradeable.ownerOf(_tokenId) == _from, "ONFT721: send from incorrect owner");
         _transfer(_from, address(this), _tokenId);
     }
 
@@ -173,17 +141,17 @@ contract MockErc721CrossChainV2 is SuAuthenticated, ERC721Upgradeable, ONFT721Co
 
     function supportsInterface(bytes4 interfaceId)
     public
-    override (SuAuthenticated, ERC721Upgradeable, ONFT721CoreUpgradeable)
+    override (ERC721Upgradeable, ONFT721CoreUpgradeable)
     virtual
     view
     returns (bool) {
         return interfaceId == type(IVotesUpgradeable).interfaceId || super.supportsInterface(interfaceId);
     }
-
-    /**
-     * @dev This empty reserved space is put in place to allow future versions to add new
-     * variables without shifting down storage in the inheritance chain.
-     * See https://docs.openzeppelin.com/contracts/4.x/upgradeable#storage_gaps
-     */
-    uint256[50] private __gap;
+//
+//    /**
+//     * @dev This empty reserved space is put in place to allow future versions to add new
+//     * variables without shifting down storage in the inheritance chain.
+//     * See https://docs.openzeppelin.com/contracts/4.x/upgradeable#storage_gaps
+//     */
+//    uint256[50] private __gap;
 }

@@ -22,19 +22,10 @@ import type { TypedEventFilter, TypedEvent, TypedListener } from "./common";
 
 interface MockErc721CrossChainV2Interface extends ethers.utils.Interface {
   functions: {
-    "ACCESS_CONTROL_SINGLETON()": FunctionFragment;
-    "ADMIN_ROLE()": FunctionFragment;
-    "ALERTER_ROLE()": FunctionFragment;
     "CLOCK_MODE()": FunctionFragment;
-    "DAO_ROLE()": FunctionFragment;
     "DEFAULT_PAYLOAD_SIZE_LIMIT()": FunctionFragment;
     "DOMAIN_SEPARATOR()": FunctionFragment;
     "FUNCTION_TYPE_SEND()": FunctionFragment;
-    "LIQUIDATION_ACCESS_ROLE()": FunctionFragment;
-    "MINT_ACCESS_ROLE()": FunctionFragment;
-    "REWARD_ACCESS_ROLE()": FunctionFragment;
-    "SYSTEM_ROLE()": FunctionFragment;
-    "VAULT_ACCESS_ROLE()": FunctionFragment;
     "approve(address,uint256)": FunctionFragment;
     "balanceOf(address)": FunctionFragment;
     "changeBackendSigner(address)": FunctionFragment;
@@ -103,22 +94,9 @@ interface MockErc721CrossChainV2Interface extends ethers.utils.Interface {
   };
 
   encodeFunctionData(
-    functionFragment: "ACCESS_CONTROL_SINGLETON",
-    values?: undefined
-  ): string;
-  encodeFunctionData(
-    functionFragment: "ADMIN_ROLE",
-    values?: undefined
-  ): string;
-  encodeFunctionData(
-    functionFragment: "ALERTER_ROLE",
-    values?: undefined
-  ): string;
-  encodeFunctionData(
     functionFragment: "CLOCK_MODE",
     values?: undefined
   ): string;
-  encodeFunctionData(functionFragment: "DAO_ROLE", values?: undefined): string;
   encodeFunctionData(
     functionFragment: "DEFAULT_PAYLOAD_SIZE_LIMIT",
     values?: undefined
@@ -129,26 +107,6 @@ interface MockErc721CrossChainV2Interface extends ethers.utils.Interface {
   ): string;
   encodeFunctionData(
     functionFragment: "FUNCTION_TYPE_SEND",
-    values?: undefined
-  ): string;
-  encodeFunctionData(
-    functionFragment: "LIQUIDATION_ACCESS_ROLE",
-    values?: undefined
-  ): string;
-  encodeFunctionData(
-    functionFragment: "MINT_ACCESS_ROLE",
-    values?: undefined
-  ): string;
-  encodeFunctionData(
-    functionFragment: "REWARD_ACCESS_ROLE",
-    values?: undefined
-  ): string;
-  encodeFunctionData(
-    functionFragment: "SYSTEM_ROLE",
-    values?: undefined
-  ): string;
-  encodeFunctionData(
-    functionFragment: "VAULT_ACCESS_ROLE",
     values?: undefined
   ): string;
   encodeFunctionData(
@@ -393,17 +351,7 @@ interface MockErc721CrossChainV2Interface extends ethers.utils.Interface {
     values: [BigNumberish]
   ): string;
 
-  decodeFunctionResult(
-    functionFragment: "ACCESS_CONTROL_SINGLETON",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(functionFragment: "ADMIN_ROLE", data: BytesLike): Result;
-  decodeFunctionResult(
-    functionFragment: "ALERTER_ROLE",
-    data: BytesLike
-  ): Result;
   decodeFunctionResult(functionFragment: "CLOCK_MODE", data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: "DAO_ROLE", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "DEFAULT_PAYLOAD_SIZE_LIMIT",
     data: BytesLike
@@ -414,26 +362,6 @@ interface MockErc721CrossChainV2Interface extends ethers.utils.Interface {
   ): Result;
   decodeFunctionResult(
     functionFragment: "FUNCTION_TYPE_SEND",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: "LIQUIDATION_ACCESS_ROLE",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: "MINT_ACCESS_ROLE",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: "REWARD_ACCESS_ROLE",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: "SYSTEM_ROLE",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: "VAULT_ACCESS_ROLE",
     data: BytesLike
   ): Result;
   decodeFunctionResult(functionFragment: "approve", data: BytesLike): Result;
@@ -817,31 +745,13 @@ export class MockErc721CrossChainV2 extends BaseContract {
   interface: MockErc721CrossChainV2Interface;
 
   functions: {
-    ACCESS_CONTROL_SINGLETON(overrides?: CallOverrides): Promise<[string]>;
-
-    ADMIN_ROLE(overrides?: CallOverrides): Promise<[string]>;
-
-    ALERTER_ROLE(overrides?: CallOverrides): Promise<[string]>;
-
     CLOCK_MODE(overrides?: CallOverrides): Promise<[string]>;
-
-    DAO_ROLE(overrides?: CallOverrides): Promise<[string]>;
 
     DEFAULT_PAYLOAD_SIZE_LIMIT(overrides?: CallOverrides): Promise<[BigNumber]>;
 
     DOMAIN_SEPARATOR(overrides?: CallOverrides): Promise<[string]>;
 
     FUNCTION_TYPE_SEND(overrides?: CallOverrides): Promise<[number]>;
-
-    LIQUIDATION_ACCESS_ROLE(overrides?: CallOverrides): Promise<[string]>;
-
-    MINT_ACCESS_ROLE(overrides?: CallOverrides): Promise<[string]>;
-
-    REWARD_ACCESS_ROLE(overrides?: CallOverrides): Promise<[string]>;
-
-    SYSTEM_ROLE(overrides?: CallOverrides): Promise<[string]>;
-
-    VAULT_ACCESS_ROLE(overrides?: CallOverrides): Promise<[string]>;
 
     approve(
       to: string,
@@ -1218,31 +1128,13 @@ export class MockErc721CrossChainV2 extends BaseContract {
     ): Promise<[string]>;
   };
 
-  ACCESS_CONTROL_SINGLETON(overrides?: CallOverrides): Promise<string>;
-
-  ADMIN_ROLE(overrides?: CallOverrides): Promise<string>;
-
-  ALERTER_ROLE(overrides?: CallOverrides): Promise<string>;
-
   CLOCK_MODE(overrides?: CallOverrides): Promise<string>;
-
-  DAO_ROLE(overrides?: CallOverrides): Promise<string>;
 
   DEFAULT_PAYLOAD_SIZE_LIMIT(overrides?: CallOverrides): Promise<BigNumber>;
 
   DOMAIN_SEPARATOR(overrides?: CallOverrides): Promise<string>;
 
   FUNCTION_TYPE_SEND(overrides?: CallOverrides): Promise<number>;
-
-  LIQUIDATION_ACCESS_ROLE(overrides?: CallOverrides): Promise<string>;
-
-  MINT_ACCESS_ROLE(overrides?: CallOverrides): Promise<string>;
-
-  REWARD_ACCESS_ROLE(overrides?: CallOverrides): Promise<string>;
-
-  SYSTEM_ROLE(overrides?: CallOverrides): Promise<string>;
-
-  VAULT_ACCESS_ROLE(overrides?: CallOverrides): Promise<string>;
 
   approve(
     to: string,
@@ -1613,31 +1505,13 @@ export class MockErc721CrossChainV2 extends BaseContract {
   ): Promise<string>;
 
   callStatic: {
-    ACCESS_CONTROL_SINGLETON(overrides?: CallOverrides): Promise<string>;
-
-    ADMIN_ROLE(overrides?: CallOverrides): Promise<string>;
-
-    ALERTER_ROLE(overrides?: CallOverrides): Promise<string>;
-
     CLOCK_MODE(overrides?: CallOverrides): Promise<string>;
-
-    DAO_ROLE(overrides?: CallOverrides): Promise<string>;
 
     DEFAULT_PAYLOAD_SIZE_LIMIT(overrides?: CallOverrides): Promise<BigNumber>;
 
     DOMAIN_SEPARATOR(overrides?: CallOverrides): Promise<string>;
 
     FUNCTION_TYPE_SEND(overrides?: CallOverrides): Promise<number>;
-
-    LIQUIDATION_ACCESS_ROLE(overrides?: CallOverrides): Promise<string>;
-
-    MINT_ACCESS_ROLE(overrides?: CallOverrides): Promise<string>;
-
-    REWARD_ACCESS_ROLE(overrides?: CallOverrides): Promise<string>;
-
-    SYSTEM_ROLE(overrides?: CallOverrides): Promise<string>;
-
-    VAULT_ACCESS_ROLE(overrides?: CallOverrides): Promise<string>;
 
     approve(
       to: string,
@@ -2321,31 +2195,13 @@ export class MockErc721CrossChainV2 extends BaseContract {
   };
 
   estimateGas: {
-    ACCESS_CONTROL_SINGLETON(overrides?: CallOverrides): Promise<BigNumber>;
-
-    ADMIN_ROLE(overrides?: CallOverrides): Promise<BigNumber>;
-
-    ALERTER_ROLE(overrides?: CallOverrides): Promise<BigNumber>;
-
     CLOCK_MODE(overrides?: CallOverrides): Promise<BigNumber>;
-
-    DAO_ROLE(overrides?: CallOverrides): Promise<BigNumber>;
 
     DEFAULT_PAYLOAD_SIZE_LIMIT(overrides?: CallOverrides): Promise<BigNumber>;
 
     DOMAIN_SEPARATOR(overrides?: CallOverrides): Promise<BigNumber>;
 
     FUNCTION_TYPE_SEND(overrides?: CallOverrides): Promise<BigNumber>;
-
-    LIQUIDATION_ACCESS_ROLE(overrides?: CallOverrides): Promise<BigNumber>;
-
-    MINT_ACCESS_ROLE(overrides?: CallOverrides): Promise<BigNumber>;
-
-    REWARD_ACCESS_ROLE(overrides?: CallOverrides): Promise<BigNumber>;
-
-    SYSTEM_ROLE(overrides?: CallOverrides): Promise<BigNumber>;
-
-    VAULT_ACCESS_ROLE(overrides?: CallOverrides): Promise<BigNumber>;
 
     approve(
       to: string,
@@ -2700,17 +2556,7 @@ export class MockErc721CrossChainV2 extends BaseContract {
   };
 
   populateTransaction: {
-    ACCESS_CONTROL_SINGLETON(
-      overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
-
-    ADMIN_ROLE(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
-    ALERTER_ROLE(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
     CLOCK_MODE(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
-    DAO_ROLE(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     DEFAULT_PAYLOAD_SIZE_LIMIT(
       overrides?: CallOverrides
@@ -2721,20 +2567,6 @@ export class MockErc721CrossChainV2 extends BaseContract {
     FUNCTION_TYPE_SEND(
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
-
-    LIQUIDATION_ACCESS_ROLE(
-      overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
-
-    MINT_ACCESS_ROLE(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
-    REWARD_ACCESS_ROLE(
-      overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
-
-    SYSTEM_ROLE(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
-    VAULT_ACCESS_ROLE(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     approve(
       to: string,

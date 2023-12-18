@@ -1,11 +1,9 @@
-import { HardhatRuntimeEnvironment } from "hardhat/types";
 import { DeployFunction } from "hardhat-deploy/types";
-import { ethers, getNamedAccounts, run } from "hardhat";
+import { ethers, getNamedAccounts } from "hardhat";
 import { getNetworkNameById, NETWORK } from "../utils/network";
-import {MockErc721CrossChain} from "../typechain-types";
-import {deployProxy} from "../test/utils";
+import { upgrades } from "hardhat";
 
-const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
+const func: DeployFunction = async () => {
     const TOKENS = {
         [NETWORK.goerli]: { range: [0, 99] },
         [NETWORK.mumbai]: { range: [100, 199] },
@@ -18,13 +16,25 @@ const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
     const network = await ethers.provider.getNetwork();
     const token = TOKENS[getNetworkNameById(network.chainId)];
 
+    const SignatureVerificationLib = await ethers.getContractFactory("SignatureVerification");
+    const signatureVerificationLib = await SignatureVerificationLib.deploy();
+    await signatureVerificationLib.deployed();
+
+    console.log(`✅ SignatureVerification deployed`);
+
+    const MockErc721CrossChainV2 = await ethers.getContractFactory(
+        "MockErc721CrossChainV2",
+        // { libraries: { SignatureVerification: signatureVerificationLib.address }}
+    );
     const args = [nft, token.range[0], token.range[1]];
-    const tx = await deployProxy("MockErc721CrossChainV2", args);
+    const mockErc721CrossChainV2 = await upgrades.deployProxy(MockErc721CrossChainV2, args, { initializer: 'initialize', unsafeAllow: ['external-library-linking'] });
+    await mockErc721CrossChainV2.deployed();
+
     console.log(
-        `✅ NFT deployed on chain ${network.name} with range ${token.range[0]}-${token.range[1]} with address ${tx.address}`
+        `✅ NFT deployed on chain ${network.name} with range ${token.range[0]}-${token.range[1]} with address ${mockErc721CrossChainV2.address}`
     );
 
-    await run("verify:verify", { address: tx.address, constructorArguments: args });
+    // await run("verify:verify", { address: tx.address, constructorArguments: args });
     console.log("✅ NFT verified");
 };
 export default func;
