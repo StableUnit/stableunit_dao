@@ -8,7 +8,8 @@ library SignatureVerification {
 
     function recoverSigner(address _sender, uint256 _timestamp, bytes memory _signature) internal view returns (address) {
         if (block.timestamp > _timestamp + 10 minutes) revert OldSignature();
-        if (block.timestamp < _timestamp) revert FutureSignature();
+        // In case of Arbitrum timestamp
+        if (block.timestamp < _timestamp - 15 minutes) revert FutureSignature();
 
         bytes32 messageHash = keccak256(abi.encodePacked(_sender, _timestamp, block.chainid));
         bytes32 ethSignedMessageHash = keccak256(

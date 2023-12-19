@@ -28,6 +28,10 @@ dotenv.config({ path: envPath });
 const {
     INFURA_API_KEY,
     ALCHEMY_API_KEY_MAINNET,
+    ALCHEMY_API_KEY_OPTIMISM,
+    ALCHEMY_API_KEY_ARBITRUM,
+    ALCHEMY_API_KEY_OPTIMISM_GOERLI,
+    QUICKNODE_API_KEY_FANTOM,
     PRIVATE_KEY_TESTNET_DEPLOYER,
     PRIVATE_KEY_TESTNET_ADMIN,
     PRIVATE_KEY_TESTNET_VANITY_1,
@@ -67,16 +71,6 @@ const config: HardhatUserConfig = {
         alice: 6,
         bob: 7,
         carl: 8,
-        nft: {
-            default: 9,
-            goerli: "0xbfD2135BFfbb0B5378b56643c2Df8a87552Bfa23",
-            sepolia: "0xae92d5aD7583AD66E49A0c67BAd18F6ba52dDDc1",
-            mumbai: "0xf69186dfBa60DdB133E91E9A4B5673624293d8F8",
-            "bnb-testnet": "0x6Fcb97553D41516Cb228ac03FdC8B9a0a9df04A1",
-            matic: "0x3c2269811836af69497E5F486A85D7316753cf62",
-            bnb: "0x3c2269811836af69497E5F486A85D7316753cf62",
-            mainnet: "0x66A71Dcef29A0fFBDBE3c6a460a3B5BC225Cd675",
-        },
     },
     solidity: {
         version: "0.8.23",
@@ -100,23 +94,37 @@ const config: HardhatUserConfig = {
             // // see https://github.com/sc-forks/solidity-coverage/issues/652
             // initialBaseFeePerGas: 0,
         },
-        goerli: {
-            url: `https://goerli.infura.io/v3/${INFURA_API_KEY}`,
+        mainnet: {
+            url: `https://eth-mainnet.g.alchemy.com/v2/${ALCHEMY_API_KEY_MAINNET}`,
             accounts: accountsTestnet,
-            // timeout: 100000,
-            // blockGasLimit: 7_000_000,
-            // gas: 7_000_000,
         },
+        optimisticEthereum: {
+            url: `https://opt-mainnet.g.alchemy.com/v2/${ALCHEMY_API_KEY_OPTIMISM}`,
+            accounts: accountsTestnet,
+        },
+        arbitrumOne: {
+            url: `https://arb-mainnet.g.alchemy.com/v2/${ALCHEMY_API_KEY_ARBITRUM}`,
+            accounts: accountsTestnet,
+        },
+        opera: {
+            url: `https://autumn-newest-valley.fantom.quiknode.pro/${QUICKNODE_API_KEY_FANTOM}`,
+            accounts: accountsTestnet,
+        },
+        avalanche: {
+            url: `https://avalanche-mainnet.infura.io/v3/${INFURA_API_KEY}`,
+            accounts: accountsTestnet,
+        },
+
         sepolia: {
             url: `https://sepolia.infura.io/v3/${INFURA_API_KEY}`,
             accounts: accountsTestnet,
         },
-        mumbai: {
-            url: `https://polygon-mumbai.infura.io/v3/${INFURA_API_KEY}`,
+        optimisticGoerli: {
+            url: `https://opt-goerli.g.alchemy.com/v2/${ALCHEMY_API_KEY_OPTIMISM_GOERLI}`,
             accounts: accountsTestnet,
         },
-        matic: {
-            url: `https://polygon-mainnet.infura.io/v3/${INFURA_API_KEY}`,
+        arbitrumSepolia: {
+            url: `https://arbitrum-sepolia.infura.io/v3/${INFURA_API_KEY}`,
             accounts: accountsTestnet,
         },
     },
@@ -127,11 +135,33 @@ const config: HardhatUserConfig = {
     etherscan: {
         apiKey: {
             mainnet: process.env.ETHERSCAN_API_KEY as string,
-            goerli: process.env.ETHERSCAN_API_KEY as string,
-            polygon: process.env.POLYGONSCAN_API_KEY as string,
-            polygonMumbai: process.env.POLYGONSCAN_API_KEY as string,
             arbitrumOne: process.env.ARBISCAN_API_KEY as string,
+            opera: process.env.FANTOM_API_KEY as string,
+            optimisticEthereum: process.env.OPTIMISTIC_API_KEY as string,
+            avalanche: "",
+
+            sepolia: process.env.ETHERSCAN_API_KEY as string,
+            arbitrumSepolia: process.env.ARBISCAN_API_KEY as string,
+            optimisticGoerli: process.env.OPTIMISTIC_API_KEY as string,
         },
+        customChains: [
+            {
+                network: "avalanche",
+                chainId: 43114,
+                urls: {
+                    apiURL: "https://api.routescan.io/v2/network/mainnet/evm/43114/etherscan",
+                    browserURL: "https://avalanche.routescan.io",
+                },
+            },
+            {
+                network: "arbitrumSepolia",
+                chainId: 421614,
+                urls: {
+                    apiURL: "https://api-sepolia.arbiscan.io/api",
+                    browserURL: "https://sepolia.arbiscan.io/",
+                },
+            },
+        ],
     },
     paths: {
         deploy: "deploy",
@@ -146,7 +176,7 @@ const config: HardhatUserConfig = {
         alphaSort: true,
         runOnCompile: true,
         disambiguatePaths: false,
-        only: [':MockErc721CrossChainV2']
+        only: [":MockErc721CrossChainV2"],
     },
 };
 
