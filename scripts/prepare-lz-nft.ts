@@ -38,10 +38,6 @@ async function main() {
     const mockErc721CrossChain = (await ethers.getContract("MockErc721CrossChainV2")) as MockErc721CrossChain;
     console.log("✅ Mint for deployer success");
 
-    // let dstChainId: number;
-    // let localContractAddress: string;
-    // let dstContractAddress: string;
-
     for (let networkToProceed of SUPPORTED_NETWORKS) {
         if (networkToProceed !== getNetworkNameById(network.chainId)) {
             console.log("PROCESSING", networkToProceed);
@@ -49,6 +45,9 @@ async function main() {
             const localContractAddress = mockErc721CrossChain.address;
             const dstContractAddress = getNFTContractAddress(networkToProceed);
 
+            console.log("dstChainId", dstChainId);
+            console.log("localContractAddress", localContractAddress);
+            console.log("dstContractAddress", dstContractAddress);
             const trustedRemote = ethers.utils.solidityPack(
                 ["address", "address"],
                 [dstContractAddress, localContractAddress]

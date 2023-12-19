@@ -20,6 +20,9 @@
     "deploy-nft:sepolia": "hardhat deploy --tags NFT --network sepolia",
     "deploy-nft:arbitrumSepolia": "hardhat deploy --tags NFT --network arbitrumSepolia",
     "deploy-nft:optimisticGoerli": "hardhat deploy --tags NFT --network optimisticGoerli",
+    "prepare-nft:sepolia": "hardhat run ./scripts/prepare-lz-nft.ts --network sepolia",
+    "prepare-nft:arbitrumSepolia": "hardhat run ./scripts/prepare-lz-nft.ts --network arbitrumSepolia",
+    "prepare-nft:optimisticGoerli": "hardhat run ./scripts/prepare-lz-nft.ts --network optimisticGoerli",
 
     "deploy-suDAO:goerli": "hardhat deploy --tags SuDAO --network goerli",
     "deploy-suDAO:mumbai": "hardhat deploy --tags SuDAO --network mumbai",
