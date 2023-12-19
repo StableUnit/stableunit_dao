@@ -174,7 +174,7 @@ const config: HardhatUserConfig = {
     },
     contractSizer: {
         alphaSort: true,
-        runOnCompile: true,
+        runOnCompile: false,
         disambiguatePaths: false,
         only: [":MockErc721CrossChainV2"],
     },

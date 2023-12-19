@@ -1,14 +1,24 @@
 import { DeployFunction } from "hardhat-deploy/types";
-import { ethers, upgrades, run } from "hardhat";
+import { ethers } from "hardhat";
 import { getNetworkNameById, NETWORK } from "../utils/network";
 import { SuAccessControlSingleton } from "../typechain-types";
 import { endpoint } from "../utils/endpoint";
+import { deployProxy } from "../test/utils";
+import { verify } from "../scripts/verifyEtherscan";
+import { HardhatRuntimeEnvironment } from "hardhat/types";
 
-const func: DeployFunction = async () => {
-    const accessControlSingleton = (await ethers.getContract("SuAccessControlSingleton")) as SuAccessControlSingleton;
+const STEP = 10_000;
+export const generateRange = (i: number) => [(i - 1) * STEP, i * STEP - 1];
 
-    const STEP = 10_000;
-    const generateRange = (i: number) => [(i - 1) * STEP, i * STEP - 1];
+const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
+    let accessControlSingleton = await ethers.getContractOrNull("SuAccessControlSingleton");
+    if (!accessControlSingleton) {
+        console.log("Deploying Access Control");
+
+        const [deployer] = await hre.ethers.getSigners();
+        accessControlSingleton = await deployProxy("SuAccessControlSingleton", [deployer.address]);
+    }
+
     const TOKENS = {
         [NETWORK.mainnet]: { range: generateRange(1) }, // from 0 to 9999
         [NETWORK.optimisticEthereum]: { range: generateRange(2) }, // from 10_000 to 19_999
@@ -21,35 +31,20 @@ const func: DeployFunction = async () => {
     };
 
     const network = await ethers.provider.getNetwork();
-    const token = TOKENS[getNetworkNameById(network.chainId)];
-    const lzEndpoint = endpoint[getNetworkNameById(network.chainId)];
+    const networkName = getNetworkNameById(network.chainId);
+    console.log("Network", networkName);
+    const token = TOKENS[networkName];
+    const lzEndpoint = endpoint[networkName];
 
-    // let signatureVerificationLib = (await ethers.getContractOrNull("SignatureVerification"));
-    // if (!signatureVerificationLib) {
-    //     console.log('Deploying SignatureVerification');
-    //     const SignatureVerificationLib = await ethers.getContractFactory("SignatureVerification");
-    //     signatureVerificationLib = await SignatureVerificationLib.deploy();
-    //     await signatureVerificationLib.deployed();
-    // }
-    //
-    // console.log(`✅ SignatureVerification deployed`);
-
-    const MockErc721CrossChainV2 = await ethers.getContractFactory(
-        "MockErc721CrossChainV2"
-        // { libraries: { SignatureVerification: signatureVerificationLib.address }}
-    );
     const args = [accessControlSingleton.address, lzEndpoint, token.range[0], token.range[1]];
     console.log(args);
-    const mockErc721CrossChainV2 = await upgrades.deployProxy(MockErc721CrossChainV2, args, {
-        unsafeAllow: ["external-library-linking"],
-    });
-    await mockErc721CrossChainV2.deployed();
+    const contract = await deployProxy("MockErc721CrossChainV2", args, { unsafeAllow: ["external-library-linking"] });
 
     console.log(
-        `✅ NFT deployed on chain ${network.name} with range ${token.range[0]}-${token.range[1]} with address ${mockErc721CrossChainV2.address}`
+        `✅ NFT deployed on chain ${network.name} with range ${token.range[0]}-${token.range[1]} with address ${contract.address}`
     );
 
-    await run("verify:verify", { address: mockErc721CrossChainV2.address, constructorArguments: args });
+    await verify("MockErc721CrossChainV2");
     console.log("✅ NFT verified");
 };
 export default func;

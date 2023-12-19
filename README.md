@@ -268,8 +268,9 @@ npx hardhat transfer-owner --network mumbai --address 0x000000006cD799E2cC7A3Fe6
 ### CrossChain NFT ([gitbook](https://layerzero.gitbook.io/docs/))
 
 We use Layer-Zero UniversalONFT721 in the base. So for make NFT cross-chain sendable you should:
-1. Deploy to chain1 with `npm run deploy-nft:goerli`
-2. Deploy to chain2 with `npm run deploy-nft:mumbai` (it could fail in verification step, you can ignore that)
+1. Deploy to sepolia with `npm run deploy-nft:sepolia`
+2. Deploy to arbitrumSepolia with `npm run deploy-nft:arbitrumSepolia`
+2. Deploy to optimisticGoerli with `npm run deploy-nft:optimisticGoerli`
 3. Prepare NFT in chain1 with `hardhat run ./scripts/prepare-lz-nft.ts --network mumbai`
 4. Prepare NFT in chain2 with `hardhat run ./scripts/prepare-lz-nft.ts --network goerli`
 5. For testing that all works - run script that sends token with id 100 from deployer in mumbai to admin in goerli with `hardhat run ./scripts/send-lz-nft.ts --network mumbai`

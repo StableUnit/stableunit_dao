@@ -1,5 +1,4 @@
-import {deployments, ethers, getNamedAccounts, run} from "hardhat";
-import {getNetworkNameById, NETWORK} from "../utils/network";
+import { deployments, run } from "hardhat";
 
 export const verify = async (contractName: string, contractPath?: string, constructorArguments?: any[]) => {
     try {
@@ -7,6 +6,7 @@ export const verify = async (contractName: string, contractPath?: string, constr
 
         // hardhat documentation says that we need to use "verify:verify" subtask
         // but it doesn't work with proxy
+        // Also, upgradeable contracts don't need any constructorArguments
         await run("verify:verify", {
             address: Contract.address,
             contract: contractPath,
@@ -20,17 +20,6 @@ export const verify = async (contractName: string, contractPath?: string, constr
 };
 
 async function main() {
-    const { nft } = await getNamedAccounts();
-    const TOKENS = {
-        [NETWORK.goerli]: { range: [0, 99] },
-        [NETWORK.mumbai]: { range: [100, 199] },
-        [NETWORK.sepolia]: { range: [200, 299] },
-        [NETWORK.polygon]: { range: [300, 399] },
-        [NETWORK.unsupported]: { range: [0, 99] },
-    };
-    const network = await ethers.provider.getNetwork();
-    const token = TOKENS[getNetworkNameById(network.chainId)];
-
     // const suAccessControlSingleton = await ethers.getContract("SuAccessControlSingleton");
 
     // await verify("SuDAOv2", undefined, [suAccessControlSingleton.address]);
@@ -42,7 +31,7 @@ async function main() {
     // await verify("VeERC20");
     // await verify("TokenDistributorV4");
     // await verify("MockErc721");
-    await verify("MockErc721CrossChainV2", undefined, [nft, token.range[0], token.range[1]]);
+    await verify("MockErc721CrossChainV2");
 }
 
 main().catch((error) => {
