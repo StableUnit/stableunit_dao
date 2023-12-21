@@ -58,12 +58,11 @@ interface MockErc721CrossChainV2Interface extends ethers.utils.Interface {
     "getTrustedRemoteAddress(uint16)": FunctionFragment;
     "getVotes(address)": FunctionFragment;
     "hasMinted(address)": FunctionFragment;
-    "initialize(address,address,uint256,uint256)": FunctionFragment;
+    "initialize(address,address,uint256)": FunctionFragment;
     "isApprovedForAll(address,address)": FunctionFragment;
     "isTrustedRemote(uint16,bytes)": FunctionFragment;
     "lzEndpoint()": FunctionFragment;
     "lzReceive(uint16,bytes,uint64,bytes)": FunctionFragment;
-    "maxMintId()": FunctionFragment;
     "minDstGasLookup(uint16,uint16)": FunctionFragment;
     "minGasToTransferAndStore()": FunctionFragment;
     "mint(bytes,uint256)": FunctionFragment;
@@ -234,7 +233,7 @@ interface MockErc721CrossChainV2Interface extends ethers.utils.Interface {
   encodeFunctionData(functionFragment: "hasMinted", values: [string]): string;
   encodeFunctionData(
     functionFragment: "initialize",
-    values: [string, string, BigNumberish, BigNumberish]
+    values: [string, string, BigNumberish]
   ): string;
   encodeFunctionData(
     functionFragment: "isApprovedForAll",
@@ -252,7 +251,6 @@ interface MockErc721CrossChainV2Interface extends ethers.utils.Interface {
     functionFragment: "lzReceive",
     values: [BigNumberish, BytesLike, BigNumberish, BytesLike]
   ): string;
-  encodeFunctionData(functionFragment: "maxMintId", values?: undefined): string;
   encodeFunctionData(
     functionFragment: "minDstGasLookup",
     values: [BigNumberish, BigNumberish]
@@ -515,7 +513,6 @@ interface MockErc721CrossChainV2Interface extends ethers.utils.Interface {
   ): Result;
   decodeFunctionResult(functionFragment: "lzEndpoint", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "lzReceive", data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: "maxMintId", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "minDstGasLookup",
     data: BytesLike
@@ -981,8 +978,7 @@ export class MockErc721CrossChainV2 extends BaseContract {
     initialize(
       _accessControlSingleton: string,
       _layerZeroEndpoint: string,
-      _startMintId: BigNumberish,
-      _endMintId: BigNumberish,
+      _chainNumber: BigNumberish,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
 
@@ -1007,8 +1003,6 @@ export class MockErc721CrossChainV2 extends BaseContract {
       _payload: BytesLike,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
-
-    maxMintId(overrides?: CallOverrides): Promise<[BigNumber]>;
 
     minDstGasLookup(
       arg0: BigNumberish,
@@ -1383,8 +1377,7 @@ export class MockErc721CrossChainV2 extends BaseContract {
   initialize(
     _accessControlSingleton: string,
     _layerZeroEndpoint: string,
-    _startMintId: BigNumberish,
-    _endMintId: BigNumberish,
+    _chainNumber: BigNumberish,
     overrides?: Overrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
 
@@ -1409,8 +1402,6 @@ export class MockErc721CrossChainV2 extends BaseContract {
     _payload: BytesLike,
     overrides?: Overrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
-
-  maxMintId(overrides?: CallOverrides): Promise<BigNumber>;
 
   minDstGasLookup(
     arg0: BigNumberish,
@@ -1773,8 +1764,7 @@ export class MockErc721CrossChainV2 extends BaseContract {
     initialize(
       _accessControlSingleton: string,
       _layerZeroEndpoint: string,
-      _startMintId: BigNumberish,
-      _endMintId: BigNumberish,
+      _chainNumber: BigNumberish,
       overrides?: CallOverrides
     ): Promise<void>;
 
@@ -1799,8 +1789,6 @@ export class MockErc721CrossChainV2 extends BaseContract {
       _payload: BytesLike,
       overrides?: CallOverrides
     ): Promise<void>;
-
-    maxMintId(overrides?: CallOverrides): Promise<BigNumber>;
 
     minDstGasLookup(
       arg0: BigNumberish,
@@ -2472,8 +2460,7 @@ export class MockErc721CrossChainV2 extends BaseContract {
     initialize(
       _accessControlSingleton: string,
       _layerZeroEndpoint: string,
-      _startMintId: BigNumberish,
-      _endMintId: BigNumberish,
+      _chainNumber: BigNumberish,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
 
@@ -2498,8 +2485,6 @@ export class MockErc721CrossChainV2 extends BaseContract {
       _payload: BytesLike,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
-
-    maxMintId(overrides?: CallOverrides): Promise<BigNumber>;
 
     minDstGasLookup(
       arg0: BigNumberish,
@@ -2874,8 +2859,7 @@ export class MockErc721CrossChainV2 extends BaseContract {
     initialize(
       _accessControlSingleton: string,
       _layerZeroEndpoint: string,
-      _startMintId: BigNumberish,
-      _endMintId: BigNumberish,
+      _chainNumber: BigNumberish,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
 
@@ -2900,8 +2884,6 @@ export class MockErc721CrossChainV2 extends BaseContract {
       _payload: BytesLike,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
-
-    maxMintId(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     minDstGasLookup(
       arg0: BigNumberish,

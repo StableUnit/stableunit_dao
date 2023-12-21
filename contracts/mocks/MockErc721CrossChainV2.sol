@@ -10,7 +10,7 @@ contract MockErc721CrossChainV2 is SuAuthenticated, ONFT721Upgradeable, ERC721Vo
     mapping(address => bool) public hasMinted;
     string private baseURI;
     uint public nextMintId;
-    uint public maxMintId;
+    uint private maxMintId;
     address private backendSigner; // The address corresponding to the private key used by your backend
 
     error UnavailableFunctionalityError();
@@ -18,14 +18,14 @@ contract MockErc721CrossChainV2 is SuAuthenticated, ONFT721Upgradeable, ERC721Vo
     error MaxMintLimit();
     error InvalidSignature();
 
-    function initialize(address _accessControlSingleton, address _layerZeroEndpoint, uint _startMintId, uint _endMintId) initializer public {
+    function initialize(address _accessControlSingleton, address _layerZeroEndpoint, uint _chainNumber) initializer public {
         __ONFT721Upgradeable_init("StableUnit MockErc721CrossChain", "MockErc721CrossChain", 1, _layerZeroEndpoint);
         __suAuthenticatedInit(_accessControlSingleton);
 
-        baseURI = "ipfs://QmeSjSinHpPnmXmspMjwiXyN6zS4E9zccariGR3jxcaWtq/";
+        baseURI = "https://bafybeiat5zgl7wk2nq52do3pkypemzhxzduiqe36qh77fts6w44ppy3aeu.ipfs.w3s.link/";
         backendSigner = msg.sender;
-        nextMintId = _startMintId;
-        maxMintId = _endMintId;
+        nextMintId = _chainNumber * 1e6;
+        maxMintId = (_chainNumber + 1) * 1e6 - 1;
     }
 
     /**
