@@ -22,7 +22,7 @@ contract SuDAONFT is SuAuthenticated, ONFT721Upgradeable, ERC721VotesUpgradeable
         __ONFT721Upgradeable_init("StableUnit DAO NFT", "SuDaoNFT", 1, _layerZeroEndpoint);
         __suAuthenticatedInit(_accessControlSingleton);
 
-        baseURI = "https://bafybeiat5zgl7wk2nq52do3pkypemzhxzduiqe36qh77fts6w44ppy3aeu.ipfs.w3s.link/";
+        baseURI = "";
         backendSigner = msg.sender;
         nextMintId = _chainNumber * 1e6;
         maxMintId = (_chainNumber + 1) * 1e6 - 1;
@@ -66,7 +66,7 @@ contract SuDAONFT is SuAuthenticated, ONFT721Upgradeable, ERC721VotesUpgradeable
         return baseURI;
     }
 
-    function setBaseURI(string calldata uri) public {
+    function setBaseURI(string calldata uri) external onlyAdmin {
         baseURI = uri;
     }
 

@@ -1,7 +1,7 @@
 import { DeployFunction } from "hardhat-deploy/types";
 import { ethers } from "hardhat";
 import { getNetworkNameById, NETWORK, NetworkType } from "../utils/network";
-import { SuAccessControlSingleton } from "../typechain-types";
+import {SuAccessControlSingleton, SuDAONFT} from "../typechain-types";
 import { endpoint } from "../utils/endpoint";
 import { deployProxy } from "../test/utils";
 import { verify } from "../scripts/verifyEtherscan";
@@ -49,12 +49,13 @@ const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
 
     const args = [accessControlSingleton.address, endpoint[networkName], networkNumber];
     console.log(args);
-    const contract = await deployProxy("SuDAONFT", args, { unsafeAllow: ["external-library-linking"] });
-
+    const suDaoNftContract = (await deployProxy("SuDAONFT", args, { unsafeAllow: ["external-library-linking"] })) as SuDAONFT;
     console.log(
-        `✅ NFT deployed on chain ${network.name} with networkNumber ${networkNumber} with address ${contract.address}`
+        `✅ NFT deployed on chain ${network.name} with networkNumber ${networkNumber} with address ${suDaoNftContract.address}`
     );
-
+    await suDaoNftContract.setBaseURI(
+        "https://bafybeiat5zgl7wk2nq52do3pkypemzhxzduiqe36qh77fts6w44ppy3aeu.ipfs.w3s.link/"
+    );
     await verify("SuDAONFT");
     console.log("✅ NFT verified");
 };
