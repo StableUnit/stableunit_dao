@@ -2,11 +2,11 @@
 pragma solidity ^0.8.7;
 
 import "@openzeppelin/contracts-upgradeable/token/ERC721/extensions/ERC721VotesUpgradeable.sol";
-import "../3rd-party/layer-zero-labs/contracts-upgradable/token/onft/ERC721/ONFT721Upgradeable.sol";
-import "../periphery/contracts/access-control/SuAuthenticated.sol";
-import "../lib/SignatureVerification.sol";
+import "./3rd-party/layer-zero-labs/contracts-upgradable/token/onft/ERC721/ONFT721Upgradeable.sol";
+import "./periphery/contracts/access-control/SuAuthenticated.sol";
+import "./lib/SignatureVerification.sol";
 
-contract MockErc721CrossChainV2 is SuAuthenticated, ONFT721Upgradeable, ERC721VotesUpgradeable {
+contract SuDAONFT is SuAuthenticated, ONFT721Upgradeable, ERC721VotesUpgradeable {
     mapping(address => bool) public hasMinted;
     string private baseURI;
     uint public nextMintId;
@@ -19,7 +19,7 @@ contract MockErc721CrossChainV2 is SuAuthenticated, ONFT721Upgradeable, ERC721Vo
     error InvalidSignature();
 
     function initialize(address _accessControlSingleton, address _layerZeroEndpoint, uint _chainNumber) initializer public {
-        __ONFT721Upgradeable_init("StableUnit MockErc721CrossChain", "MockErc721CrossChain", 1, _layerZeroEndpoint);
+        __ONFT721Upgradeable_init("StableUnit DAO NFT", "SuDaoNFT", 1, _layerZeroEndpoint);
         __suAuthenticatedInit(_accessControlSingleton);
 
         baseURI = "https://bafybeiat5zgl7wk2nq52do3pkypemzhxzduiqe36qh77fts6w44ppy3aeu.ipfs.w3s.link/";

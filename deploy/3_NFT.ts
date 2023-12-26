@@ -49,13 +49,13 @@ const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
 
     const args = [accessControlSingleton.address, endpoint[networkName], networkNumber];
     console.log(args);
-    const contract = await deployProxy("MockErc721CrossChainV2", args, { unsafeAllow: ["external-library-linking"] });
+    const contract = await deployProxy("SuDAONFT", args, { unsafeAllow: ["external-library-linking"] });
 
     console.log(
         `✅ NFT deployed on chain ${network.name} with networkNumber ${networkNumber} with address ${contract.address}`
     );
 
-    await verify("MockErc721CrossChainV2");
+    await verify("SuDAONFT");
     console.log("✅ NFT verified");
 };
 export default func;

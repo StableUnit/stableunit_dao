@@ -6,11 +6,11 @@
 import { ethers } from "hardhat";
 
 import { getNetworkNameById, NetworkType, SUPPORTED_NETWORKS } from "../utils/network";
-import CROSS_CHAIN_SEPOLIA from "../submodule-artifacts/sepolia/MockErc721CrossChainV2.json";
-import CROSS_CHAIN_OPTIMISTIC_GOERLI from "../submodule-artifacts/optimisticGoerli/MockErc721CrossChainV2.json";
-import CROSS_CHAIN_ARBITRUM_SEPOLIA from "../submodule-artifacts/arbitrumSepolia/MockErc721CrossChainV2.json";
+import CROSS_CHAIN_SEPOLIA from "../submodule-artifacts/sepolia/SuDAONFT.json";
+import CROSS_CHAIN_OPTIMISTIC_GOERLI from "../submodule-artifacts/optimisticGoerli/SuDAONFT.json";
+import CROSS_CHAIN_ARBITRUM_SEPOLIA from "../submodule-artifacts/arbitrumSepolia/SuDAONFT.json";
 import { lzChainId } from "../utils/endpoint";
-import { MockErc721CrossChain } from "../typechain-types";
+import { SuDAONFT } from "../typechain-types";
 
 const getNFTContractAddress = (networkName: NetworkType) => {
     switch (networkName) {
@@ -35,7 +35,7 @@ async function main() {
     const network = await ethers.provider.getNetwork();
     console.log("Current network = ", network.name);
 
-    const mockErc721CrossChain = (await ethers.getContract("MockErc721CrossChainV2")) as MockErc721CrossChain;
+    const mockErc721CrossChain = (await ethers.getContract("SuDAONFT")) as SuDAONFT;
     console.log("✅ Mint for deployer success");
 
     for (let networkToProceed of SUPPORTED_NETWORKS) {
