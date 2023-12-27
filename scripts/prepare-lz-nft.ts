@@ -6,6 +6,12 @@
 import { ethers } from "hardhat";
 
 import { getNetworkNameById, NetworkType, SUPPORTED_NETWORKS } from "../utils/network";
+import CROSS_CHAIN_OPTIMISTIC from "../submodule-artifacts/optimisticEthereum/DAONFT.json";
+import CROSS_CHAIN_OPERA from "../submodule-artifacts/opera/DAONFT.json";
+import CROSS_CHAIN_ARBITRUM_ONE from "../submodule-artifacts/arbitrumOne/DAONFT.json";
+import CROSS_CHAIN_AVALANCHE from "../submodule-artifacts/avalanche/DAONFT.json";
+import CROSS_CHAIN_SCROLL from "../submodule-artifacts/scroll/DAONFT.json";
+
 import CROSS_CHAIN_SEPOLIA from "../submodule-artifacts/sepolia/SuDAONFT.json";
 import CROSS_CHAIN_OPTIMISTIC_GOERLI from "../submodule-artifacts/optimisticGoerli/SuDAONFT.json";
 import CROSS_CHAIN_ARBITRUM_SEPOLIA from "../submodule-artifacts/arbitrumSepolia/SuDAONFT.json";
@@ -14,6 +20,17 @@ import { SuDAONFT } from "../typechain-types";
 
 const getNFTContractAddress = (networkName: NetworkType) => {
     switch (networkName) {
+        case "avalanche":
+            return CROSS_CHAIN_AVALANCHE.address;
+        case "opera":
+            return CROSS_CHAIN_OPERA.address;
+        case "optimisticEthereum":
+            return CROSS_CHAIN_OPTIMISTIC.address;
+        case "arbitrumOne":
+            return CROSS_CHAIN_ARBITRUM_ONE.address;
+        case "scroll":
+            return CROSS_CHAIN_SCROLL.address;
+
         case "sepolia":
             return CROSS_CHAIN_SEPOLIA.address;
         case "optimisticGoerli":
@@ -33,10 +50,9 @@ async function main() {
     let tx;
 
     const network = await ethers.provider.getNetwork();
-    console.log("Current network = ", network.name);
+    console.log("Current network = ", network.name, network.chainId);
 
-    const mockErc721CrossChain = (await ethers.getContract("SuDAONFT")) as SuDAONFT;
-    console.log("✅ Mint for deployer success");
+    const mockErc721CrossChain = (await ethers.getContract("DAONFT")) as SuDAONFT;
 
     for (let networkToProceed of SUPPORTED_NETWORKS) {
         if (networkToProceed !== getNetworkNameById(network.chainId)) {

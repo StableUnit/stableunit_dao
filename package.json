@@ -23,6 +23,12 @@
     "deploy-nft:avalanche": "hardhat deploy --tags NFT --network avalanche",
     "deploy-nft:opera": "hardhat deploy --tags NFT --network opera",
     "deploy-nft:scroll": "hardhat deploy --tags NFT --network scroll",
+    "prepare-nft:mainnet": "hardhat run ./scripts/prepare-lz-nft.ts --network mainnet",
+    "prepare-nft:optimisticEthereum": "hardhat run ./scripts/prepare-lz-nft.ts --network optimisticEthereum",
+    "prepare-nft:arbitrumOne": "hardhat run ./scripts/prepare-lz-nft.ts --network arbitrumOne",
+    "prepare-nft:avalanche": "hardhat run ./scripts/prepare-lz-nft.ts --network avalanche",
+    "prepare-nft:opera": "hardhat run ./scripts/prepare-lz-nft.ts --network opera",
+    "prepare-nft:scroll": "hardhat run ./scripts/prepare-lz-nft.ts --network scroll",
 
     "deploy-nft:sepolia": "hardhat deploy --tags NFT --network sepolia",
     "deploy-nft:arbitrumSepolia": "hardhat deploy --tags NFT --network arbitrumSepolia",
