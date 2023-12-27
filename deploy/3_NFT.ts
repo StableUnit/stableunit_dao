@@ -1,7 +1,7 @@
 import { DeployFunction } from "hardhat-deploy/types";
 import { ethers } from "hardhat";
 import { getNetworkNameById, NETWORK, NetworkType } from "../utils/network";
-import { SuAccessControlSingleton, DAONFT } from "../typechain-types";
+import { SuAccessControlSingleton, StableUnitPassport } from "../typechain-types";
 import { endpoint } from "../utils/endpoint";
 import { deployProxy } from "../test/utils";
 import { verify } from "../scripts/verifyEtherscan";
@@ -33,13 +33,12 @@ const getNetworkNumber = (network: NetworkType) => {
 };
 
 const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
-    let accessControlSingleton = await ethers.getContractOrNull("SuAccessControlSingleton");
-    if (!accessControlSingleton) {
-        console.log("Deploying Access Control");
+    console.log("Deploying Access Control");
 
-        const [deployer] = await hre.ethers.getSigners();
-        accessControlSingleton = await deployProxy("SuAccessControlSingleton", [deployer.address]);
-    }
+    // let accessControlSingleton = await ethers.getContract("SuAccessControlSingleton");
+    const accessControlSingleton = await deployProxy("SuAccessControlSingleton", [
+        "0xa33ac3F6c76ae645051550F56Aa74F902e1B3510",
+    ]);
 
     const network = await ethers.provider.getNetwork();
     const networkName = getNetworkNameById(network.chainId);
@@ -51,16 +50,19 @@ const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
 
     const args = [accessControlSingleton.address, endpoint[networkName], networkNumber];
     console.log(args);
-    const suDaoNftContract = (await deployProxy("DAONFT", args, {
+    const suDaoNftContract = (await deployProxy("StableUnitPassport", args, {
         unsafeAllow: ["external-library-linking"],
-    })) as DAONFT;
+    })) as StableUnitPassport;
     console.log(
         `✅ NFT deployed on chain ${network.name} with networkNumber ${networkNumber} with address ${suDaoNftContract.address}`
     );
     await suDaoNftContract.setBaseURI(
-        "https://bafybeiat5zgl7wk2nq52do3pkypemzhxzduiqe36qh77fts6w44ppy3aeu.ipfs.w3s.link/"
+        "https://bafybeicuc4jc7gv4bkid2mu7kc2ymqngrioegumbjffiasencckjvdhlcy.ipfs.w3s.link/"
     );
-    await verify("DAONFT");
+    console.log("✅ setBaseURI done");
+    await suDaoNftContract.changeBackendSigner("0x2b8DC2cc8D545Bc9E5a2015c8eCfC5dc74316477");
+    console.log("✅ changeBackendSigner done");
+    await verify("StableUnitPassport");
     console.log("✅ NFT verified");
 };
 export default func;

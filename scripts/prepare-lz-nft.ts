@@ -6,17 +6,13 @@
 import { ethers } from "hardhat";
 
 import { getNetworkNameById, NetworkType, SUPPORTED_NETWORKS } from "../utils/network";
-import CROSS_CHAIN_OPTIMISTIC from "../submodule-artifacts/optimisticEthereum/DAONFT.json";
-import CROSS_CHAIN_OPERA from "../submodule-artifacts/opera/DAONFT.json";
-import CROSS_CHAIN_ARBITRUM_ONE from "../submodule-artifacts/arbitrumOne/DAONFT.json";
-import CROSS_CHAIN_AVALANCHE from "../submodule-artifacts/avalanche/DAONFT.json";
-import CROSS_CHAIN_SCROLL from "../submodule-artifacts/scroll/DAONFT.json";
-
-import CROSS_CHAIN_SEPOLIA from "../submodule-artifacts/sepolia/SuDAONFT.json";
-import CROSS_CHAIN_OPTIMISTIC_GOERLI from "../submodule-artifacts/optimisticGoerli/SuDAONFT.json";
-import CROSS_CHAIN_ARBITRUM_SEPOLIA from "../submodule-artifacts/arbitrumSepolia/SuDAONFT.json";
+import CROSS_CHAIN_OPTIMISTIC from "../submodule-artifacts/optimisticEthereum/StableUnitPassport.json";
+import CROSS_CHAIN_OPERA from "../submodule-artifacts/opera/StableUnitPassport.json";
+import CROSS_CHAIN_ARBITRUM_ONE from "../submodule-artifacts/arbitrumOne/StableUnitPassport.json";
+import CROSS_CHAIN_AVALANCHE from "../submodule-artifacts/avalanche/StableUnitPassport.json";
+import CROSS_CHAIN_SCROLL from "../submodule-artifacts/scroll/StableUnitPassport.json";
 import { lzChainId } from "../utils/endpoint";
-import { SuDAONFT } from "../typechain-types";
+import { StableUnitPassport } from "../typechain-types";
 
 const getNFTContractAddress = (networkName: NetworkType) => {
     switch (networkName) {
@@ -31,14 +27,14 @@ const getNFTContractAddress = (networkName: NetworkType) => {
         case "scroll":
             return CROSS_CHAIN_SCROLL.address;
 
-        case "sepolia":
-            return CROSS_CHAIN_SEPOLIA.address;
-        case "optimisticGoerli":
-            return CROSS_CHAIN_OPTIMISTIC_GOERLI.address;
-        case "arbitrumSepolia":
-            return CROSS_CHAIN_ARBITRUM_SEPOLIA.address;
+        // case "sepolia":
+        //     return CROSS_CHAIN_SEPOLIA.address;
+        // case "optimisticGoerli":
+        //     return CROSS_CHAIN_OPTIMISTIC_GOERLI.address;
+        // case "arbitrumSepolia":
+        //     return CROSS_CHAIN_ARBITRUM_SEPOLIA.address;
         default:
-            return CROSS_CHAIN_SEPOLIA.address;
+            return undefined;
     }
 };
 
@@ -52,7 +48,7 @@ async function main() {
     const network = await ethers.provider.getNetwork();
     console.log("Current network = ", network.name, network.chainId);
 
-    const mockErc721CrossChain = (await ethers.getContract("DAONFT")) as SuDAONFT;
+    const mockErc721CrossChain = (await ethers.getContract("StableUnitPassport")) as StableUnitPassport;
 
     for (let networkToProceed of SUPPORTED_NETWORKS) {
         if (networkToProceed !== getNetworkNameById(network.chainId)) {
@@ -60,6 +56,10 @@ async function main() {
             const dstChainId = lzChainId[networkToProceed];
             const localContractAddress = mockErc721CrossChain.address;
             const dstContractAddress = getNFTContractAddress(networkToProceed);
+            if (!dstContractAddress) {
+                console.log("NO DST CONTRACT ADDRESS");
+                return;
+            }
 
             console.log("dstChainId", dstChainId);
             console.log("localContractAddress", localContractAddress);

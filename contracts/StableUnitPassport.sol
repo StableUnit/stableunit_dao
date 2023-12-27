@@ -6,7 +6,7 @@ import "./3rd-party/layer-zero-labs/contracts-upgradable/token/onft/ERC721/ONFT7
 import "./periphery/contracts/access-control/SuAuthenticated.sol";
 import "./lib/SignatureVerification.sol";
 
-contract DAONFT is SuAuthenticated, ONFT721Upgradeable, ERC721VotesUpgradeable {
+contract StableUnitPassport is SuAuthenticated, ONFT721Upgradeable, ERC721VotesUpgradeable {
     mapping(address => bool) public hasMinted;
     string private baseURI;
     uint public nextMintId;
@@ -19,7 +19,7 @@ contract DAONFT is SuAuthenticated, ONFT721Upgradeable, ERC721VotesUpgradeable {
     error InvalidSignature();
 
     function initialize(address _accessControlSingleton, address _layerZeroEndpoint, uint _chainNumber) initializer public {
-        __ONFT721Upgradeable_init("Some NFT", "SomeNFT", 1, _layerZeroEndpoint);
+        __ONFT721Upgradeable_init("StableUnit Passport", "SUP", 1, _layerZeroEndpoint);
         __suAuthenticatedInit(_accessControlSingleton);
 
         baseURI = "";
