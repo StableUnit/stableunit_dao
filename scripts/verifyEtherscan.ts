@@ -21,7 +21,6 @@ export const verify = async (contractName: string, contractPath?: string, constr
 
 async function main() {
     // const suAccessControlSingleton = await ethers.getContract("SuAccessControlSingleton");
-
     // await verify("SuDAOv2", undefined, [suAccessControlSingleton.address]);
     // await verify("VeERC20v2");
     // await verify("SuDAOUpgrader");
@@ -31,7 +30,7 @@ async function main() {
     // await verify("VeERC20");
     // await verify("TokenDistributorV4");
     // await verify("MockErc721");
-    await verify("MockErc721CrossChainV2");
+    // await verify("MockErc721CrossChainV2");
 }
 
 main().catch((error) => {
