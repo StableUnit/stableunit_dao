@@ -17,6 +17,13 @@
     "deploy": "hardhat deploy",
     "deploy:sepolia": "hardhat deploy --tags SuDAOTest --network sepolia",
 
+    "deploy-nft:mainnet": "hardhat deploy --tags NFT --network mainnet",
+    "deploy-nft:optimisticEthereum": "hardhat deploy --tags NFT --network optimisticEthereum",
+    "deploy-nft:arbitrumOne": "hardhat deploy --tags NFT --network arbitrumOne",
+    "deploy-nft:avalanche": "hardhat deploy --tags NFT --network avalanche",
+    "deploy-nft:opera": "hardhat deploy --tags NFT --network opera",
+    "deploy-nft:scroll": "hardhat deploy --tags NFT --network scroll",
+
     "deploy-nft:sepolia": "hardhat deploy --tags NFT --network sepolia",
     "deploy-nft:arbitrumSepolia": "hardhat deploy --tags NFT --network arbitrumSepolia",
     "deploy-nft:optimisticGoerli": "hardhat deploy --tags NFT --network optimisticGoerli",

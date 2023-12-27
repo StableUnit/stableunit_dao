@@ -5,6 +5,7 @@ export type NetworkType =
     | "opera" // fantom-opera
     | "avalanche"
     | "sepolia"
+    | "scroll"
     // | "optimisticSepolia" OZ don't work with it
     | "optimisticGoerli"
     | "arbitrumSepolia"
@@ -16,6 +17,7 @@ export const NETWORK: Record<NetworkType, NetworkType> = {
     opera: "opera",
     arbitrumOne: "arbitrumOne",
     avalanche: "avalanche",
+    scroll: "scroll",
 
     arbitrumSepolia: "arbitrumSepolia",
     sepolia: "sepolia",
@@ -25,7 +27,13 @@ export const NETWORK: Record<NetworkType, NetworkType> = {
     unsupported: "unsupported",
 };
 
-export const SUPPORTED_NETWORKS = [NETWORK.sepolia, NETWORK.optimisticGoerli, NETWORK.arbitrumSepolia];
+export const SUPPORTED_NETWORKS = [
+    NETWORK.optimisticEthereum,
+    NETWORK.opera,
+    NETWORK.arbitrumOne,
+    NETWORK.avalanche,
+    NETWORK.scroll,
+];
 
 export const getNetworkNameById: (chainId?: number) => NetworkType = (chainId) => {
     switch (chainId) {
@@ -41,6 +49,8 @@ export const getNetworkNameById: (chainId?: number) => NetworkType = (chainId) =
             return NETWORK.avalanche;
         case 421614:
             return NETWORK.arbitrumSepolia;
+        case 534352:
+            return NETWORK.scroll;
         case 11155111:
             return NETWORK.sepolia;
         case 420:
@@ -67,6 +77,8 @@ export const getIdByNetworkName: (name: NetworkType) => number = (name) => {
             return 43114;
         case NETWORK.arbitrumSepolia:
             return 421614;
+        case NETWORK.scroll:
+            return 534352;
         case NETWORK.sepolia:
             return 11155111;
         case NETWORK.optimisticGoerli:

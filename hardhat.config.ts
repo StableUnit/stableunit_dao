@@ -30,6 +30,8 @@ const {
     ALCHEMY_API_KEY_MAINNET,
     ALCHEMY_API_KEY_OPTIMISM,
     ALCHEMY_API_KEY_ARBITRUM,
+    ALCHEMY_API_KEY_ARBITRUM2,
+    SCROLL_API_KEY,
     ALCHEMY_API_KEY_OPTIMISM_GOERLI,
     QUICKNODE_API_KEY_FANTOM,
     PRIVATE_KEY_TESTNET_DEPLOYER,
@@ -103,7 +105,7 @@ const config: HardhatUserConfig = {
             accounts: accountsTestnet,
         },
         arbitrumOne: {
-            url: `https://arb-mainnet.g.alchemy.com/v2/${ALCHEMY_API_KEY_ARBITRUM}`,
+            url: `https://arb-mainnet.g.alchemy.com/v2/${ALCHEMY_API_KEY_ARBITRUM2}`,
             accounts: accountsTestnet,
         },
         opera: {
@@ -112,6 +114,10 @@ const config: HardhatUserConfig = {
         },
         avalanche: {
             url: `https://avalanche-mainnet.infura.io/v3/${INFURA_API_KEY}`,
+            accounts: accountsTestnet,
+        },
+        scroll: {
+            url: "https://rpc.scroll.io",
             accounts: accountsTestnet,
         },
 
@@ -138,13 +144,30 @@ const config: HardhatUserConfig = {
             arbitrumOne: process.env.ARBISCAN_API_KEY as string,
             opera: process.env.FANTOM_API_KEY as string,
             optimisticEthereum: process.env.OPTIMISTIC_API_KEY as string,
-            avalanche: "",
+            avalanche: "snowtrace",
+            scroll: process.env.SCROLL_API_KEY as string,
 
             sepolia: process.env.ETHERSCAN_API_KEY as string,
             arbitrumSepolia: process.env.ARBISCAN_API_KEY as string,
             optimisticGoerli: process.env.OPTIMISTIC_API_KEY as string,
         },
         customChains: [
+            // {
+            //     network: "arbitrumOne",
+            //     chainId: 42161,
+            //     urls: {
+            //         apiURL: "https://api.arbiscan.io/api", // https://arbitrum.llamarpc.com
+            //         browserURL: "https://arbiscan.io/",
+            //     },
+            // },
+            {
+                network: "scroll",
+                chainId: 534352,
+                urls: {
+                    apiURL: "https://api.scrollscan.com/api",
+                    browserURL: "https://blockscout.scroll.io/",
+                },
+            },
             {
                 network: "avalanche",
                 chainId: 43114,

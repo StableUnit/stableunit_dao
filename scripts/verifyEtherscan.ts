@@ -31,6 +31,7 @@ async function main() {
     // await verify("TokenDistributorV4");
     // await verify("MockErc721");
     // await verify("MockErc721CrossChainV2");
+    await verify("DAONFT");
 }
 
 main().catch((error) => {
