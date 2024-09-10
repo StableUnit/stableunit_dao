@@ -384,9 +384,9 @@ describe("VeERC20", () => {
             await mintAndLockTokens(amountToLock, user1);
             await veERC20.connect(admin).delegateOnBehalf(user1.address, user2.address);
             await veERC20.connect(admin).delegateOnBehalf(user2.address, user3.address);
-            console.log('1', await veERC20.getVotes(user1.address));
-            console.log('2', await veERC20.getVotes(user2.address));
-            console.log('3', await veERC20.getVotes(user3.address));
+            console.log("1", await veERC20.getVotes(user1.address));
+            console.log("2", await veERC20.getVotes(user2.address));
+            console.log("3", await veERC20.getVotes(user3.address));
         });
 
         it("after unlock no voting power", async () => {

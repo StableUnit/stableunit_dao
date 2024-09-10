@@ -120,6 +120,11 @@ const config: HardhatUserConfig = {
             url: "https://rpc.scroll.io",
             accounts: accountsTestnet,
         },
+        bsc: {
+            url: "https://bsc.drpc.org",
+            accounts: accountsTestnet,
+            gasPrice: 3_000_000_000, // such a big amount can be used for contract deployment
+        },
 
         sepolia: {
             url: `https://sepolia.infura.io/v3/${INFURA_API_KEY}`,
@@ -146,6 +151,7 @@ const config: HardhatUserConfig = {
             optimisticEthereum: process.env.OPTIMISTIC_API_KEY as string,
             avalanche: "snowtrace",
             scroll: process.env.SCROLL_API_KEY as string,
+            bsc: process.env.BSC_API_KEY as string,
 
             sepolia: process.env.ETHERSCAN_API_KEY as string,
             arbitrumSepolia: process.env.ARBISCAN_API_KEY as string,

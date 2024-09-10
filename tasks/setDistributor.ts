@@ -16,7 +16,7 @@ task("setDistributor", "set all parameters from the script").setAction(async (ta
     const BN_1E6 = hre.ethers.BigNumber.from(10).pow(6);
     const BN_1E12 = hre.ethers.BigNumber.from(10).pow(12);
     const distributor = (await hre.ethers.getContract("TokenDistributorV4")) as TokenDistributorV4;
-    const mockErc721 = (await hre.ethers.getContract("MockErc721"));
+    const mockErc721 = await hre.ethers.getContract("MockErc721");
     // const accessControlSingleton = await hre.ethers.getContract("SuAccessControlSingleton") as SuAccessControlSingleton;
     // console.log(`setDistributor.TokenDistributorV4@${ (await hre.ethers.provider.getNetwork()).name } = `, distributor.address);
     // console.log(`setDistributor.mockErc721@${ (await hre.ethers.provider.getNetwork()).name } = `, mockErc721.address);

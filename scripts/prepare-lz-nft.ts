@@ -11,6 +11,7 @@ import CROSS_CHAIN_OPERA from "../submodule-artifacts/opera/StableUnitPassport.j
 import CROSS_CHAIN_ARBITRUM_ONE from "../submodule-artifacts/arbitrumOne/StableUnitPassport.json";
 import CROSS_CHAIN_AVALANCHE from "../submodule-artifacts/avalanche/StableUnitPassport.json";
 import CROSS_CHAIN_SCROLL from "../submodule-artifacts/scroll/StableUnitPassport.json";
+import CROSS_CHAIN_BSC from "../submodule-artifacts/bsc/StableUnitPassport.json";
 import { lzChainId } from "../utils/endpoint";
 import { StableUnitPassport } from "../typechain-types";
 
@@ -26,6 +27,8 @@ const getNFTContractAddress = (networkName: NetworkType) => {
             return CROSS_CHAIN_ARBITRUM_ONE.address;
         case "scroll":
             return CROSS_CHAIN_SCROLL.address;
+        case "bsc":
+            return CROSS_CHAIN_BSC.address;
 
         // case "sepolia":
         //     return CROSS_CHAIN_SEPOLIA.address;
@@ -46,7 +49,7 @@ async function main() {
     let tx;
 
     const network = await ethers.provider.getNetwork();
-    console.log("Current network = ", network.name, network.chainId);
+    console.log("Current network =", network.name, network.chainId);
 
     const mockErc721CrossChain = (await ethers.getContract("StableUnitPassport")) as StableUnitPassport;
 

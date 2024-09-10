@@ -21,12 +21,14 @@ const getNetworkNumber = (network: NetworkType) => {
             return 4;
         case NETWORK.scroll:
             return 5;
-        case NETWORK.arbitrumSepolia:
+        case NETWORK.bsc:
             return 6;
-        case NETWORK.sepolia:
+        case NETWORK.arbitrumSepolia:
             return 7;
-        case NETWORK.optimisticGoerli:
+        case NETWORK.sepolia:
             return 8;
+        case NETWORK.optimisticGoerli:
+            return 9;
         default:
             return undefined;
     }

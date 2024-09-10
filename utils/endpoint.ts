@@ -8,6 +8,7 @@ import { NETWORK } from "./network";
  * */
 export const endpoint = {
     [NETWORK.mainnet]: "0x66A71Dcef29A0fFBDBE3c6a460a3B5BC225Cd675",
+    [NETWORK.bsc]: "0x3c2269811836af69497E5F486A85D7316753cf62",
     [NETWORK.avalanche]: "0x3c2269811836af69497E5F486A85D7316753cf62",
     [NETWORK.arbitrumOne]: "0x3c2269811836af69497E5F486A85D7316753cf62",
     [NETWORK.optimisticEthereum]: "0x3c2269811836af69497E5F486A85D7316753cf62",
@@ -21,6 +22,7 @@ export const endpoint = {
 
 export const lzChainId = {
     [NETWORK.mainnet]: 101,
+    [NETWORK.bsc]: 102,
     [NETWORK.avalanche]: 106,
     [NETWORK.arbitrumOne]: 110,
     [NETWORK.optimisticEthereum]: 111,

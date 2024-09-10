@@ -12,7 +12,9 @@ export const deployProxy = async (
 ) => {
     const contractFactoryDefault = await ethers.getContractFactory(contractName);
     const contractFactoryWithSigner = await ethers.getContractFactory(contractName, signer);
+    console.log("deployImplementation start");
     await upgrades.deployImplementation(contractFactoryDefault);
+    console.log("deployImplementation end");
     // await upgrades.deployImplementation(
     //     contractFactoryDefault,
     //     needDelegateCall ? { unsafeAllow: ["delegatecall"] } : undefined
